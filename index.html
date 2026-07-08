@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 * {
     box-sizing: border-box;
@@ -7004,14 +7005,41 @@ body.claro .video-info h3 {
 <div id="milf" class="grid" style="display:none"></div>
 
 <div id="upload" style="display:none;padding:20px;text-align:center;">
-    <div id="uploadInitial" style="display:inline-block; background-color:#000; border:2px solid #22c55e; padding:40px; border-radius:12px; box-shadow: 0 0 20px rgba(34, 197, 94, 0.2); max-width: 500px; width: 100%;">
+    <div id="uploadInitial" style="display:inline-block; background-color:#000; border:2px solid #22c55e; padding:40px; border-radius:12px; box-shadow: 0 0 20px rgba(34, 197, 94, 0.2); max-width: 650px; width: 100%;">
         <div style="margin-bottom: 20px;">
             <svg viewBox="0 0 24 24" width="80" height="80" fill="#22c55e" style="opacity: 0.8;"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
         </div>
         <h3 style="color:#22c55e; margin-top:0; font-family:'Inter', sans-serif; text-transform:uppercase; letter-spacing:1px;">Enviar Vídeos</h3>
         <p style="color: #888; font-size: 14px; margin-bottom: 25px;">Seus vídeos serão privados até que você os publique.</p>
-        <label for="fileInput" style="background:#22c55e; color:#000; padding:12px 30px; border-radius:8px; font-weight:bold; cursor:pointer; display:inline-block; text-transform:uppercase; transition: 0.3s;">Selecionar Arquivos</label>
+        
+        <!-- Opções de Upload -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+            <label for="fileInput" style="background:#22c55e; color:#000; padding:12px 16px; border-radius:8px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; text-transform:uppercase; transition: 0.3s; font-size: 12px; text-align: center; line-height: 1.2;">
+                <span style="margin-right: 6px; font-size: 16px;">📁</span> <span>Um Arquivo</span>
+            </label>
+            <label for="multiFileInput" style="background:#22c55e; color:#000; padding:12px 16px; border-radius:8px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; text-transform:uppercase; transition: 0.3s; font-size: 12px; text-align: center; line-height: 1.2;">
+                <span style="margin-right: 6px; font-size: 16px;">📂</span> <span>Vários Arquivos</span>
+            </label>
+            <label for="folderInput" style="background:#22c55e; color:#000; padding:12px 16px; border-radius:8px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; text-transform:uppercase; transition: 0.3s; font-size: 12px; text-align: center; line-height: 1.2;">
+                <span style="margin-right: 6px; font-size: 16px;">📁</span> <span>Pasta</span>
+            </label>
+            <label for="zipInput" style="background:#22c55e; color:#000; padding:12px 16px; border-radius:8px; font-weight:bold; cursor:pointer; display:flex; align-items:center; justify-content:center; text-transform:uppercase; transition: 0.3s; font-size: 12px; text-align: center; line-height: 1.2;">
+                <span style="margin-right: 6px; font-size: 16px;">📦</span> <span>Arquivo ZIP</span>
+            </label>
+        </div>
+        
+        <!-- Inputs Ocultos -->
         <input type="file" id="fileInput" accept="video/*,image/*" style="display: none;">
+        <input type="file" id="multiFileInput" accept="video/*,image/*" multiple style="display: none;">
+        <input type="file" id="folderInput" accept="video/*,image/*" webkitdirectory directory multiple style="display: none;">
+        <input type="file" id="zipInput" accept=".zip" style="display: none;">
+        
+        <!-- Dica de Drag and Drop -->
+        <div id="dragDropZone" style="margin-top: 20px; padding: 20px; border: 2px dashed #22c55e; border-radius: 8px; text-align: center; cursor: pointer; transition: 0.3s; background: rgba(34, 197, 94, 0.05);">
+            <div style="font-size: 32px; margin-bottom: 10px;">📤</div>
+            <p style="color: #22c55e; margin: 0; font-weight: bold; font-size: 14px;">Arraste arquivos ou pastas aqui</p>
+            <p style="color: #888; margin: 5px 0 0 0; font-size: 12px;">ou use os botões acima</p>
+        </div>
     </div>
 
     <!-- Interface Estilo YouTube Studio -->
@@ -9598,6 +9626,283 @@ function toggleCinemaFullscreen() {
 
 var currentUploadFile = null;
 var currentThumbUrl = null;
+var bulkUploadQueue = [];
+var isBulkUploading = false;
+
+// ===== FUNÇÕES DE UPLOAD EM MASSA =====
+
+window.handleBulkUpload = async function(files) {
+    if (!files || files.length === 0) return;
+    
+    bulkUploadQueue = Array.from(files).filter(f => f.type.startsWith('video') || f.type.startsWith('image'));
+    
+    if (bulkUploadQueue.length === 0) {
+        alert('Nenhum vídeo ou imagem válido encontrado.');
+        return;
+    }
+    
+    if (bulkUploadQueue.length === 1) {
+        // Se for apenas um arquivo, usar o fluxo normal
+        currentUploadFile = bulkUploadQueue[0];
+        document.getElementById('uploadInitial').style.display = 'none';
+        document.getElementById('uploadStudio').style.display = 'block';
+        document.getElementById('studioTitle').value = bulkUploadQueue[0].name.replace(/\.[^/.]+$/, "");
+        
+        const videoPreview = document.getElementById('studioVideoPreview');
+        const placeholder = document.getElementById('previewPlaceholder');
+        const previewUrl = URL.createObjectURL(bulkUploadQueue[0]);
+        
+        if (bulkUploadQueue[0].type.startsWith('image')) {
+            placeholder.innerHTML = `<img src="${previewUrl}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
+            videoPreview.style.display = 'none';
+            placeholder.style.display = 'flex';
+        } else {
+            videoPreview.src = previewUrl;
+            videoPreview.style.display = 'block';
+            placeholder.style.display = 'none';
+        }
+        return;
+    }
+    
+    // Múltiplos arquivos - mostrar interface de fila
+    showBulkUploadQueue();
+};
+
+window.showBulkUploadQueue = function() {
+    const queueHtml = `
+        <div id="bulkUploadModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 20000; padding: 20px;">
+            <div style="background: #000; border: 2px solid #22c55e; border-radius: 12px; max-width: 600px; width: 100%; max-height: 80vh; overflow-y: auto; padding: 25px;">
+                <h2 style="color: #22c55e; margin-top: 0; text-transform: uppercase; letter-spacing: 1px;">Upload em Massa</h2>
+                <p style="color: #888; margin-bottom: 20px;">Você tem ${bulkUploadQueue.length} arquivo(s) para carregar. Escolha como deseja proceder:</p>
+                
+                <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid #22c55e; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                    <div style="color: #22c55e; font-weight: bold; margin-bottom: 10px;">Arquivos na fila:</div>
+                    <div id="queueList" style="max-height: 200px; overflow-y: auto; font-size: 13px; color: #ccc;">
+                        ${bulkUploadQueue.map((f, i) => `<div style="padding: 5px; border-bottom: 1px solid rgba(34, 197, 94, 0.2);">${i + 1}. ${f.name}</div>`).join('')}
+                    </div>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                    <label style="color: #22c55e; font-size: 12px; font-weight: bold; text-transform: uppercase;">Aplicar mesmas informações para todos?</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <input type="text" id="bulkTitle" placeholder="Título (opcional)" style="background: #0a0f0a; border: 1px solid #22c55e; padding: 10px; border-radius: 6px; color: #fff; outline: none;">
+                        <select id="bulkCategory" style="background: #0a0f0a; border: 1px solid #22c55e; padding: 10px; border-radius: 6px; color: #fff; outline: none; cursor: pointer;">
+                            <option value="Porno">Porno</option>
+                            <option value="Amador">Amador</option>
+                            <option value="Anal">Anal</option>
+                            <option value="Oral">Oral</option>
+                            <option value="Casal">Casal</option>
+                            <option value="Solo">Solo</option>
+                            <option value="Milf">Milf</option>
+                        </select>
+                    </div>
+                    <textarea id="bulkDesc" placeholder="Descrição (opcional)" style="background: #0a0f0a; border: 1px solid #22c55e; padding: 10px; border-radius: 6px; color: #fff; outline: none; min-height: 60px; resize: vertical;"></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button onclick="closeBulkUploadModal()" style="flex: 1; background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s;">Cancelar</button>
+                    <button onclick="processBulkUpload(false)" style="flex: 1; background: transparent; border: 1px solid #22c55e; color: #22c55e; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s;">Publicar Temporariamente</button>
+                    <button onclick="processBulkUpload(true)" style="flex: 1; background: #22c55e; border: none; color: #000; padding: 12px; border-radius: 8px; font-weight: 900; cursor: pointer; text-transform: uppercase; transition: 0.3s; box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);">Publicar para Sempre</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', queueHtml);
+};
+
+window.closeBulkUploadModal = function() {
+    const modal = document.getElementById('bulkUploadModal');
+    if (modal) modal.remove();
+    bulkUploadQueue = [];
+};
+
+window.processBulkUpload = async function(isPermanent = false) {
+    if (isBulkUploading) return;
+    isBulkUploading = true;
+    
+    const bulkTitle = document.getElementById('bulkTitle')?.value || '';
+    const bulkCategory = document.getElementById('bulkCategory')?.value || 'Porno';
+    const bulkDesc = document.getElementById('bulkDesc')?.value || '';
+    
+    const modal = document.getElementById('bulkUploadModal');
+    if (modal) {
+        modal.innerHTML = `
+            <div style="background: #000; border: 2px solid #22c55e; border-radius: 12px; padding: 30px; text-align: center;">
+                <h2 style="color: #22c55e; margin-top: 0; text-transform: uppercase;">Processando Upload</h2>
+                <div id="bulkProgress" style="width: 100%; height: 8px; background: rgba(34, 197, 94, 0.2); border-radius: 4px; margin: 20px 0; overflow: hidden;">
+                    <div id="bulkProgressBar" style="height: 100%; background: #22c55e; width: 0%; transition: width 0.3s;"></div>
+                </div>
+                <p id="bulkStatus" style="color: #888; margin: 0;">Carregando 0 de ${bulkUploadQueue.length}...</p>
+            </div>
+        `;
+    }
+    
+    let successCount = 0;
+    let errorCount = 0;
+    
+    for (let i = 0; i < bulkUploadQueue.length; i++) {
+        const file = bulkUploadQueue[i];
+        try {
+            await uploadSingleFile(file, bulkTitle || file.name.replace(/\.[^/.]+$/, ""), bulkCategory, bulkDesc, isPermanent);
+            successCount++;
+        } catch (err) {
+            console.error('Erro ao carregar arquivo:', file.name, err);
+            errorCount++;
+        }
+        
+        // Atualizar progresso
+        const progress = ((i + 1) / bulkUploadQueue.length) * 100;
+        const progressBar = document.getElementById('bulkProgressBar');
+        const statusText = document.getElementById('bulkStatus');
+        if (progressBar) progressBar.style.width = progress + '%';
+        if (statusText) statusText.textContent = `Carregando ${i + 1} de ${bulkUploadQueue.length}...`;
+    }
+    
+    // Finalizar
+    closeBulkUploadModal();
+    isBulkUploading = false;
+    render();
+    show('home');
+    alert(`Upload em massa concluído!\n✓ Sucesso: ${successCount}\n✗ Erros: ${errorCount}`);
+};
+
+window.uploadSingleFile = async function(file, title, category, desc, isPermanent) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            const base64Data = e.target.result;
+            const videoObj = {
+                title: title,
+                desc: desc,
+                category: category,
+                location: '',
+                tags: '',
+                creator: '',
+                ageRating: '18+',
+                src: base64Data,
+                thumb: null,
+                type: file.type.startsWith('image') ? 'photo' : 'video',
+                isPermanent: isPermanent
+            };
+            
+            try {
+                if (isPermanent) {
+                    const dbId = await saveVideoToDB(videoObj);
+                    videoObj.id = dbId;
+                    videos.push(videoObj);
+                    const videosParaStorage = videos.map(v => {
+                        if (v.isPermanent) {
+                            const { src, ...metadata } = v;
+                            return metadata;
+                        }
+                        return v;
+                    });
+                    localStorage.setItem("kawe_videos", JSON.stringify(videosParaStorage));
+                } else {
+                    videos.push(videoObj);
+                    localStorage.setItem("kawe_videos", JSON.stringify(videos));
+                }
+                resolve();
+            } catch (err) {
+                reject(err);
+            }
+        };
+        reader.onerror = () => reject('Erro ao ler arquivo');
+        reader.readAsDataURL(file);
+    });
+};
+
+window.handleZipUpload = async function(zipFile) {
+    try {
+        const JSZip = window.JSZip;
+        if (!JSZip) {
+            alert('Biblioteca ZIP não carregada. Tente novamente.');
+            return;
+        }
+        
+        const zip = new JSZip();
+        const zipContent = await zip.loadAsync(zipFile);
+        const files = [];
+        
+        zipContent.forEach((relativePath, file) => {
+            if (!file.dir) {
+                const ext = relativePath.split('.').pop().toLowerCase();
+                const isVideo = ['mp4', 'webm', 'mkv', 'avi', 'mov', 'flv', 'wmv', 'mpeg'].includes(ext);
+                const isImage = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].includes(ext);
+                
+                if (isVideo || isImage) {
+                    file.async('blob').then(blob => {
+                        const newFile = new File([blob], relativePath, { type: file.type || (isVideo ? 'video/mp4' : 'image/jpeg') });
+                        files.push(newFile);
+                    });
+                }
+            }
+        });
+        
+        // Aguardar processamento de todos os arquivos
+        setTimeout(() => {
+            if (files.length > 0) {
+                handleBulkUpload(files);
+            } else {
+                alert('Nenhum vídeo ou imagem encontrado no arquivo ZIP.');
+            }
+        }, 500);
+    } catch (err) {
+        alert('Erro ao processar arquivo ZIP: ' + err.message);
+    }
+};
+
+// ===== DRAG AND DROP =====
+
+window.setupDragDrop = function() {
+    const dragZone = document.getElementById('dragDropZone');
+    if (!dragZone) return;
+    
+    dragZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dragZone.style.background = 'rgba(34, 197, 94, 0.15)';
+        dragZone.style.borderColor = '#4ade80';
+    });
+    
+    dragZone.addEventListener('dragleave', () => {
+        dragZone.style.background = 'rgba(34, 197, 94, 0.05)';
+        dragZone.style.borderColor = '#22c55e';
+    });
+    
+    dragZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dragZone.style.background = 'rgba(34, 197, 94, 0.05)';
+        dragZone.style.borderColor = '#22c55e';
+        
+        const items = e.dataTransfer.items;
+        const files = [];
+        
+        if (items) {
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].kind === 'file') {
+                    const file = items[i].getAsFile();
+                    if (file.name.endsWith('.zip')) {
+                        handleZipUpload(file);
+                        return;
+                    }
+                    files.push(file);
+                }
+            }
+        }
+        
+        if (files.length > 0) {
+            handleBulkUpload(files);
+        }
+    });
+};
+
+// Inicializar drag and drop quando a página carregar
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupDragDrop);
+} else {
+    setupDragDrop();
+}
 
 fileInput.addEventListener("change", e => {
     let f = e.target.files[0];
@@ -9625,6 +9930,34 @@ fileInput.addEventListener("change", e => {
         }
     }
 });
+
+// Event listeners para upload em massa
+const multiFileInput = document.getElementById('multiFileInput');
+if (multiFileInput) {
+    multiFileInput.addEventListener('change', e => {
+        if (e.target.files && e.target.files.length > 0) {
+            handleBulkUpload(e.target.files);
+        }
+    });
+}
+
+const folderInput = document.getElementById('folderInput');
+if (folderInput) {
+    folderInput.addEventListener('change', e => {
+        if (e.target.files && e.target.files.length > 0) {
+            handleBulkUpload(e.target.files);
+        }
+    });
+}
+
+const zipInput = document.getElementById('zipInput');
+if (zipInput) {
+    zipInput.addEventListener('change', e => {
+        if (e.target.files && e.target.files[0]) {
+            handleZipUpload(e.target.files[0]);
+        }
+    });
+}
 
 window.previewThumb = function(input) {
     if (input.files && input.files[0]) {

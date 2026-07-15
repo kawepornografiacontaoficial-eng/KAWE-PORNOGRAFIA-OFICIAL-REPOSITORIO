@@ -1722,6 +1722,21 @@ body.claro .menu button:hover, body.claro .menu a.menu-link:hover {
     background: transparent;
     min-height: calc(100vh - 100px);
     animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    align-items: start;
+    justify-items: stretch;
+    grid-auto-rows: max-content;
+}
+.grid > .secao-padrao,
+.grid > h2,
+.grid > h3,
+.grid > p,
+.grid > .catalogo-item {
+    grid-column: 1 / -1;
+}
+.grid > .video-card,
+.grid > .card {
+    width: 100%;
+    align-self: start;
 }
 
 @keyframes fadeIn {
@@ -5565,10 +5580,8 @@ body.claro .video-info h3 {
 
 <header class="translucent">
 <div style="display: flex; align-items: center; flex-grow: 1; overflow: hidden;">
-    <div class="lang-switch" style="margin-right: 15px;">
-        <div class="lang-btn active" onclick="switchLanguage('pt')">PT</div>
-        <div class="lang-btn" onclick="switchLanguage('en')">EN</div>
-    </div>
+    <!-- Seletor PT/EN removido -->
+
     <button id="menuBtn" onclick="toggleMenu()" style="display: flex; align-items: center; justify-content: center; padding: 8px; flex-shrink: 0;">
         <svg id="menuIcon" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
             <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
@@ -5985,7 +5998,7 @@ body.claro .video-info h3 {
 <button onclick="show('notificacoes')"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align: middle; margin-right: 8px;"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg> Notificações</button>
 <button onclick="show('config')"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align: middle; margin-right: 8px;"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg> Configurações</button>
 <button onclick="show('ajudar')"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align: middle; margin-right: 8px;"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg> Ajudar Criador</button>
-<button onclick="modo()"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align: middle; margin-right: 8px;"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg> Modo Claro/Escuro</button>
+<!-- Botão Modo Claro/Escuro removido -->
 <button onclick="show('suporte')"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align: middle; margin-right: 8px;"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/></svg> Suporte / Feedback</button>
 
 <div class="divisor" style="display: flex; align-items: center; gap: 8px; margin: 20px 15px 10px;">
@@ -6366,7 +6379,7 @@ body.claro .video-info h3 {
                             <div class="adv-label" data-tr="special_modes">Modos Especiais</div>
                             <div class="adv-row">
                                 <button class="adv-btn" onclick="toggleFocusMode()">Modo Foco</button>
-                                <button class="adv-btn" onclick="toggleTheme()">Trocar Tema</button>
+                                <!-- Botão Trocar Tema removido -->
                             </div>
                         </div>
                     </div>
@@ -7187,7 +7200,96 @@ body.claro .video-info h3 {
         <h3><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L3.82 7.87c-.11.2-.06.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg> Configurações</h3>
         <p>Ajustes de player e gerenciamento de dados do aplicativo.</p>
     </div>
+
+    <div class="secao-padrao" style="margin-top:20px;">
+        <h3 style="display:flex; align-items:center; gap:10px;">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.9-.11-1.34a4.5 4.5 0 0 1-4.39 3.34 4.5 4.5 0 0 1-4.5-4.5 4.5 4.5 0 0 1 3.34-4.39A9.06 9.06 0 0 0 12 3zm-6 8.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm3-4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm6 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/></svg>
+            Tema de Cor Premium
+        </h3>
+        <p style="color:#888; margin-bottom:16px; font-size:13px;">Escolha a cor de destaque do site. Sua preferência é salva automaticamente.</p>
+        <div id="premiumThemeGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:12px;"></div>
+    </div>
 </div>
+
+<script>
+(function(){
+    const THEMES = [
+        { id:'roxo',     name:'Roxo Real',    color:'#7c3aed', accent:'#a855f7' },
+        { id:'laranja',  name:'Laranja Fogo', color:'#f97316', accent:'#fb923c' },
+        { id:'vermelho', name:'Vermelho Rubi',color:'#dc2626', accent:'#ef4444' },
+        { id:'preto',    name:'Preto Ônix',   color:'#0a0a0a', accent:'#4b5563' },
+        { id:'branco',   name:'Branco Pérola',color:'#f5f5f5', accent:'#9ca3af' },
+        { id:'azul',     name:'Azul Safira',  color:'#2563eb', accent:'#3b82f6' },
+        { id:'rosa',     name:'Rosa Quartzo', color:'#ec4899', accent:'#f472b6' }
+    ];
+
+    function applyPremiumTheme(id){
+        const t = THEMES.find(x=>x.id===id); if(!t) return;
+        const r = document.documentElement;
+        r.style.setProperty('--kawe-accent', t.color);
+        r.style.setProperty('--kawe-accent-2', t.accent);
+        let styleEl = document.getElementById('kawePremiumThemeStyle');
+        if(!styleEl){
+            styleEl = document.createElement('style');
+            styleEl.id = 'kawePremiumThemeStyle';
+            document.head.appendChild(styleEl);
+        }
+        styleEl.textContent = `
+            body, header.translucent { background: linear-gradient(180deg, ${t.color}12, transparent 40%) !important; }
+            .header-shortcuts button:hover, .menu-link:hover { border-color: ${t.color} !important; color: ${t.color} !important; }
+            .auth-btn.btn-login, button.auth-submit { background: linear-gradient(135deg, ${t.color}, ${t.accent}) !important; color:#fff !important; border-color:${t.color} !important; }
+            h2 img { border-color: ${t.color} !important; box-shadow: 0 0 15px ${t.color}66 !important; }
+            #search:focus { border-color: ${t.color} !important; box-shadow: 0 0 0 3px ${t.color}33 !important; }
+            .card-video:hover { border-color: ${t.color} !important; box-shadow: 0 6px 24px ${t.color}44 !important; }
+            .premium-theme-swatch.selected { outline: 3px solid ${t.color} !important; }
+        `;
+        localStorage.setItem('kawe_premium_theme', id);
+        document.querySelectorAll('.premium-theme-swatch').forEach(el=>{
+            el.classList.toggle('selected', el.dataset.theme===id);
+        });
+    }
+    window.applyPremiumTheme = applyPremiumTheme;
+
+    function renderThemeGrid(){
+        const grid = document.getElementById('premiumThemeGrid');
+        if(!grid || grid.dataset.rendered) return;
+        grid.dataset.rendered = '1';
+        const saved = localStorage.getItem('kawe_premium_theme');
+        THEMES.forEach(t=>{
+            const btn = document.createElement('button');
+            btn.className = 'premium-theme-swatch';
+            btn.dataset.theme = t.id;
+            btn.title = t.name;
+            btn.style.cssText = `cursor:pointer; border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:14px 10px; background:rgba(255,255,255,0.03); display:flex; flex-direction:column; align-items:center; gap:8px; transition:transform 0.2s, outline 0.2s;`;
+            btn.innerHTML = `
+                <span style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg, ${t.color}, ${t.accent}); box-shadow:0 4px 14px ${t.color}66, inset 0 -6px 12px rgba(0,0,0,0.25); display:inline-block;"></span>
+                <span style="font-size:12px; color:#ddd; font-weight:600; letter-spacing:0.5px;">${t.name}</span>
+            `;
+            btn.onmouseover = ()=> btn.style.transform='translateY(-2px)';
+            btn.onmouseout  = ()=> btn.style.transform='none';
+            btn.onclick = ()=> applyPremiumTheme(t.id);
+            grid.appendChild(btn);
+        });
+        if(saved) applyPremiumTheme(saved);
+    }
+
+    // Renderiza quando a seção de Configurações abre
+    const _origShow = window.show;
+    if(typeof _origShow === 'function'){
+        window.show = function(id){
+            const r = _origShow.apply(this, arguments);
+            if(id === 'config') setTimeout(renderThemeGrid, 0);
+            return r;
+        };
+    }
+    document.addEventListener('DOMContentLoaded', ()=>{
+        const saved = localStorage.getItem('kawe_premium_theme');
+        if(saved) applyPremiumTheme(saved);
+        renderThemeGrid();
+    });
+})();
+</script>
+
 
 <div id="suporte" style="display:none; padding: 20px;">
     <div class="secao-padrao" style="max-width: 600px; margin: 0 auto;">
@@ -11124,11 +11226,8 @@ var userLevel = Math.floor(userXP / 100) + 1;
 (function() {
     const shortcuts = document.querySelector('.header-shortcuts');
     if(shortcuts) {
-        const xpBtn = document.createElement('button');
-        xpBtn.id = 'userXPDisplay';
-        xpBtn.style.cssText = 'background:rgba(234,179,8,0.1); color:#eab308; border-color:rgba(234,179,8,0.3);';
-        xpBtn.textContent = `Nível ${userLevel} (${userXP % 100}/100 XP)`;
-        shortcuts.prepend(xpBtn);
+        // Badge amarelo de XP no header removido a pedido do usuário
+
     }
 })();
 
@@ -11179,11 +11278,8 @@ document.head.appendChild(lightModeStyle);
 (function() {
     const shortcuts = document.querySelector('.header-shortcuts');
     if(shortcuts) {
-        const themeBtn = document.createElement('button');
-        themeBtn.onclick = toggleDarkMode;
-        themeBtn.innerHTML = '🌓';
-        themeBtn.title = 'Alternar Tema';
-        shortcuts.appendChild(themeBtn);
+        // Botão de alternar tema (🌓) removido a pedido do usuário
+
     }
     
     // Adicionar botão PiP no player
@@ -13396,11 +13492,8 @@ function updateXPDisplay() {
 (function() {
     const shortcuts = document.querySelector('.header-shortcuts');
     if(shortcuts) {
-        const xpBtn = document.createElement('button');
-        xpBtn.id = 'userXPDisplay';
-        xpBtn.style.cssText = 'background:rgba(234,179,8,0.1); color:#eab308; border-color:rgba(234,179,8,0.3);';
-        xpBtn.textContent = `Nível ${userLevel} (${userXP % 100}/100 XP)`;
-        shortcuts.prepend(xpBtn);
+        // Badge amarelo de XP no header removido a pedido do usuário
+
     }
 })();
 
@@ -13487,11 +13580,8 @@ function initWatermark() {
 (function() {
     const shortcuts = document.querySelector('.header-shortcuts');
     if(shortcuts) {
-        const themeBtn = document.createElement('button');
-        themeBtn.onclick = toggleDarkMode;
-        themeBtn.innerHTML = '🌓';
-        themeBtn.title = 'Alternar Tema';
-        shortcuts.appendChild(themeBtn);
+        // Botão de alternar tema (🌓) removido a pedido do usuário
+
     }
     
     // Adicionar botão PiP no player
@@ -15714,6 +15804,645 @@ function exportCreatorData(type) {
         <div class="win-footer"><button class="creator-btn creator-btn-primary" onclick="closeWinModal('advancedFiltersModal')">Aplicar Filtros</button></div>
     </div>
 </div>
+
+<!-- =========================================================
+     KAWE ADMIN v2 — 15 funções em localStorage
+     Bloco autocontido. Não altera nada existente.
+     ========================================================= -->
+<style id="kaweCustomCssTag"></style>
+<script>
+(function(){
+  'use strict';
+  const LS = {
+    get(k, d){ try { const v = JSON.parse(localStorage.getItem(k)); return v===null?d:v; } catch(e){ return d; } },
+    set(k, v){ localStorage.setItem(k, JSON.stringify(v)); }
+  };
+  const K = {
+    accounts:'kawe_accounts', creators:'kawe_creators', verify:'kawe_verify_queue',
+    notif:'kawe_admin_notif', tickets:'kawe_support_tickets', payouts:'kawe_payouts',
+    payoutBal:'kawe_payout_balance', ads:'kawe_site_ads', announcements:'kawe_announcements',
+    ipLogs:'kawe_ip_logs', globalTheme:'kawe_global_theme',
+    customCss:'kawe_custom_css', customJs:'kawe_custom_js',
+    banned:'kawe_banned', online:'kawe_online_users'
+  };
+
+  const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const toast = m => { try { showNotification(m); } catch(e){ console.log(m); } };
+
+  // ========= SESSION IP + REALTIME PRESENCE =========
+  window.__kaweIP = 'carregando...';
+  fetch('https://api.ipify.org?format=json').then(r=>r.json()).then(d=>{ window.__kaweIP = d.ip || 'desconhecido'; }).catch(()=>{ window.__kaweIP='desconhecido'; });
+  function beat(){
+    const online = LS.get(K.online, {});
+    const now = Date.now();
+    Object.keys(online).forEach(sid => { if(now - online[sid].at > 45000) delete online[sid]; });
+    let sid = sessionStorage.getItem('kawe_sid');
+    if(!sid){ sid = 's_'+now.toString(36)+Math.random().toString(36).slice(2,7); sessionStorage.setItem('kawe_sid', sid); }
+    const cur = LS.get('kawe_current_user', null);
+    online[sid] = { user: cur?.username || 'Visitante', ip: window.__kaweIP, at: now, ua: navigator.userAgent.slice(0,60) };
+    LS.set(K.online, online);
+  }
+  setInterval(beat, 10000); setTimeout(beat, 500);
+
+  // ========= HOOK LOGIN / CADASTRO =========
+  function hookAuth(){
+    document.querySelectorAll('button.auth-submit').forEach(btn => {
+      const oc = btn.getAttribute('onclick') || '';
+      if(oc.includes('Cadastro realizado')) btn.setAttribute('onclick','kaweHandleRegister(this)');
+      else if(oc.includes('Login realizado')) btn.setAttribute('onclick','kaweHandleLogin(this)');
+    });
+  }
+  window.kaweHandleRegister = function(btn){
+    const form = btn.closest('.auth-form') || btn.parentElement;
+    const inputs = form.querySelectorAll('input, select');
+    const [u,e,p,d,g,pw] = [inputs[0],inputs[1],inputs[2],inputs[3],inputs[4],inputs[5]].map(x=>x?.value?.trim?.()||x?.value||'');
+    if(!u || !e || !pw){ alert('Preencha usuário, email e senha.'); return; }
+    const list = LS.get(K.accounts, []);
+    if(list.some(a => a.email===e || a.username===u)){ alert('Usuário ou email já cadastrado.'); return; }
+    const acc = { id:'u_'+Date.now(), username:u, email:e, phone:p, birthdate:d, gender:g,
+      password:btoa(pw), status:'pending', role:'user', createdAt:new Date().toISOString(),
+      ip: window.__kaweIP, ua: navigator.userAgent };
+    list.push(acc); LS.set(K.accounts, list);
+    const vq = LS.get(K.verify, []); vq.push({ id:acc.id, username:u, email:e, at:acc.createdAt });
+    LS.set(K.verify, vq);
+    kaweAddNotif('Novo cadastro pendente: '+u,'verify');
+    kaweLog(acc,'signup');
+    // aviso global se existir
+    const ann = LS.get(K.announcements, []).filter(a=>a.active);
+    if(ann.length) alert('AVISO: '+ann[0].title+'\n\n'+ann[0].body);
+    alert('Cadastro enviado! Aguardando aprovação do administrador.');
+    try { closeAuthModal(); } catch(_){}
+  };
+  window.kaweHandleLogin = function(btn){
+    const form = btn.closest('.auth-form') || btn.parentElement;
+    const inputs = form.querySelectorAll('input');
+    const id = inputs[0]?.value?.trim() || '';
+    const pw = btoa(inputs[1]?.value || '');
+    if(LS.get(K.banned, []).includes(id)){ alert('Conta banida pelo administrador.'); return; }
+    const acc = LS.get(K.accounts, []).find(a => (a.email===id || a.username===id) && a.password===pw);
+    if(!acc){ alert('Credenciais inválidas ou conta inexistente.'); return; }
+    if(acc.status==='pending'){ alert('Conta aguardando aprovação.'); return; }
+    if(acc.status==='rejected'){ alert('Cadastro recusado pelo administrador.'); return; }
+    localStorage.setItem('kawe_current_user', JSON.stringify(acc));
+    kaweLog(acc,'login'); kaweAddNotif('Login: '+acc.username,'login');
+    const ann = LS.get(K.announcements, []).filter(a=>a.active);
+    if(ann.length) alert('AVISO: '+ann[0].title+'\n\n'+ann[0].body);
+    alert('Login realizado com sucesso!');
+    try { closeAuthModal(); } catch(_){}
+  };
+
+  function kaweAddNotif(text,type){
+    const l = LS.get(K.notif, []);
+    l.push({ id:Date.now()+Math.random(), text, type:type||'info', at:new Date().toISOString(), read:false });
+    LS.set(K.notif, l.slice(-300));
+  }
+  function kaweLog(acc, action){
+    const l = LS.get(K.ipLogs, []);
+    l.push({ user:acc.username||acc.email, email:acc.email, action,
+      ip: window.__kaweIP, ua:navigator.userAgent.slice(0,80),
+      mac:'indisponível (browser)', at:new Date().toISOString() });
+    LS.set(K.ipLogs, l.slice(-500));
+  }
+  window.kaweAddNotif = kaweAddNotif;
+
+  // ========= ADMIN NAV EXTENSION =========
+  const _origAdminNav = window.adminNav;
+  window.adminNav = function(sec){
+    const content = document.querySelector('.admin-content');
+    if(content && !document.getElementById('adminSec-'+sec) && SECS[sec]){
+      const div = document.createElement('div');
+      div.className = 'admin-section'; div.id = 'adminSec-'+sec;
+      div.innerHTML = SECS[sec].html;
+      content.appendChild(div);
+    }
+    if(typeof _origAdminNav==='function') _origAdminNav(sec);
+    if(SECS[sec]?.render) try { SECS[sec].render(); } catch(e){ console.error(e); }
+  };
+
+  // ========= SECTION DEFINITIONS =========
+  const SECS = {
+    users: { html:`<div class="admin-section-title">Usuários Cadastrados</div>
+      <div class="admin-card">
+        <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+          <input class="admin-input" id="kaweUsersQ" placeholder="Buscar por nome, email ou ID" oninput="kaweRenderUsers()" style="max-width:340px;margin:0">
+          <span id="kaweUsersCount" style="align-self:center;color:#888;font-size:13px"></span>
+        </div>
+        <div id="kaweUsersList"></div>
+      </div>`, render:()=>kaweRenderUsers() },
+
+    creators: { html:`<div class="admin-section-title">Criadores Cadastrados</div>
+      <div class="admin-card">
+        <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+          <input class="admin-input" id="kaweCreatorsQ" placeholder="Buscar criador" oninput="kaweRenderCreators()" style="max-width:340px;margin:0">
+          <button class="admin-btn admin-btn-primary" onclick="kawePromoteCreator()">+ Promover usuário</button>
+        </div>
+        <div id="kaweCreatorsList"></div>
+      </div>`, render:()=>kaweRenderCreators() },
+
+    mod: { html:`<div class="admin-section-title">Moderação de Vídeos</div>
+      <div class="admin-card">
+        <p style="color:#888;font-size:13px;margin:0 0 12px">Vídeos com dados faltando (thumb, descrição, categoria, tags, fonte) aparecem sinalizados.</p>
+        <div id="kaweModList"></div>
+      </div>`, render:()=>kaweRenderMod() },
+
+    push: { html:`<div class="admin-section-title">Notificações do Sistema</div>
+      <div class="admin-card">
+        <div style="display:flex;gap:10px;margin-bottom:12px">
+          <button class="admin-btn admin-btn-secondary" onclick="kaweMarkAllRead()">Marcar todas como lidas</button>
+          <button class="admin-btn admin-btn-secondary" onclick="kaweClearNotifs()">Limpar tudo</button>
+          <button class="admin-btn admin-btn-primary" onclick="kaweSimNotif('backup')">+ Simular: Backup</button>
+          <button class="admin-btn admin-btn-primary" onclick="kaweSimNotif('restore')">+ Simular: Restauração</button>
+          <button class="admin-btn admin-btn-primary" onclick="kaweSimNotif('video_removed')">+ Simular: Vídeo removido</button>
+        </div>
+        <div id="kaweNotifList"></div>
+      </div>`, render:()=>kaweRenderNotifs() },
+
+    monetization: { html:`<div class="admin-section-title">Monetização — Dashboard</div>
+      <div class="admin-stats-grid" id="kaweMonetStats"></div>
+      <div class="admin-card"><h3 style="color:#fff;margin:0 0 15px">Receita por origem (simulada)</h3><div id="kaweMonetBreak"></div></div>`,
+      render:()=>kaweRenderMonet() },
+
+    payouts: { html:`<div class="admin-section-title">Saque PIX</div>
+      <div class="admin-card">
+        <div style="color:#888;font-size:12px;margin-bottom:6px">Saldo disponível</div>
+        <div id="kawePayBal" style="font-size:32px;font-weight:800;color:#22c55e;margin-bottom:18px">R$ 0,00</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <h4 style="color:#fff;margin:0 0 8px">Depositar</h4>
+            <input class="admin-input" id="kaweDepAmt" placeholder="Valor R$" type="number" step="0.01" min="0">
+            <button class="admin-btn admin-btn-success" onclick="kaweDeposit()">Depositar</button>
+          </div>
+          <div>
+            <h4 style="color:#fff;margin:0 0 8px">Sacar via PIX</h4>
+            <input class="admin-input" id="kaweWAmt" placeholder="Valor R$" type="number" step="0.01" min="0">
+            <input class="admin-input" id="kaweWKey" placeholder="Chave PIX (CPF, email, telefone)">
+            <button class="admin-btn admin-btn-primary" onclick="kaweWithdraw()">Solicitar saque</button>
+          </div>
+        </div>
+      </div>
+      <div class="admin-card"><h3 style="color:#fff;margin:0 0 12px">Histórico</h3><div id="kawePayHist"></div></div>`,
+      render:()=>kaweRenderPayouts() },
+
+    cats: { html:`<div class="admin-section-title">Categorias / Menus</div>
+      <div class="admin-card">
+        <p style="color:#888;font-size:13px;margin:0 0 10px">Atalho para o gerenciador de categorias existente.</p>
+        <button class="admin-btn admin-btn-primary" onclick="adminNav('categorias')">Abrir gerenciador</button>
+      </div>`, render:()=>{} },
+
+    ads: { html:`<div class="admin-section-title">Anúncios</div>
+      <div class="admin-card">
+        <h3 style="color:#fff;margin:0 0 12px">Novo anúncio</h3>
+        <input class="admin-input" id="kaweAdT" placeholder="Título">
+        <input class="admin-input" id="kaweAdImg" placeholder="URL da imagem (opcional)">
+        <input class="admin-input" id="kaweAdLink" placeholder="URL de destino">
+        <label class="admin-label">Posição</label>
+        <select class="admin-select" id="kaweAdSlot">
+          <option value="topo">Topo</option><option value="sidebar">Sidebar</option>
+          <option value="pre-video">Pré-vídeo</option><option value="rodape">Rodapé</option>
+        </select>
+        <button class="admin-btn admin-btn-primary" onclick="kaweAddAd()">Adicionar</button>
+      </div>
+      <div class="admin-card"><h3 style="color:#fff;margin:0 0 12px">Anúncios cadastrados</h3><div id="kaweAdsList"></div></div>`,
+      render:()=>kaweRenderAds() },
+
+    code: { html:`<div class="admin-section-title">Editor de Código Fonte</div>
+      <div class="admin-card">
+        <p style="color:#f97316;font-size:12px;margin:0 0 10px">⚠ CSS e JS custom são aplicados ao vivo e persistem no localStorage.</p>
+        <label class="admin-label">CSS customizado</label>
+        <textarea class="admin-textarea" id="kaweCssIn" style="font-family:monospace;font-size:12px;min-height:180px"></textarea>
+        <label class="admin-label">JavaScript customizado</label>
+        <textarea class="admin-textarea" id="kaweJsIn" style="font-family:monospace;font-size:12px;min-height:180px"></textarea>
+        <div style="display:flex;gap:10px;margin-top:8px">
+          <button class="admin-btn admin-btn-success" onclick="kaweApplyCode()">Aplicar ao site</button>
+          <button class="admin-btn admin-btn-secondary" onclick="kaweResetCode()">Resetar</button>
+        </div>
+      </div>`, render:()=>kaweLoadCode() },
+
+    announcements: { html:`<div class="admin-section-title">Avisos Globais</div>
+      <div class="admin-card">
+        <p style="color:#888;font-size:13px;margin:0 0 12px">Exibido quando um usuário faz login ou cadastro.</p>
+        <input class="admin-input" id="kaweAnnT" placeholder="Título">
+        <textarea class="admin-textarea" id="kaweAnnB" placeholder="Mensagem"></textarea>
+        <button class="admin-btn admin-btn-primary" onclick="kaweSaveAnn()">Publicar</button>
+      </div>
+      <div class="admin-card"><h3 style="color:#fff;margin:0 0 12px">Avisos publicados</h3><div id="kaweAnnList"></div></div>`,
+      render:()=>kaweRenderAnn() },
+
+    maintenance: { html:`<div class="admin-section-title">Manutenção — Auditoria de Conteúdo</div>
+      <div class="admin-card">
+        <div style="display:flex;gap:10px;margin-bottom:12px">
+          <button class="admin-btn admin-btn-primary" onclick="kaweScanMaint()">Rescanear agora</button>
+          <span id="kaweMaintCount" style="align-self:center;color:#888;font-size:13px"></span>
+        </div>
+        <div id="kaweMaintList"></div>
+      </div>`, render:()=>kaweScanMaint() },
+
+    verification: { html:`<div class="admin-section-title">Verificação de Contas</div>
+      <div class="admin-card">
+        <p style="color:#888;font-size:13px;margin:0 0 12px">Cadastros aguardando aprovação:</p>
+        <div id="kaweVerList"></div>
+      </div>`, render:()=>kaweRenderVerify() },
+
+    support: { html:`<div class="admin-section-title">Suporte — Correio Eletrônico</div>
+      <div class="admin-card">
+        <div id="kaweSupList"></div>
+      </div>`, render:()=>kaweRenderSupport() },
+
+    security: { html:`<div class="admin-section-title">Segurança — IP & Sessão</div>
+      <div class="admin-card">
+        <p style="color:#f97316;font-size:12px;margin:0 0 10px">⚠ MAC address não é acessível via navegador. Registramos IP público, user-agent e ação.</p>
+        <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+          <input class="admin-input" id="kaweIpQ" placeholder="Filtrar por usuário ou IP" oninput="kaweRenderIps()" style="max-width:320px;margin:0">
+          <button class="admin-btn admin-btn-secondary" onclick="kaweClearIps()">Limpar logs</button>
+        </div>
+        <div id="kaweIpList"></div>
+      </div>`, render:()=>kaweRenderIps() },
+
+    theme: { html:`<div class="admin-section-title">Tema Global</div>
+      <div class="admin-card">
+        <p style="color:#888;font-size:13px;margin:0 0 12px">O tema selecionado é aplicado imediatamente para todos os visitantes.</p>
+        <div id="kaweThemeGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px"></div>
+      </div>`, render:()=>kaweRenderThemeGrid() },
+
+    traffic: { html:`<div class="admin-section-title">Tráfego em Tempo Real</div>
+      <div class="admin-stats-grid">
+        <div class="admin-stat-card"><div class="admin-stat-value" id="kaweRtClock">--:--:--</div><div class="admin-stat-label" id="kaweRtDate">--/--/----</div></div>
+        <div class="admin-stat-card"><div class="admin-stat-value" id="kaweRtOnline">0</div><div class="admin-stat-label">Online agora</div></div>
+        <div class="admin-stat-card"><div class="admin-stat-value" id="kaweRtTotal">0</div><div class="admin-stat-label">Contas totais</div></div>
+        <div class="admin-stat-card"><div class="admin-stat-value" id="kaweRtPend">0</div><div class="admin-stat-label">Verificação pendente</div></div>
+      </div>
+      <div class="admin-card"><h3 style="color:#fff;margin:0 0 12px">Sessões ativas</h3><div id="kaweRtList"></div></div>`,
+      render:()=>kaweStartRT() }
+  };
+
+  // ========= RENDERERS =========
+  const row = (html) => `<div style="background:rgba(255,255,255,0.04);padding:12px;border-radius:8px;margin-bottom:8px;font-size:13px;color:#ddd">${html}</div>`;
+
+  window.kaweRenderUsers = function(){
+    const q = (document.getElementById('kaweUsersQ')?.value||'').toLowerCase();
+    const list = LS.get(K.accounts, []).filter(a =>
+      !q || (a.username+' '+a.email+' '+a.id).toLowerCase().includes(q));
+    const banned = LS.get(K.banned, []);
+    document.getElementById('kaweUsersCount').textContent = list.length+' usuário(s)';
+    const el = document.getElementById('kaweUsersList');
+    if(!list.length){ el.innerHTML = '<p style="color:#666;font-size:13px">Nenhum usuário.</p>'; return; }
+    el.innerHTML = list.map(a=>row(`
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
+        <div>
+          <div style="font-weight:700;color:#fff">${esc(a.username)} <span style="color:#888;font-weight:400">&lt;${esc(a.email)}&gt;</span></div>
+          <div style="color:#888;font-size:12px;margin-top:4px">Tel: ${esc(a.phone||'-')} · Nasc: ${esc(a.birthdate||'-')} · Gênero: ${esc(a.gender||'-')}</div>
+          <div style="color:#666;font-size:11px;margin-top:4px">ID ${esc(a.id)} · IP ${esc(a.ip||'-')} · ${new Date(a.createdAt).toLocaleString('pt-BR')}</div>
+          <div style="margin-top:6px"><span style="padding:2px 8px;border-radius:6px;font-size:11px;background:${a.status==='approved'?'rgba(34,197,94,0.2);color:#22c55e':a.status==='rejected'?'rgba(239,68,68,0.2);color:#ef4444':'rgba(234,179,8,0.2);color:#eab308'}">${esc(a.status)}</span> ${banned.includes(a.email)||banned.includes(a.username)?'<span style="padding:2px 8px;border-radius:6px;font-size:11px;background:rgba(239,68,68,0.25);color:#ef4444;margin-left:6px">BANIDO</span>':''}</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="admin-btn admin-btn-secondary" onclick="kaweBanUser('${a.id}')">${banned.includes(a.email)||banned.includes(a.username)?'Desbanir':'Banir'}</button>
+          <button class="admin-btn" style="background:rgba(239,68,68,0.2);color:#ef4444" onclick="kaweDelUser('${a.id}')">Excluir</button>
+        </div>
+      </div>`)).join('');
+  };
+  window.kaweBanUser = function(id){
+    const acc = LS.get(K.accounts,[]).find(a=>a.id===id); if(!acc) return;
+    const b = LS.get(K.banned,[]);
+    const key = acc.email;
+    if(b.includes(key) || b.includes(acc.username)){
+      LS.set(K.banned, b.filter(x=>x!==key && x!==acc.username));
+      kaweAddNotif('Conta desbanida: '+acc.username,'ban');
+    } else { b.push(key); b.push(acc.username); LS.set(K.banned,b); kaweAddNotif('Conta banida: '+acc.username,'ban'); }
+    kaweRenderUsers(); if(document.getElementById('kaweCreatorsList')) kaweRenderCreators();
+  };
+  window.kaweDelUser = function(id){
+    if(!confirm('Excluir esta conta permanentemente?')) return;
+    const list = LS.get(K.accounts,[]).filter(a=>a.id!==id); LS.set(K.accounts,list);
+    const cr = LS.get(K.creators,[]).filter(a=>a.id!==id); LS.set(K.creators,cr);
+    kaweAddNotif('Conta excluída','delete'); kaweRenderUsers();
+  };
+
+  window.kaweRenderCreators = function(){
+    const q = (document.getElementById('kaweCreatorsQ')?.value||'').toLowerCase();
+    const list = LS.get(K.creators, []).filter(a=>!q||(a.username+' '+a.email).toLowerCase().includes(q));
+    const banned = LS.get(K.banned,[]);
+    const el = document.getElementById('kaweCreatorsList');
+    if(!list.length){ el.innerHTML = '<p style="color:#666;font-size:13px">Nenhum criador cadastrado.</p>'; return; }
+    el.innerHTML = list.map(a=>row(`
+      <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center">
+        <div><div style="font-weight:700;color:#fff">${esc(a.username)} <span style="color:#888;font-weight:400">&lt;${esc(a.email)}&gt;</span></div>
+          <div style="color:#666;font-size:11px">ID ${esc(a.id)} · Desde ${new Date(a.createdAt).toLocaleDateString('pt-BR')}</div></div>
+        <div style="display:flex;gap:6px">
+          <button class="admin-btn admin-btn-secondary" onclick="kaweBanUser('${a.id}')">${banned.includes(a.email)?'Desbanir':'Banir'}</button>
+          <button class="admin-btn" style="background:rgba(239,68,68,0.2);color:#ef4444" onclick="kaweRemoveCreator('${a.id}')">Remover</button>
+        </div>
+      </div>`)).join('');
+  };
+  window.kawePromoteCreator = function(){
+    const em = prompt('Email do usuário a promover a criador:'); if(!em) return;
+    const acc = LS.get(K.accounts,[]).find(a=>a.email===em); if(!acc){ alert('Não encontrado'); return; }
+    const cr = LS.get(K.creators,[]); if(cr.some(c=>c.id===acc.id)){ alert('Já é criador'); return; }
+    cr.push({...acc, role:'creator'}); LS.set(K.creators,cr); kaweAddNotif('Novo criador: '+acc.username,'creator'); kaweRenderCreators();
+  };
+  window.kaweRemoveCreator = function(id){
+    LS.set(K.creators, LS.get(K.creators,[]).filter(a=>a.id!==id)); kaweRenderCreators();
+  };
+
+  window.kaweRenderMod = function(){
+    const el = document.getElementById('kaweModList'); if(!el) return;
+    const vids = (typeof videos !== 'undefined' && Array.isArray(videos)) ? videos : [];
+    if(!vids.length){ el.innerHTML = '<p style="color:#666;font-size:13px">Catálogo vazio.</p>'; return; }
+    el.innerHTML = vids.map((v,i)=>{
+      const missing = [];
+      if(!v.title) missing.push('título');
+      if(!v.desc && !v.description) missing.push('descrição');
+      if(!v.thumb) missing.push('miniatura');
+      if(!v.cat && !v.categoria) missing.push('categoria');
+      if(!v.src && !v.iframe) missing.push('fonte');
+      if(!v.tags || (Array.isArray(v.tags)&&!v.tags.length)) missing.push('tags');
+      const ok = missing.length===0;
+      return row(`<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap">
+        <div><div style="font-weight:700;color:#fff">#${i+1} · ${esc(v.title||'(sem título)')}</div>
+        <div style="color:${ok?'#22c55e':'#f97316'};font-size:12px;margin-top:4px">${ok?'✓ Completo':'Faltando: '+missing.join(', ')}</div></div>
+      </div>`);
+    }).join('');
+  };
+
+  window.kaweRenderNotifs = function(){
+    const list = LS.get(K.notif,[]).slice().reverse();
+    const el = document.getElementById('kaweNotifList');
+    if(!list.length){ el.innerHTML = '<p style="color:#666;font-size:13px">Nenhuma notificação.</p>'; return; }
+    el.innerHTML = list.map(n=>row(`<div style="display:flex;justify-content:space-between;gap:10px">
+      <div><span style="padding:2px 6px;border-radius:4px;background:rgba(139,92,246,0.2);color:#a78bfa;font-size:10px;text-transform:uppercase">${esc(n.type)}</span>
+        <div style="margin-top:4px;color:#fff">${esc(n.text)}</div>
+        <div style="color:#666;font-size:11px;margin-top:4px">${new Date(n.at).toLocaleString('pt-BR')}</div></div>
+      ${n.read?'<span style="color:#666;font-size:11px">lida</span>':'<span style="color:#22c55e;font-size:11px">nova</span>'}
+    </div>`)).join('');
+  };
+  window.kaweMarkAllRead = function(){ const l=LS.get(K.notif,[]); l.forEach(n=>n.read=true); LS.set(K.notif,l); kaweRenderNotifs(); };
+  window.kaweClearNotifs = function(){ if(confirm('Limpar todas?')){ LS.set(K.notif,[]); kaweRenderNotifs(); } };
+  window.kaweSimNotif = function(t){ const msgs = {backup:'Backup automático concluído',restore:'Restauração de dados executada',video_removed:'Vídeo removido do catálogo'}; kaweAddNotif(msgs[t]||t,t); kaweRenderNotifs(); };
+
+  window.kaweRenderMonet = function(){
+    const bal = LS.get(K.payoutBal, 0);
+    const vids = (typeof videos!=='undefined'?videos:[]).length;
+    const users = LS.get(K.accounts,[]).length;
+    const ads = LS.get(K.ads,[]).length;
+    const stats = [
+      ['R$ '+bal.toFixed(2).replace('.',','),'Saldo atual'],
+      [vids*3,'Impressões estimadas (dia)'],
+      [ads,'Anúncios ativos'],
+      [users,'Contas ativas']
+    ];
+    document.getElementById('kaweMonetStats').innerHTML = stats.map(s=>`<div class="admin-stat-card"><div class="admin-stat-value">${s[0]}</div><div class="admin-stat-label">${s[1]}</div></div>`).join('');
+    const br = [['Anúncios display', 62],['Anúncios pré-vídeo', 24],['Assinaturas premium', 10],['Outros', 4]];
+    document.getElementById('kaweMonetBreak').innerHTML = br.map(x=>`<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;color:#ddd;font-size:13px"><span>${x[0]}</span><span>${x[1]}%</span></div><div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;margin-top:4px"><div style="width:${x[1]}%;height:100%;background:linear-gradient(90deg,#22c55e,#16a34a);border-radius:3px"></div></div></div>`).join('');
+  };
+
+  window.kaweRenderPayouts = function(){
+    document.getElementById('kawePayBal').textContent = 'R$ '+LS.get(K.payoutBal,0).toFixed(2).replace('.',',');
+    const h = LS.get(K.payouts,[]).slice().reverse();
+    const el = document.getElementById('kawePayHist');
+    if(!h.length){ el.innerHTML = '<p style="color:#666;font-size:13px">Sem transações.</p>'; return; }
+    el.innerHTML = h.map(t=>row(`<div style="display:flex;justify-content:space-between">
+      <div><span style="color:${t.type==='deposit'?'#22c55e':'#f97316'};font-weight:700">${t.type==='deposit'?'DEPÓSITO':'SAQUE PIX'}</span>
+        ${t.pix?`<span style="color:#888;font-size:12px"> · ${esc(t.pix)}</span>`:''}
+        <div style="color:#666;font-size:11px">${new Date(t.at).toLocaleString('pt-BR')} · ${esc(t.status||'ok')}</div></div>
+      <div style="font-weight:700;color:#fff">R$ ${t.amount.toFixed(2).replace('.',',')}</div>
+    </div>`)).join('');
+  };
+  window.kaweDeposit = function(){
+    const v = parseFloat(document.getElementById('kaweDepAmt').value); if(!v||v<=0){ alert('Valor inválido'); return; }
+    LS.set(K.payoutBal, +(LS.get(K.payoutBal,0)+v).toFixed(2));
+    const h = LS.get(K.payouts,[]); h.push({type:'deposit',amount:v,at:new Date().toISOString(),status:'confirmado'}); LS.set(K.payouts,h);
+    document.getElementById('kaweDepAmt').value=''; kaweAddNotif(`Depósito R$ ${v.toFixed(2)}`,'monetization'); kaweRenderPayouts();
+  };
+  window.kaweWithdraw = function(){
+    const v = parseFloat(document.getElementById('kaweWAmt').value); const k = document.getElementById('kaweWKey').value.trim();
+    if(!v||v<=0){ alert('Valor inválido'); return; } if(!k){ alert('Informe a chave PIX'); return; }
+    const bal = LS.get(K.payoutBal,0); if(v>bal){ alert('Saldo insuficiente'); return; }
+    LS.set(K.payoutBal, +(bal-v).toFixed(2));
+    const h = LS.get(K.payouts,[]); h.push({type:'withdraw',amount:v,pix:k,at:new Date().toISOString(),status:'processando'}); LS.set(K.payouts,h);
+    document.getElementById('kaweWAmt').value=''; document.getElementById('kaweWKey').value='';
+    kaweAddNotif(`Saque PIX R$ ${v.toFixed(2)} → ${k}`,'monetization'); kaweRenderPayouts();
+  };
+
+  window.kaweRenderAds = function(){
+    const list = LS.get(K.ads,[]);
+    const el = document.getElementById('kaweAdsList');
+    if(!list.length){ el.innerHTML = '<p style="color:#666;font-size:13px">Nenhum anúncio.</p>'; return; }
+    el.innerHTML = list.map((a,i)=>row(`<div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+      <div><div style="font-weight:700;color:#fff">${esc(a.title)}</div>
+      <div style="color:#888;font-size:12px">Posição: ${esc(a.slot)} · ${esc(a.link)}</div></div>
+      <button class="admin-btn" style="background:rgba(239,68,68,0.2);color:#ef4444" onclick="kaweDelAd(${i})">Remover</button>
+    </div>`)).join('');
+  };
+  window.kaweAddAd = function(){
+    const a = { title:document.getElementById('kaweAdT').value.trim(), img:document.getElementById('kaweAdImg').value.trim(),
+      link:document.getElementById('kaweAdLink').value.trim(), slot:document.getElementById('kaweAdSlot').value, at:Date.now() };
+    if(!a.title||!a.link){ alert('Preencha título e URL'); return; }
+    const l = LS.get(K.ads,[]); l.push(a); LS.set(K.ads,l);
+    ['kaweAdT','kaweAdImg','kaweAdLink'].forEach(id=>document.getElementById(id).value='');
+    kaweAddNotif('Anúncio adicionado: '+a.title,'ads'); kaweRenderAds();
+  };
+  window.kaweDelAd = function(i){ const l=LS.get(K.ads,[]); l.splice(i,1); LS.set(K.ads,l); kaweRenderAds(); };
+
+  window.kaweLoadCode = function(){
+    document.getElementById('kaweCssIn').value = LS.get(K.customCss,'') || '';
+    document.getElementById('kaweJsIn').value = LS.get(K.customJs,'') || '';
+  };
+  window.kaweApplyCode = function(){
+    const css = document.getElementById('kaweCssIn').value;
+    const js = document.getElementById('kaweJsIn').value;
+    LS.set(K.customCss, css); LS.set(K.customJs, js);
+    document.getElementById('kaweCustomCssTag').textContent = css;
+    if(js.trim()){ try { new Function(js)(); toast('Código aplicado!'); } catch(e){ alert('Erro no JS: '+e.message); } }
+    else toast('CSS aplicado');
+  };
+  window.kaweResetCode = function(){
+    if(!confirm('Resetar código customizado?')) return;
+    LS.set(K.customCss,''); LS.set(K.customJs,'');
+    document.getElementById('kaweCustomCssTag').textContent = ''; kaweLoadCode();
+  };
+
+  window.kaweSaveAnn = function(){
+    const t = document.getElementById('kaweAnnT').value.trim();
+    const b = document.getElementById('kaweAnnB').value.trim();
+    if(!t){ alert('Título obrigatório'); return; }
+    const l = LS.get(K.announcements,[]); l.push({id:Date.now(),title:t,body:b,active:true,at:new Date().toISOString()});
+    LS.set(K.announcements,l);
+    document.getElementById('kaweAnnT').value=''; document.getElementById('kaweAnnB').value='';
+    kaweAddNotif('Aviso global publicado','announcement'); kaweRenderAnn();
+  };
+  window.kaweRenderAnn = function(){
+    const list = LS.get(K.announcements,[]).slice().reverse();
+    const el = document.getElementById('kaweAnnList');
+    if(!list.length){ el.innerHTML = '<p style="color:#666;font-size:13px">Nenhum aviso.</p>'; return; }
+    el.innerHTML = list.map(a=>row(`<div style="display:flex;justify-content:space-between;gap:10px">
+      <div><div style="font-weight:700;color:#fff">${esc(a.title)}</div>
+        <div style="color:#ddd;font-size:13px;margin-top:4px">${esc(a.body)}</div>
+        <div style="color:#666;font-size:11px;margin-top:4px">${new Date(a.at).toLocaleString('pt-BR')}</div></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <button class="admin-btn admin-btn-secondary" onclick="kaweToggleAnn(${a.id})">${a.active?'Desativar':'Ativar'}</button>
+        <button class="admin-btn" style="background:rgba(239,68,68,0.2);color:#ef4444" onclick="kaweDelAnn(${a.id})">Excluir</button>
+      </div></div>`)).join('');
+  };
+  window.kaweToggleAnn = function(id){ const l=LS.get(K.announcements,[]); const a=l.find(x=>x.id===id); if(a){ a.active=!a.active; LS.set(K.announcements,l); kaweRenderAnn(); } };
+  window.kaweDelAnn = function(id){ LS.set(K.announcements, LS.get(K.announcements,[]).filter(a=>a.id!==id)); kaweRenderAnn(); };
+
+  window.kaweScanMaint = function(){
+    const vids = (typeof videos!=='undefined'?videos:[]);
+    const issues = [];
+    vids.forEach((v,i)=>{
+      if(!v.title || v.title.length<3) issues.push({tipo:'Vídeo',ref:'#'+(i+1),problema:'título ausente ou muito curto'});
+      if(v.title && /[a-z]{20,}/.test(v.title)) issues.push({tipo:'Vídeo',ref:v.title,problema:'possível título mal escrito'});
+      if(!v.thumb) issues.push({tipo:'Vídeo',ref:v.title||'#'+i,problema:'sem miniatura'});
+      if(!v.cat && !v.categoria) issues.push({tipo:'Vídeo',ref:v.title||'#'+i,problema:'sem categoria'});
+      if(!v.desc && !v.description) issues.push({tipo:'Vídeo',ref:v.title||'#'+i,problema:'sem descrição'});
+    });
+    if(typeof categorias!=='undefined' && Array.isArray(categorias)){
+      categorias.forEach(c => { if(typeof c==='string' && c.length<2) issues.push({tipo:'Categoria',ref:c,problema:'nome muito curto'}); });
+    }
+    document.getElementById('kaweMaintCount').textContent = issues.length+' problema(s)';
+    const el = document.getElementById('kaweMaintList');
+    if(!issues.length){ el.innerHTML = '<p style="color:#22c55e;font-size:13px">✓ Tudo em ordem.</p>'; return; }
+    el.innerHTML = issues.map(x=>row(`<div style="display:flex;justify-content:space-between">
+      <div><span style="padding:2px 6px;border-radius:4px;background:rgba(249,115,22,0.2);color:#f97316;font-size:11px">${x.tipo}</span> <span style="color:#fff;margin-left:6px">${esc(x.ref)}</span></div>
+      <div style="color:#f97316;font-size:12px">${esc(x.problema)}</div></div>`)).join('');
+  };
+
+  window.kaweRenderVerify = function(){
+    const list = LS.get(K.verify,[]);
+    const el = document.getElementById('kaweVerList');
+    if(!list.length){ el.innerHTML = '<p style="color:#666;font-size:13px">Fila vazia.</p>'; return; }
+    el.innerHTML = list.map(v=>row(`<div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+      <div><div style="font-weight:700;color:#fff">${esc(v.username)} <span style="color:#888;font-weight:400">&lt;${esc(v.email)}&gt;</span></div>
+      <div style="color:#666;font-size:11px">Solicitado: ${new Date(v.at).toLocaleString('pt-BR')}</div></div>
+      <div style="display:flex;gap:6px">
+        <button class="admin-btn admin-btn-success" onclick="kaweVerAct('${v.id}',true)">Aceitar</button>
+        <button class="admin-btn" style="background:rgba(239,68,68,0.2);color:#ef4444" onclick="kaweVerAct('${v.id}',false)">Recusar</button>
+      </div></div>`)).join('');
+  };
+  window.kaweVerAct = function(id, ok){
+    const acc = LS.get(K.accounts,[]);
+    const a = acc.find(x=>x.id===id); if(a){ a.status = ok?'approved':'rejected'; LS.set(K.accounts,acc); }
+    LS.set(K.verify, LS.get(K.verify,[]).filter(v=>v.id!==id));
+    kaweAddNotif((ok?'Aprovado':'Recusado')+': '+(a?.username||id),'verify'); kaweRenderVerify();
+  };
+
+  window.kaweRenderSupport = function(){
+    const list = LS.get(K.tickets,[]).slice().reverse();
+    const el = document.getElementById('kaweSupList');
+    if(!list.length){ el.innerHTML = '<p style="color:#666;font-size:13px">Nenhum ticket recebido.</p>'; return; }
+    el.innerHTML = list.map((t,i)=>row(`<div>
+      <div style="display:flex;justify-content:space-between;gap:10px">
+        <div><span style="padding:2px 6px;border-radius:4px;background:rgba(59,130,246,0.2);color:#3b82f6;font-size:11px">${esc(t.status||'aberto')}</span>
+          <strong style="color:#fff;margin-left:6px">${esc(t.subject||'(sem assunto)')}</strong></div>
+        <div style="color:#666;font-size:11px">${new Date(t.at||Date.now()).toLocaleString('pt-BR')}</div>
+      </div>
+      <div style="color:#888;font-size:12px;margin-top:4px">De: ${esc(t.email||'-')} ${t.name?'· '+esc(t.name):''}</div>
+      <div style="color:#ddd;font-size:13px;margin-top:8px;white-space:pre-wrap">${esc(t.message||'')}</div>
+      <div style="margin-top:8px;display:flex;gap:6px">
+        <button class="admin-btn admin-btn-secondary" onclick="kaweTicketReply(${i})">Responder</button>
+        <button class="admin-btn" style="background:rgba(239,68,68,0.2);color:#ef4444" onclick="kaweTicketDel(${i})">Excluir</button>
+      </div></div>`)).join('');
+  };
+  window.kaweTicketReply = function(idx){
+    const r = prompt('Resposta (será registrada localmente):'); if(!r) return;
+    const rev = LS.get(K.tickets,[]).slice().reverse(); const t = rev[idx];
+    t.reply = r; t.status='respondido';
+    const all = rev.reverse(); LS.set(K.tickets, all);
+    kaweAddNotif('Ticket respondido: '+(t.subject||''),'support'); kaweRenderSupport();
+  };
+  window.kaweTicketDel = function(idx){
+    const rev = LS.get(K.tickets,[]).slice().reverse(); rev.splice(idx,1);
+    LS.set(K.tickets, rev.reverse()); kaweRenderSupport();
+  };
+  // Hook: se existir botão de suporte enviando ticket, salva
+  window.kaweSubmitTicket = function(subject,email,message,name){
+    const l = LS.get(K.tickets,[]); l.push({subject,email,message,name,at:new Date().toISOString(),status:'aberto'});
+    LS.set(K.tickets,l); kaweAddNotif('Novo ticket: '+subject,'support');
+  };
+
+  window.kaweRenderIps = function(){
+    const q = (document.getElementById('kaweIpQ')?.value||'').toLowerCase();
+    const list = LS.get(K.ipLogs,[]).slice().reverse().filter(l=>!q||(l.user+' '+l.ip+' '+l.email).toLowerCase().includes(q));
+    const el = document.getElementById('kaweIpList');
+    if(!list.length){ el.innerHTML = '<p style="color:#666;font-size:13px">Sem registros.</p>'; return; }
+    el.innerHTML = list.map(l=>row(`<div style="display:flex;justify-content:space-between;gap:10px">
+      <div><span style="color:#fff;font-weight:700">${esc(l.user)}</span> <span style="color:#888;font-size:12px">${esc(l.action)}</span>
+        <div style="color:#a78bfa;font-size:12px;margin-top:4px;font-family:monospace">IP ${esc(l.ip)} · MAC ${esc(l.mac||'-')}</div>
+        <div style="color:#666;font-size:11px;margin-top:2px">${esc(l.ua||'')}</div></div>
+      <div style="color:#666;font-size:11px">${new Date(l.at).toLocaleString('pt-BR')}</div></div>`)).join('');
+  };
+  window.kaweClearIps = function(){ if(confirm('Limpar logs de IP?')){ LS.set(K.ipLogs,[]); kaweRenderIps(); } };
+
+  // ========= TEMA GLOBAL =========
+  const THEMES = [
+    {id:'preto',   name:'Preto',    bg:'#0a0a0a', accent:'#8b5cf6', text:'#fff'},
+    {id:'branco',  name:'Branco',   bg:'#f5f5f5', accent:'#2563eb', text:'#0a0a0a'},
+    {id:'amarelo', name:'Amarelo',  bg:'#1a1500', accent:'#facc15', text:'#fff'},
+    {id:'azul',    name:'Azul',     bg:'#0a1428', accent:'#3b82f6', text:'#fff'},
+    {id:'vermelho',name:'Vermelho', bg:'#1c0808', accent:'#dc2626', text:'#fff'},
+    {id:'roxo',    name:'Roxo',     bg:'#140a1f', accent:'#a855f7', text:'#fff'},
+    {id:'rosa',    name:'Rosa',     bg:'#1f0a15', accent:'#ec4899', text:'#fff'},
+    {id:'laranja', name:'Laranja',  bg:'#1f1208', accent:'#f97316', text:'#fff'}
+  ];
+  function applyGlobalTheme(t){
+    if(!t) return;
+    let s = document.getElementById('kaweGlobalThemeTag');
+    if(!s){ s=document.createElement('style'); s.id='kaweGlobalThemeTag'; document.head.appendChild(s); }
+    s.textContent = `:root{--kawe-g-bg:${t.bg};--kawe-g-accent:${t.accent};--kawe-g-text:${t.text}}
+      body{background:${t.bg}!important;color:${t.text}!important}
+      .header,header{background:${t.bg}!important}
+      .btn-primary,.auth-submit,.admin-btn-primary{background:${t.accent}!important;border-color:${t.accent}!important}`;
+  }
+  window.kaweRenderThemeGrid = function(){
+    const el = document.getElementById('kaweThemeGrid');
+    const cur = LS.get(K.globalTheme,'preto');
+    el.innerHTML = THEMES.map(t=>`<div onclick="kawePickTheme('${t.id}')" style="cursor:pointer;padding:14px;border-radius:12px;background:${t.bg};border:2px solid ${cur===t.id?t.accent:'transparent'};text-align:center;transition:transform .15s" onmouseenter="this.style.transform='scale(1.05)'" onmouseleave="this.style.transform='scale(1)'">
+      <div style="width:36px;height:36px;border-radius:50%;background:${t.accent};margin:0 auto 8px"></div>
+      <div style="color:${t.text};font-weight:700;font-size:13px">${t.name}</div>
+      <div style="color:${t.text};opacity:.6;font-size:10px;margin-top:2px">PREMIUM</div></div>`).join('');
+  };
+  window.kawePickTheme = function(id){
+    LS.set(K.globalTheme,id); const t = THEMES.find(x=>x.id===id); applyGlobalTheme(t);
+    kaweAddNotif('Tema global alterado: '+t.name,'theme'); kaweRenderThemeGrid();
+  };
+
+  // ========= REALTIME =========
+  let rtInt = null;
+  window.kaweStartRT = function(){
+    if(rtInt) clearInterval(rtInt);
+    const tick = () => {
+      const d = new Date();
+      const c = document.getElementById('kaweRtClock'); if(!c){ clearInterval(rtInt); rtInt=null; return; }
+      c.textContent = d.toLocaleTimeString('pt-BR');
+      document.getElementById('kaweRtDate').textContent = d.toLocaleDateString('pt-BR');
+      const on = LS.get(K.online,{}); const now = Date.now();
+      const active = Object.entries(on).filter(([,v])=>now-v.at<45000);
+      document.getElementById('kaweRtOnline').textContent = active.length;
+      document.getElementById('kaweRtTotal').textContent = LS.get(K.accounts,[]).length;
+      document.getElementById('kaweRtPend').textContent = LS.get(K.verify,[]).length;
+      document.getElementById('kaweRtList').innerHTML = active.length ? active.map(([sid,v])=>row(`<div style="display:flex;justify-content:space-between">
+        <div><span style="color:#fff;font-weight:700">${esc(v.user)}</span> <span style="color:#a78bfa;font-family:monospace;font-size:12px">${esc(v.ip)}</span></div>
+        <div style="color:#666;font-size:11px">${Math.floor((now-v.at)/1000)}s atrás</div></div>`)).join('') : '<p style="color:#666;font-size:13px">Nenhuma sessão ativa.</p>';
+    };
+    tick(); rtInt = setInterval(tick, 1000);
+  };
+
+  // ========= INIT =========
+  function init(){
+    hookAuth();
+    // aplicar customizações salvas
+    document.getElementById('kaweCustomCssTag').textContent = LS.get(K.customCss,'') || '';
+    const savedJs = LS.get(K.customJs,'');
+    if(savedJs){ try { new Function(savedJs)(); } catch(e){ console.warn('kawe custom JS:', e); } }
+    const th = LS.get(K.globalTheme,null);
+    if(th){ const t = THEMES.find(x=>x.id===th); if(t) applyGlobalTheme(t); }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+
+</body>
+</html>
 
 </body>
 </html>

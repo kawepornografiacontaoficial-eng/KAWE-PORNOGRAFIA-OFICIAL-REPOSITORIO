@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5625,6 +5626,10 @@ body.claro .video-info h3 {
     <button class="auth-btn" onclick="abrirAdmin()" style="background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.1)); color: #22c55e; border: 1px solid rgba(34,197,94,0.5); font-size:12px;" title="Painel Admin">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle; margin-right:4px;"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
         Admin
+    </button>
+    <button class="auth-btn" onclick="abrirVIP()" style="background: linear-gradient(135deg, #facc15, #eab308); color: #000; border: 1px solid #fde047; font-size:12px; font-weight:800; box-shadow: 0 0 12px rgba(250,204,21,0.5);" title="Área VIP">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle; margin-right:4px;"><path d="M12 2l2.39 4.84L20 8l-4 3.9.94 5.5L12 14.8 7.06 17.4 8 11.9 4 8l5.61-1.16L12 2z"/></svg>
+        VIP
     </button>
     <button class="auth-btn" onclick="abrirChatGeral()" style="background: linear-gradient(135deg, rgba(59,130,246,0.25), rgba(59,130,246,0.1)); color: #3b82f6; border: 1px solid rgba(59,130,246,0.6); font-size:12px;" title="Chat Geral">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle; margin-right:4px;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
@@ -16447,4 +16452,761 @@ function exportCreatorData(type) {
   window.kaweDelAd = function(i){ const l=LS.get(K.ads,[]); l.splice(i,1); LS.set(K.ads,l); kaweRenderAds(); };
 
   window.kaweLoadCode = function(){
-    document.getE
+    document.getElementById('kaweCssIn').value = LS.get(K.customCss,'') || '';
+    document.getElementById('kaweJsIn').value = LS.get(K.customJs,'') || '';
+  };
+  window.kaweApplyCode = function(){
+    const css = document.getElementById('kaweCssIn').value;
+    const js = document.getElementById('kaweJsIn').value;
+    LS.set(K.customCss, css); LS.set(K.customJs, js);
+    document.getElementById('kaweCustomCssTag').textContent = css;
+    if(js.trim()){ try { new Function(js)(); toast('Código aplicado!'); } catch(e){ alert('Erro no JS: '+e.message); } }
+    else toast('CSS aplicado');
+  };
+  window.kaweResetCode = function(){
+    if(!confirm('Resetar código customizado?')) return;
+    LS.set(K.customCss,''); LS.set(K.customJs,'');
+    document.getElementById('kaweCustomCssTag').textContent = ''; kaweLoadCode();
+  };
+
+  window.kaweSaveAnn = function(){
+    const t = document.getElementById('kaweAnnT').value.trim();
+    const b = document.getElementById('kaweAnnB').value.trim();
+    if(!t){ alert('Título obrigatório'); return; }
+    const l = LS.get(K.announcements,[]); l.push({id:Date.now(),title:t,body:b,active:true,at:new Date().toISOString()});
+    LS.set(K.announcements,l);
+    document.getElementById('kaweAnnT').value=''; document.getElementById('kaweAnnB').value='';
+    kaweAddNotif('Aviso global publicado','announcement'); kaweRenderAnn();
+  };
+  window.kaweRenderAnn = function(){
+    const list = LS.get(K.announcements,[]).slice().reverse();
+    const el = document.getElementById('kaweAnnList');
+    if(!list.length){ el.innerHTML = '<p style="color:#666;font-size:13px">Nenhum aviso.</p>'; return; }
+    el.innerHTML = list.map(a=>row(`<div style="display:flex;justify-content:space-between;gap:10px">
+      <div><div style="font-weight:700;color:#fff">${esc(a.title)}</div>
+        <div style="color:#ddd;font-size:13px;margin-top:4px">${esc(a.body)}</div>
+        <div style="color:#666;font-size:11px;margin-top:4px">${new Date(a.at).toLocaleString('pt-BR')}</div></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <button class="admin-btn admin-btn-secondary" onclick="kaweToggleAnn(${a.id})">${a.active?'Desativar':'Ativar'}</button>
+        <button class="admin-btn" style="background:rgba(239,68,68,0.2);color:#ef4444" onclick="kaweDelAnn(${a.id})">Excluir</button>
+      </div></div>`)).join('');
+  };
+  window.kaweToggleAnn = function(id){ const l=LS.get(K.announcements,[]); const a=l.find(x=>x.id===id); if(a){ a.active=!a.active; LS.set(K.announcements,l); kaweRenderAnn(); } };
+  window.kaweDelAnn = function(id){ LS.set(K.announcements, LS.get(K.announcements,[]).filter(a=>a.id!==id)); kaweRenderAnn(); };
+
+  window.kaweScanMaint = function(){
+    const vids = (typeof videos!=='undefined'?videos:[]);
+    const issues = [];
+    vids.forEach((v,i)=>{
+      if(!v.title || v.title.length<3) issues.push({tipo:'Vídeo',ref:'#'+(i+1),problema:'título ausente ou muito curto'});
+      if(v.title && /[a-z]{20,}/.test(v.title)) issues.push({tipo:'Vídeo',ref:v.title,problema:'possível título mal escrito'});
+      if(!v.thumb) issues.push({tipo:'Vídeo',ref:v.title||'#'+i,problema:'sem miniatura'});
+      if(!v.cat && !v.categoria) issues.push({tipo:'Vídeo',ref:v.title||'#'+i,problema:'sem categoria'});
+      if(!v.desc && !v.description) issues.push({tipo:'Vídeo',ref:v.title||'#'+i,problema:'sem descrição'});
+    });
+    if(typeof categorias!=='undefined' && Array.isArray(categorias)){
+      categorias.forEach(c => { if(typeof c==='string' && c.length<2) issues.push({tipo:'Categoria',ref:c,problema:'nome muito curto'}); });
+    }
+    document.getElementById('kaweMaintCount').textContent = issues.length+' problema(s)';
+    const el = document.getElementById('kaweMaintList');
+    if(!issues.length){ el.innerHTML = '<p style="color:#22c55e;font-size:13px">✓ Tudo em ordem.</p>'; return; }
+    el.innerHTML = issues.map(x=>row(`<div style="display:flex;justify-content:space-between">
+      <div><span style="padding:2px 6px;border-radius:4px;background:rgba(249,115,22,0.2);color:#f97316;font-size:11px">${x.tipo}</span> <span style="color:#fff;margin-left:6px">${esc(x.ref)}</span></div>
+      <div style="color:#f97316;font-size:12px">${esc(x.problema)}</div></div>`)).join('');
+  };
+
+  window.kaweRenderVerify = function(){
+    const list = LS.get(K.verify,[]);
+    const el = document.getElementById('kaweVerList');
+    if(!list.length){ el.innerHTML = '<p style="color:#666;font-size:13px">Fila vazia.</p>'; return; }
+    el.innerHTML = list.map(v=>row(`<div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+      <div><div style="font-weight:700;color:#fff">${esc(v.username)} <span style="color:#888;font-weight:400">&lt;${esc(v.email)}&gt;</span></div>
+      <div style="color:#666;font-size:11px">Solicitado: ${new Date(v.at).toLocaleString('pt-BR')}</div></div>
+      <div style="display:flex;gap:6px">
+        <button class="admin-btn admin-btn-success" onclick="kaweVerAct('${v.id}',true)">Aceitar</button>
+        <button class="admin-btn" style="background:rgba(239,68,68,0.2);color:#ef4444" onclick="kaweVerAct('${v.id}',false)">Recusar</button>
+      </div></div>`)).join('');
+  };
+  window.kaweVerAct = function(id, ok){
+    const acc = LS.get(K.accounts,[]);
+    const a = acc.find(x=>x.id===id); if(a){ a.status = ok?'approved':'rejected'; LS.set(K.accounts,acc); }
+    LS.set(K.verify, LS.get(K.verify,[]).filter(v=>v.id!==id));
+    kaweAddNotif((ok?'Aprovado':'Recusado')+': '+(a?.username||id),'verify'); kaweRenderVerify();
+  };
+
+  window.kaweRenderSupport = function(){
+    const list = LS.get(K.tickets,[]).slice().reverse();
+    const el = document.getElementById('kaweSupList');
+    if(!list.length){ el.innerHTML = '<p style="color:#666;font-size:13px">Nenhum ticket recebido.</p>'; return; }
+    el.innerHTML = list.map((t,i)=>row(`<div>
+      <div style="display:flex;justify-content:space-between;gap:10px">
+        <div><span style="padding:2px 6px;border-radius:4px;background:rgba(59,130,246,0.2);color:#3b82f6;font-size:11px">${esc(t.status||'aberto')}</span>
+          <strong style="color:#fff;margin-left:6px">${esc(t.subject||'(sem assunto)')}</strong></div>
+        <div style="color:#666;font-size:11px">${new Date(t.at||Date.now()).toLocaleString('pt-BR')}</div>
+      </div>
+      <div style="color:#888;font-size:12px;margin-top:4px">De: ${esc(t.email||'-')} ${t.name?'· '+esc(t.name):''}</div>
+      <div style="color:#ddd;font-size:13px;margin-top:8px;white-space:pre-wrap">${esc(t.message||'')}</div>
+      <div style="margin-top:8px;display:flex;gap:6px">
+        <button class="admin-btn admin-btn-secondary" onclick="kaweTicketReply(${i})">Responder</button>
+        <button class="admin-btn" style="background:rgba(239,68,68,0.2);color:#ef4444" onclick="kaweTicketDel(${i})">Excluir</button>
+      </div></div>`)).join('');
+  };
+  window.kaweTicketReply = function(idx){
+    const r = prompt('Resposta (será registrada localmente):'); if(!r) return;
+    const rev = LS.get(K.tickets,[]).slice().reverse(); const t = rev[idx];
+    t.reply = r; t.status='respondido';
+    const all = rev.reverse(); LS.set(K.tickets, all);
+    kaweAddNotif('Ticket respondido: '+(t.subject||''),'support'); kaweRenderSupport();
+  };
+  window.kaweTicketDel = function(idx){
+    const rev = LS.get(K.tickets,[]).slice().reverse(); rev.splice(idx,1);
+    LS.set(K.tickets, rev.reverse()); kaweRenderSupport();
+  };
+  // Hook: se existir botão de suporte enviando ticket, salva
+  window.kaweSubmitTicket = function(subject,email,message,name){
+    const l = LS.get(K.tickets,[]); l.push({subject,email,message,name,at:new Date().toISOString(),status:'aberto'});
+    LS.set(K.tickets,l); kaweAddNotif('Novo ticket: '+subject,'support');
+  };
+
+  window.kaweRenderIps = function(){
+    const q = (document.getElementById('kaweIpQ')?.value||'').toLowerCase();
+    const list = LS.get(K.ipLogs,[]).slice().reverse().filter(l=>!q||(l.user+' '+l.ip+' '+l.email).toLowerCase().includes(q));
+    const el = document.getElementById('kaweIpList');
+    if(!list.length){ el.innerHTML = '<p style="color:#666;font-size:13px">Sem registros.</p>'; return; }
+    el.innerHTML = list.map(l=>row(`<div style="display:flex;justify-content:space-between;gap:10px">
+      <div><span style="color:#fff;font-weight:700">${esc(l.user)}</span> <span style="color:#888;font-size:12px">${esc(l.action)}</span>
+        <div style="color:#a78bfa;font-size:12px;margin-top:4px;font-family:monospace">IP ${esc(l.ip)} · MAC ${esc(l.mac||'-')}</div>
+        <div style="color:#666;font-size:11px;margin-top:2px">${esc(l.ua||'')}</div></div>
+      <div style="color:#666;font-size:11px">${new Date(l.at).toLocaleString('pt-BR')}</div></div>`)).join('');
+  };
+  window.kaweClearIps = function(){ if(confirm('Limpar logs de IP?')){ LS.set(K.ipLogs,[]); kaweRenderIps(); } };
+
+  // ========= TEMA GLOBAL =========
+  const THEMES = [
+    {id:'preto',   name:'Preto',    bg:'#0a0a0a', accent:'#8b5cf6', text:'#fff'},
+    {id:'branco',  name:'Branco',   bg:'#f5f5f5', accent:'#2563eb', text:'#0a0a0a'},
+    {id:'amarelo', name:'Amarelo',  bg:'#1a1500', accent:'#facc15', text:'#fff'},
+    {id:'azul',    name:'Azul',     bg:'#0a1428', accent:'#3b82f6', text:'#fff'},
+    {id:'vermelho',name:'Vermelho', bg:'#1c0808', accent:'#dc2626', text:'#fff'},
+    {id:'roxo',    name:'Roxo',     bg:'#140a1f', accent:'#a855f7', text:'#fff'},
+    {id:'rosa',    name:'Rosa',     bg:'#1f0a15', accent:'#ec4899', text:'#fff'},
+    {id:'laranja', name:'Laranja',  bg:'#1f1208', accent:'#f97316', text:'#fff'}
+  ];
+  function applyGlobalTheme(t){
+    if(!t) return;
+    let s = document.getElementById('kaweGlobalThemeTag');
+    if(!s){ s=document.createElement('style'); s.id='kaweGlobalThemeTag'; document.head.appendChild(s); }
+    s.textContent = `:root{--kawe-g-bg:${t.bg};--kawe-g-accent:${t.accent};--kawe-g-text:${t.text}}
+      body{background:${t.bg}!important;color:${t.text}!important}
+      .header,header{background:${t.bg}!important}
+      .btn-primary,.auth-submit,.admin-btn-primary{background:${t.accent}!important;border-color:${t.accent}!important}`;
+  }
+  window.kaweRenderThemeGrid = function(){
+    const el = document.getElementById('kaweThemeGrid');
+    const cur = LS.get(K.globalTheme,'preto');
+    el.innerHTML = THEMES.map(t=>`<div onclick="kawePickTheme('${t.id}')" style="cursor:pointer;padding:14px;border-radius:12px;background:${t.bg};border:2px solid ${cur===t.id?t.accent:'transparent'};text-align:center;transition:transform .15s" onmouseenter="this.style.transform='scale(1.05)'" onmouseleave="this.style.transform='scale(1)'">
+      <div style="width:36px;height:36px;border-radius:50%;background:${t.accent};margin:0 auto 8px"></div>
+      <div style="color:${t.text};font-weight:700;font-size:13px">${t.name}</div>
+      <div style="color:${t.text};opacity:.6;font-size:10px;margin-top:2px">PREMIUM</div></div>`).join('');
+  };
+  window.kawePickTheme = function(id){
+    LS.set(K.globalTheme,id); const t = THEMES.find(x=>x.id===id); applyGlobalTheme(t);
+    kaweAddNotif('Tema global alterado: '+t.name,'theme'); kaweRenderThemeGrid();
+  };
+
+  // ========= REALTIME =========
+  let rtInt = null;
+  window.kaweStartRT = function(){
+    if(rtInt) clearInterval(rtInt);
+    const tick = () => {
+      const d = new Date();
+      const c = document.getElementById('kaweRtClock'); if(!c){ clearInterval(rtInt); rtInt=null; return; }
+      c.textContent = d.toLocaleTimeString('pt-BR');
+      document.getElementById('kaweRtDate').textContent = d.toLocaleDateString('pt-BR');
+      const on = LS.get(K.online,{}); const now = Date.now();
+      const active = Object.entries(on).filter(([,v])=>now-v.at<45000);
+      document.getElementById('kaweRtOnline').textContent = active.length;
+      document.getElementById('kaweRtTotal').textContent = LS.get(K.accounts,[]).length;
+      document.getElementById('kaweRtPend').textContent = LS.get(K.verify,[]).length;
+      document.getElementById('kaweRtList').innerHTML = active.length ? active.map(([sid,v])=>row(`<div style="display:flex;justify-content:space-between">
+        <div><span style="color:#fff;font-weight:700">${esc(v.user)}</span> <span style="color:#a78bfa;font-family:monospace;font-size:12px">${esc(v.ip)}</span></div>
+        <div style="color:#666;font-size:11px">${Math.floor((now-v.at)/1000)}s atrás</div></div>`)).join('') : '<p style="color:#666;font-size:13px">Nenhuma sessão ativa.</p>';
+    };
+    tick(); rtInt = setInterval(tick, 1000);
+  };
+
+  // ========= INIT =========
+  function init(){
+    hookAuth();
+    // aplicar customizações salvas
+    document.getElementById('kaweCustomCssTag').textContent = LS.get(K.customCss,'') || '';
+    const savedJs = LS.get(K.customJs,'');
+    if(savedJs){ try { new Function(savedJs)(); } catch(e){ console.warn('kawe custom JS:', e); } }
+    const th = LS.get(K.globalTheme,null);
+    if(th){ const t = THEMES.find(x=>x.id===th); if(t) applyGlobalTheme(t); }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+</script>
+<!-- ================= CHAT GERAL + PLAYER FIX ================= -->
+<style>
+#chatGeralOverlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;}
+#chatGeralOverlay.active{display:flex;}
+#chatGeralBox{width:100%;max-width:520px;height:85vh;max-height:720px;background:#0b1220;border:1px solid #1e3a8a;border-radius:14px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 10px 40px rgba(59,130,246,.35);}
+#chatGeralBox header{background:linear-gradient(135deg,#1e3a8a,#3b82f6);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;color:#fff;font-weight:700;}
+#chatGeralBox header button{background:transparent;border:none;color:#fff;font-size:22px;cursor:pointer;}
+#chatGeralMsgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:#0a0f1e;}
+.chatG-msg{max-width:80%;padding:8px 12px;border-radius:12px;background:#1e293b;color:#e2e8f0;font-size:14px;word-wrap:break-word;}
+.chatG-msg.self{align-self:flex-end;background:#3b82f6;color:#fff;}
+.chatG-msg .who{font-size:11px;opacity:.75;margin-bottom:2px;font-weight:600;}
+.chatG-msg .time{font-size:10px;opacity:.55;margin-top:2px;text-align:right;}
+.chatG-msg a{color:#93c5fd;}
+.chatG-msg img,.chatG-msg video{max-width:100%;border-radius:8px;display:block;margin-top:4px;}
+.chatG-file{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);padding:6px 10px;border-radius:8px;margin-top:4px;color:#fff;text-decoration:none;font-size:13px;}
+#chatGeralForm{display:flex;gap:6px;padding:10px;background:#0b1220;border-top:1px solid #1e3a8a;align-items:center;}
+#chatGeralNome{width:110px;padding:8px;border-radius:8px;border:1px solid #1e3a8a;background:#0a0f1e;color:#fff;font-size:12px;}
+#chatGeralInput{flex:1;padding:10px;border-radius:8px;border:1px solid #1e3a8a;background:#0a0f1e;color:#fff;font-size:14px;}
+#chatGeralForm button,#chatGeralForm label{background:#3b82f6;color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;}
+#chatGeralForm label{background:#1e40af;}
+#chatGeralFile{display:none;}
+</style>
+<div id="chatGeralOverlay" onclick="if(event.target===this)fecharChatGeral()">
+  <div id="chatGeralBox">
+    <header>
+      <span>💬 Chat Geral</span>
+      <button onclick="fecharChatGeral()" title="Fechar">✕</button>
+    </header>
+    <div id="chatGeralMsgs"></div>
+    <form id="chatGeralForm" onsubmit="enviarChatGeral(event)">
+      <input id="chatGeralNome" placeholder="Seu nome" maxlength="20" />
+      <input id="chatGeralInput" placeholder="Escreva uma mensagem..." autocomplete="off" />
+      <label for="chatGeralFile" title="Anexar arquivo">📎</label>
+      <input id="chatGeralFile" type="file" onchange="anexarArquivoChatGeral(this)" />
+      <button type="submit" title="Enviar">➤</button>
+    </form>
+  </div>
+</div>
+<script>
+(function(){
+  const KEY_MSGS='kawe_chat_geral_msgs_v1';
+  const KEY_NOME='kawe_chat_geral_nome';
+  function load(){ try{return JSON.parse(localStorage.getItem(KEY_MSGS))||[]}catch(e){return []} }
+  function save(a){ localStorage.setItem(KEY_MSGS, JSON.stringify(a)); }
+  function esc(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+  function fmtTime(t){ const d=new Date(t); return d.toLocaleString(); }
+  function render(){
+    const box=document.getElementById('chatGeralMsgs'); if(!box) return;
+    const nome=(localStorage.getItem(KEY_NOME)||'').trim();
+    const msgs=load();
+    box.innerHTML=msgs.map(m=>{
+      const self=nome && m.nome===nome ? 'self':'';
+      let body='';
+      if(m.text) body=esc(m.text).replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
+      if(m.file){
+        if(m.file.type && m.file.type.startsWith('image/')) body+=`<img src="${m.file.data}" alt="${esc(m.file.name)}">`;
+        else if(m.file.type && m.file.type.startsWith('video/')) body+=`<video controls src="${m.file.data}"></video>`;
+        else body+=`<a class="chatG-file" href="${m.file.data}" download="${esc(m.file.name)}">📄 ${esc(m.file.name)}</a>`;
+      }
+      return `<div class="chatG-msg ${self}"><div class="who">${esc(m.nome||'Anônimo')}</div>${body}<div class="time">${fmtTime(m.t)}</div></div>`;
+    }).join('');
+    box.scrollTop=box.scrollHeight;
+  }
+  window.abrirChatGeral=function(){
+    document.getElementById('chatGeralOverlay').classList.add('active');
+    const nomeEl=document.getElementById('chatGeralNome');
+    nomeEl.value=localStorage.getItem(KEY_NOME)||'';
+    nomeEl.oninput=()=>localStorage.setItem(KEY_NOME, nomeEl.value.trim());
+    render();
+    setTimeout(()=>document.getElementById('chatGeralInput').focus(),50);
+  };
+  window.fecharChatGeral=function(){ document.getElementById('chatGeralOverlay').classList.remove('active'); };
+  window.enviarChatGeral=function(e){
+    e.preventDefault();
+    const inp=document.getElementById('chatGeralInput');
+    const txt=inp.value.trim(); if(!txt) return;
+    const nome=(document.getElementById('chatGeralNome').value.trim())||'Anônimo';
+    localStorage.setItem(KEY_NOME,nome);
+    const msgs=load(); msgs.push({nome,text:txt,t:Date.now()}); save(msgs);
+    inp.value=''; render();
+  };
+  window.anexarArquivoChatGeral=function(input){
+    const f=input.files&&input.files[0]; if(!f) return;
+    if(f.size>10*1024*1024){ alert('Arquivo muito grande (máx 10MB para armazenar no navegador).'); input.value=''; return; }
+    const nome=(document.getElementById('chatGeralNome').value.trim())||'Anônimo';
+    localStorage.setItem(KEY_NOME,nome);
+    const r=new FileReader();
+    r.onload=()=>{
+      const msgs=load();
+      msgs.push({nome,t:Date.now(),file:{name:f.name,type:f.type,data:r.result}});
+      try{ save(msgs); }catch(err){ alert('Não foi possível salvar o arquivo (armazenamento cheio).'); }
+      input.value=''; render();
+    };
+    r.readAsDataURL(f);
+  };
+  window.addEventListener('storage',e=>{ if(e.key===KEY_MSGS) render(); });
+})();
+
+/* ============ PLAYER TIMER + SEEK FIX ============ */
+(function(){
+  function two(n){ n=Math.floor(n); return (n<10?'0':'')+n; }
+  function fmt(s){
+    if(!isFinite(s)||s<0) s=0;
+    const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=Math.floor(s%60);
+    return h>0 ? `${h}:${two(m)}:${two(sec)}` : `${m}:${two(sec)}`;
+  }
+  function upd(v){
+    const fill=document.getElementById('progressFill');
+    const buf=document.getElementById('bufferFill');
+    const td=document.getElementById('timeDisplay');
+    if(td) td.textContent = `${fmt(v.currentTime)} / ${fmt(v.duration||0)}`;
+    if(fill && v.duration) fill.style.width = ((v.currentTime/v.duration)*100)+'%';
+    if(buf && v.duration && v.buffered.length){
+      buf.style.width = ((v.buffered.end(v.buffered.length-1)/v.duration)*100)+'%';
+    }
+  }
+  function init(){
+    const v=document.getElementById('watchVideo'); if(!v) return;
+    ['timeupdate','durationchange','loadedmetadata','progress','seeked','play','pause'].forEach(ev=>{
+      v.addEventListener(ev,()=>upd(v));
+    });
+    // rAF fallback (some browsers throttle timeupdate)
+    (function tick(){ if(!v.paused && !v.ended) upd(v); requestAnimationFrame(tick); })();
+
+    // Draggable seek on progress bar
+    const bar=document.querySelector('.player-progress-bar'); if(!bar) return;
+    // Remove inline onclick to avoid double seek
+    bar.removeAttribute('onclick');
+    bar.style.cursor='pointer';
+    let dragging=false, wasPaused=false;
+    function pctFromEvent(e){
+      const rect=bar.getBoundingClientRect();
+      const x=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;
+      return Math.max(0,Math.min(1,x/rect.width));
+    }
+    function seekTo(e){
+      if(!v.duration||isNaN(v.duration)) return;
+      v.currentTime = pctFromEvent(e)*v.duration;
+      upd(v);
+    }
+    bar.addEventListener('mousedown',e=>{ dragging=true; wasPaused=v.paused; v.pause(); seekTo(e); });
+    document.addEventListener('mousemove',e=>{ if(dragging) seekTo(e); });
+    document.addEventListener('mouseup',()=>{ if(dragging){ dragging=false; if(!wasPaused) v.play().catch(()=>{});} });
+    bar.addEventListener('touchstart',e=>{ dragging=true; wasPaused=v.paused; v.pause(); seekTo(e); },{passive:true});
+    document.addEventListener('touchmove',e=>{ if(dragging) seekTo(e); },{passive:true});
+    document.addEventListener('touchend',()=>{ if(dragging){ dragging=false; if(!wasPaused) v.play().catch(()=>{});} });
+
+    // Override seekVideo to keep click-to-seek robust
+    window.seekVideo=function(e){ seekTo(e); };
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
+  else init();
+})();
+</script>
+<!-- ===== VIP FEATURE (added) ===== -->
+<style>
+.vip-pin-overlay, .vip-panel-overlay, .vip-admin-overlay {
+    display:none; position:fixed; inset:0;
+    background: rgba(0,0,0,0.92);
+    z-index: 100000;
+    align-items:center; justify-content:center;
+    backdrop-filter: blur(10px);
+    padding:20px;
+}
+.vip-pin-overlay.active, .vip-panel-overlay.active, .vip-admin-overlay.active { display:flex; }
+.vip-pin-box {
+    background: linear-gradient(160deg, #1a1400, #000);
+    border: 2px solid #facc15;
+    border-radius: 20px;
+    padding: 40px 32px;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 0 60px rgba(250,204,21,0.35);
+}
+.vip-pin-title {
+    color: #facc15;
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+    text-shadow: 0 0 12px rgba(250,204,21,0.6);
+}
+.vip-pin-sub {
+    color: #eab308;
+    font-size: 13px;
+    margin-bottom: 24px;
+    opacity: 0.85;
+}
+.vip-pin-inputs {
+    display:flex; gap:10px; justify-content:center; margin-bottom:20px;
+}
+.vip-pin-inputs input {
+    width: 52px; height: 62px;
+    background: #000;
+    border: 2px solid #facc15;
+    border-radius: 12px;
+    color: #facc15;
+    font-size: 28px;
+    font-weight: 900;
+    text-align: center;
+    text-transform: uppercase;
+    outline: none;
+    caret-color: #facc15;
+    transition: all 0.2s;
+}
+.vip-pin-inputs input:focus {
+    border-color: #fde047;
+    box-shadow: 0 0 12px rgba(250,204,21,0.6);
+    transform: scale(1.05);
+}
+.vip-pin-error {
+    color: #f87171; font-size: 13px; min-height: 18px; margin-bottom: 12px;
+}
+.vip-btn-primary {
+    background: linear-gradient(135deg, #facc15, #eab308);
+    color: #000; font-weight: 800; border: none;
+    padding: 12px 28px; border-radius: 10px; cursor:pointer;
+    font-size: 14px; letter-spacing: 1px; width:100%;
+    box-shadow: 0 6px 20px rgba(250,204,21,0.4);
+}
+.vip-btn-primary:hover { filter: brightness(1.1); }
+.vip-btn-ghost {
+    background: transparent; color:#888; border:1px solid #333;
+    padding:10px 20px; border-radius:10px; cursor:pointer;
+    font-size:12px; margin-top:12px;
+}
+.vip-panel-box {
+    background: linear-gradient(160deg, #0d0a00, #000);
+    border: 2px solid #facc15;
+    border-radius: 20px;
+    max-width: 1100px; width: 100%; max-height: 90vh;
+    overflow: hidden; display:flex; flex-direction:column;
+    box-shadow: 0 0 80px rgba(250,204,21,0.35);
+}
+.vip-panel-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 18px 24px;
+    background: linear-gradient(90deg, #facc15, #eab308);
+    color:#000;
+}
+.vip-panel-header .t { font-weight:900; font-size:20px; letter-spacing:2px; display:flex; align-items:center; gap:10px; }
+.vip-panel-header button {
+    background:#000; color:#facc15; border:1px solid #000;
+    padding:8px 16px; border-radius:8px; cursor:pointer; font-weight:700;
+}
+.vip-panel-body { padding: 24px; overflow-y:auto; }
+.vip-empty {
+    text-align:center; padding: 60px 20px; color:#888; font-size:14px;
+    border: 2px dashed rgba(250,204,21,0.3); border-radius: 14px;
+}
+.vip-grid {
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+}
+.vip-card {
+    background: #0a0a0a;
+    border: 1px solid rgba(250,204,21,0.35);
+    border-radius: 14px; overflow:hidden;
+    transition: all 0.25s;
+    display:flex; flex-direction:column;
+}
+.vip-card:hover {
+    transform: translateY(-3px);
+    border-color: #facc15;
+    box-shadow: 0 10px 30px rgba(250,204,21,0.25);
+}
+.vip-card .thumb {
+    width:100%; aspect-ratio: 16/9; background:#000;
+    display:flex; align-items:center; justify-content:center;
+    color:#facc15; font-size:12px; position:relative;
+}
+.vip-card .thumb img, .vip-card .thumb video {
+    width:100%; height:100%; object-fit:cover;
+}
+.vip-card .badge-vip {
+    position:absolute; top:8px; left:8px;
+    background:#facc15; color:#000; font-weight:900;
+    padding:3px 8px; border-radius:6px; font-size:11px; letter-spacing:1px;
+}
+.vip-card .info { padding:12px; }
+.vip-card .info .ttl { color:#facc15; font-weight:800; font-size:14px; margin-bottom:4px; }
+.vip-card .info .dsc { color:#aaa; font-size:12px; line-height:1.4; }
+.vip-card .info .actions { display:flex; gap:8px; margin-top:10px; }
+.vip-card .info .actions a, .vip-card .info .actions button {
+    flex:1; background:transparent; border:1px solid #facc15; color:#facc15;
+    padding:6px; border-radius:6px; font-size:12px; text-align:center;
+    text-decoration:none; cursor:pointer; font-weight:700;
+}
+.vip-card .info .actions a:hover, .vip-card .info .actions button:hover {
+    background:#facc15; color:#000;
+}
+.vip-admin-box {
+    background:#0d0a00; border:2px solid #facc15; border-radius:16px;
+    max-width:640px; width:100%; padding:24px;
+    max-height:90vh; overflow-y:auto;
+}
+.vip-admin-box h3 {
+    color:#facc15; margin:0 0 16px; font-size:20px; letter-spacing:1px;
+    display:flex; justify-content:space-between; align-items:center;
+}
+.vip-admin-box label { display:block; color:#facc15; font-size:12px; margin: 12px 0 6px; font-weight:700; letter-spacing:1px; }
+.vip-admin-box input, .vip-admin-box textarea, .vip-admin-box select {
+    width:100%; background:#000; border:1px solid rgba(250,204,21,0.4);
+    color:#facc15; padding:10px 12px; border-radius:8px;
+    font-family:inherit; font-size:14px; outline:none;
+}
+.vip-admin-box input:focus, .vip-admin-box textarea:focus { border-color:#facc15; }
+.vip-admin-box textarea { min-height:70px; resize:vertical; }
+.vip-admin-list { margin-top:20px; border-top:1px solid rgba(250,204,21,0.2); padding-top:16px; }
+.vip-admin-list .item {
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:#000; border:1px solid rgba(250,204,21,0.25);
+    padding:10px 12px; border-radius:8px; margin-bottom:8px;
+}
+.vip-admin-list .item .t { color:#facc15; font-weight:700; font-size:13px; }
+.vip-admin-list .item .m { color:#888; font-size:11px; }
+.vip-admin-list .item button {
+    background:#7f1d1d; color:#fff; border:none; padding:6px 10px;
+    border-radius:6px; cursor:pointer; font-size:12px;
+}
+#vipManageFab {
+    position: fixed; bottom: 22px; right: 22px;
+    background: linear-gradient(135deg, #facc15, #eab308);
+    color: #000; font-weight:900; border:none;
+    padding: 12px 18px; border-radius: 999px; cursor:pointer;
+    box-shadow: 0 8px 24px rgba(250,204,21,0.5);
+    display:none; z-index: 100001; letter-spacing:1px;
+}
+#vipManageFab.show { display:block; }
+@keyframes vipShake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-8px);} 75%{transform:translateX(8px);} }
+.vip-shake { animation: vipShake 0.4s ease; }
+</style>
+
+<!-- VIP PIN MODAL -->
+<div class="vip-pin-overlay" id="vipPinOverlay">
+    <div class="vip-pin-box">
+        <div class="vip-pin-title">★ ÁREA VIP ★</div>
+        <div class="vip-pin-sub">Digite a senha de 4 dígitos para acessar</div>
+        <div class="vip-pin-inputs" id="vipPinInputs">
+            <input type="password" maxlength="1" data-idx="0" autocomplete="off">
+            <input type="password" maxlength="1" data-idx="1" autocomplete="off">
+            <input type="password" maxlength="1" data-idx="2" autocomplete="off">
+            <input type="password" maxlength="1" data-idx="3" autocomplete="off">
+        </div>
+        <div class="vip-pin-error" id="vipPinError"></div>
+        <button class="vip-btn-primary" onclick="verificarSenhaVIP()">ENTRAR</button>
+        <button class="vip-btn-ghost" onclick="fecharVIPPin()">Cancelar</button>
+    </div>
+</div>
+
+<!-- VIP CONTENT PANEL -->
+<div class="vip-panel-overlay" id="vipPanelOverlay">
+    <div class="vip-panel-box">
+        <div class="vip-panel-header">
+            <div class="t">★ CONTEÚDO VIP EXCLUSIVO ★</div>
+            <button onclick="fecharVIPPanel()">Sair</button>
+        </div>
+        <div class="vip-panel-body">
+            <div id="vipContentGrid"></div>
+        </div>
+    </div>
+</div>
+
+<!-- VIP ADMIN (Manage Content) -->
+<div class="vip-admin-overlay" id="vipAdminOverlay">
+    <div class="vip-admin-box">
+        <h3>
+            <span>★ Gerenciar Conteúdo VIP</span>
+            <button class="vip-btn-ghost" style="margin:0;" onclick="fecharVIPAdmin()">Fechar</button>
+        </h3>
+        <label>Título</label>
+        <input id="vipAddTitle" placeholder="Ex: Vídeo Exclusivo VIP">
+        <label>Tipo</label>
+        <select id="vipAddType">
+            <option value="video">Vídeo (URL / mp4)</option>
+            <option value="image">Imagem (URL)</option>
+            <option value="link">Link Externo</option>
+        </select>
+        <label>URL do Conteúdo</label>
+        <input id="vipAddUrl" placeholder="https://...">
+        <label>Descrição (opcional)</label>
+        <textarea id="vipAddDesc" placeholder="Descrição curta..."></textarea>
+        <div style="margin-top:14px;">
+            <button class="vip-btn-primary" onclick="adicionarConteudoVIP()">＋ ADICIONAR CONTEÚDO VIP</button>
+        </div>
+        <div class="vip-admin-list" id="vipAdminList"></div>
+    </div>
+</div>
+
+<button id="vipManageFab" onclick="abrirVIPAdmin()">★ Gerenciar VIP</button>
+
+<script>
+(function(){
+    var VIP_PASSWORD = 'VIP2';
+    var VIP_STORE_KEY = 'kawe_vip_content_v1';
+    var VIP_UNLOCK_KEY = 'kawe_vip_unlocked_session';
+
+    function getVIPContent(){
+        try { return JSON.parse(localStorage.getItem(VIP_STORE_KEY) || '[]'); }
+        catch(e){ return []; }
+    }
+    function setVIPContent(list){
+        localStorage.setItem(VIP_STORE_KEY, JSON.stringify(list));
+    }
+
+    window.abrirVIP = function(){
+        // If already unlocked in this session, go straight to panel
+        if(sessionStorage.getItem(VIP_UNLOCK_KEY) === '1'){
+            abrirVIPPanel();
+            return;
+        }
+        var ov = document.getElementById('vipPinOverlay');
+        ov.classList.add('active');
+        var inputs = ov.querySelectorAll('input');
+        inputs.forEach(function(i){ i.value=''; });
+        document.getElementById('vipPinError').textContent = '';
+        setTimeout(function(){ inputs[0].focus(); }, 60);
+    };
+
+    window.fecharVIPPin = function(){
+        document.getElementById('vipPinOverlay').classList.remove('active');
+    };
+
+    window.verificarSenhaVIP = function(){
+        var inputs = document.querySelectorAll('#vipPinInputs input');
+        var val = '';
+        inputs.forEach(function(i){ val += (i.value || ''); });
+        if(val.length < 4){
+            document.getElementById('vipPinError').textContent = 'Digite os 4 dígitos.';
+            return;
+        }
+        if(val.toUpperCase() === VIP_PASSWORD.toUpperCase()){
+            sessionStorage.setItem(VIP_UNLOCK_KEY, '1');
+            fecharVIPPin();
+            abrirVIPPanel();
+        } else {
+            var box = document.querySelector('.vip-pin-box');
+            box.classList.remove('vip-shake'); void box.offsetWidth; box.classList.add('vip-shake');
+            document.getElementById('vipPinError').textContent = 'Senha incorreta!';
+            inputs.forEach(function(i){ i.value=''; });
+            inputs[0].focus();
+        }
+    };
+
+    function abrirVIPPanel(){
+        renderVIPGrid();
+        document.getElementById('vipPanelOverlay').classList.add('active');
+    }
+    window.abrirVIPPanel = abrirVIPPanel;
+    window.fecharVIPPanel = function(){
+        document.getElementById('vipPanelOverlay').classList.remove('active');
+    };
+
+    function renderVIPGrid(){
+        var list = getVIPContent();
+        var grid = document.getElementById('vipContentGrid');
+        if(!list.length){
+            grid.innerHTML = '<div class="vip-empty">Nenhum conteúdo VIP disponível ainda.<br>O administrador pode adicionar conteúdo pelo painel Admin.</div>';
+            return;
+        }
+        grid.className = 'vip-grid';
+        grid.innerHTML = list.map(function(it){
+            var media = '';
+            if(it.type === 'video'){
+                media = '<video src="'+escapeAttr(it.url)+'" controls playsinline></video>';
+            } else if(it.type === 'image'){
+                media = '<img src="'+escapeAttr(it.url)+'" alt="'+escapeAttr(it.title)+'">';
+            } else {
+                media = '<div style="padding:20px;">🔗 Link Externo</div>';
+            }
+            return '<div class="vip-card">'
+                + '<div class="thumb"><span class="badge-vip">VIP</span>'+ media +'</div>'
+                + '<div class="info">'
+                + '<div class="ttl">'+ escapeHtml(it.title) +'</div>'
+                + (it.desc ? '<div class="dsc">'+ escapeHtml(it.desc) +'</div>' : '')
+                + '<div class="actions"><a href="'+escapeAttr(it.url)+'" target="_blank" rel="noopener">Abrir</a></div>'
+                + '</div></div>';
+        }).join('');
+    }
+
+    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+    function escapeAttr(s){ return escapeHtml(s); }
+
+    // VIP admin (accessible only from within Admin panel)
+    window.abrirVIPAdmin = function(){
+        renderVIPAdminList();
+        document.getElementById('vipAdminOverlay').classList.add('active');
+    };
+    window.fecharVIPAdmin = function(){
+        document.getElementById('vipAdminOverlay').classList.remove('active');
+    };
+
+    window.adicionarConteudoVIP = function(){
+        var title = document.getElementById('vipAddTitle').value.trim();
+        var type  = document.getElementById('vipAddType').value;
+        var url   = document.getElementById('vipAddUrl').value.trim();
+        var desc  = document.getElementById('vipAddDesc').value.trim();
+        if(!title || !url){ alert('Preencha título e URL.'); return; }
+        var list = getVIPContent();
+        list.unshift({ id: Date.now(), title: title, type: type, url: url, desc: desc });
+        setVIPContent(list);
+        document.getElementById('vipAddTitle').value = '';
+        document.getElementById('vipAddUrl').value = '';
+        document.getElementById('vipAddDesc').value = '';
+        renderVIPAdminList();
+        alert('Conteúdo VIP adicionado com sucesso!');
+    };
+
+    window.removerConteudoVIP = function(id){
+        if(!confirm('Remover este conteúdo VIP?')) return;
+        var list = getVIPContent().filter(function(x){ return x.id !== id; });
+        setVIPContent(list);
+        renderVIPAdminList();
+    };
+
+    function renderVIPAdminList(){
+        var list = getVIPContent();
+        var el = document.getElementById('vipAdminList');
+        if(!list.length){ el.innerHTML = '<div style="color:#666; text-align:center; padding:14px; font-size:13px;">Nenhum conteúdo VIP cadastrado.</div>'; return; }
+        el.innerHTML = list.map(function(it){
+            return '<div class="item"><div><div class="t">'+ escapeHtml(it.title) +'</div><div class="m">'+ it.type +' — '+ escapeHtml(it.url).slice(0,60) +'</div></div>'
+                 + '<button onclick="removerConteudoVIP('+ it.id +')">Remover</button></div>';
+        }).join('');
+    }
+
+    // PIN inputs: auto-advance + Enter submit
+    document.addEventListener('DOMContentLoaded', wireVipPin);
+    if(document.readyState !== 'loading') wireVipPin();
+    function wireVipPin(){
+        var inputs = document.querySelectorAll('#vipPinInputs input');
+        if(!inputs.length) return;
+        inputs.forEach(function(inp, idx){
+            inp.addEventListener('input', function(){
+                if(inp.value && idx < inputs.length - 1) inputs[idx+1].focus();
+                if(idx === inputs.length - 1 && Array.from(inputs).every(function(i){ return i.value; })){
+                    verificarSenhaVIP();
+                }
+            });
+            inp.addEventListener('keydown', function(e){
+                if(e.key === 'Backspace' && !inp.value && idx > 0) inputs[idx-1].focus();
+                if(e.key === 'Enter') verificarSenhaVIP();
+            });
+        });
+
+        // Show "Gerenciar VIP" FAB whenever the Admin panel is open
+        var fab = document.getElementById('vipManageFab');
+        var adminOv = document.getElementById('adminPanelOverlay');
+        if(fab && adminOv){
+            var obs = new MutationObserver(function(){
+                if(adminOv.classList.contains('active')) fab.classList.add('show');
+                else fab.classList.remove('show');
+            });
+            obs.observe(adminOv, { attributes:true, attributeFilter:['class'] });
+        }
+    }
+})();
+</script>
+
+</body>
+</html>

@@ -1,6 +1,5 @@
 
 
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -3492,6 +3491,32 @@ body.claro .video-info h3 {
 }
 
 .btn-whatsapp { background-color: #25D366; }
+.btn-flutuante.btn-custom {
+    background: #111 center/cover no-repeat;
+    overflow: hidden;
+    padding: 0;
+}
+.btn-flutuante.btn-custom img {
+    width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+}
+.custom-social-list-admin { display:flex; flex-direction:column; gap:10px; margin:10px 0 14px; }
+.custom-social-item-admin {
+    display:grid; grid-template-columns:44px 1fr 1fr auto; gap:10px; align-items:center;
+    padding:10px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+    border-radius:10px;
+}
+.custom-social-item-admin img {
+    width:44px; height:44px; border-radius:8px; object-fit:cover;
+    background:#000; border:1px solid rgba(255,255,255,0.08);
+}
+.custom-social-item-admin small { color:#888; word-break:break-all; font-size:11.5px; }
+.custom-social-add-row-admin {
+    display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; margin-top:8px;
+}
+@media (max-width: 640px){
+    .custom-social-item-admin, .custom-social-add-row-admin { grid-template-columns:1fr 1fr; }
+}
+
 .btn-telegram { background-color: #0088cc; }
 .btn-instagram { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
 .btn-discord { background-color: #5865F2; }
@@ -6223,11 +6248,11 @@ body.claro .video-info h3 {
 <a href="https://discord.gg/SEU_CONVITE_AQUI" target="_blank" class="menu-link"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align: middle; margin-right: 8px;"><path d="M19.27 4.58c-1.3-.6-2.7-.8-4.1-.8l-.2.2c1.3.4 2.5 1 3.6 1.8-1.5-.8-3.1-1.3-4.8-1.5-1.1-.1-2.2-.1-3.3 0-1.7.2-3.3.7-4.8 1.5 1.1-.8 2.3-1.4 3.6-1.8l-.2-.2c-1.4 0-2.8.2-4.1.8-1.7 3.3-2.3 6.5-1.8 9.7 1.1 1.6 2.7 2.6 4.4 3.1l.9-1.1c-1.1-.3-2.1-.8-3.1-1.5.3.2.6.4.9.6 1.6.8 3.4 1.3 5.3 1.3 1.9 0 3.7-.5 5.3-1.3.3-.2.6-.4.9-.6-1 .7-2 1.2-3.1 1.5l.9 1.1c1.7-.5 3.3-1.5 4.4-3.1.5-3.2-.1-6.4-1.8-9.7zM8.5 13c-.8 0-1.5-.7-1.5-1.5S7.7 10 8.5 10s1.5.7 1.5 1.5-.7 1.5-1.5 1.5zm7 0c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5z"/></svg> Discord</a>
 </div>
 
-<div class="botoes-flutuantes">
-    <a href="https://api.whatsapp.com/send?phone=SEU_NUMERO_AQUI" target="_blank" class="btn-flutuante btn-whatsapp" title="WhatsApp"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z"/></svg></a>
-    <a href="https://t.me/+JvpOBzJB9K1lMzMx" target="_blank" class="btn-flutuante btn-telegram" title="Telegram"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.28-.89-.88.19-1.33L19.74 4.33c.75-.28 1.4.17 1.15 1.22l-2.72 12.85c-.19.91-.74 1.13-1.5.71L12.4 16.1l-2.11 2.03c-.24.24-.44.44-.9.44z"/></svg></a>
-    <a href="https://instagram.com/SEU_USUARIO_AQUI" target="_blank" class="btn-flutuante btn-instagram" title="Instagram"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 01-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 017.8 2m-.2 2A3.6 3.6 0 004 7.6v8.8A3.6 3.6 0 007.6 20h8.8a3.6 3.6 0 003.6-3.6V7.6A3.6 3.6 0 0016.4 4H7.6m12.4 2.25c.41 0 .75.34.75.75s-.34.75-.75.75-.75-.34-.75-.75.34-.75.75-.75M12 7a5 5 0 110 10 5 5 0 010-10m0 2a3 3 0 100 6 3 3 0 000-6z"/></svg></a>
-    <a href="https://discord.gg/SEU_CONVITE_AQUI" target="_blank" class="btn-flutuante btn-discord" title="Discord"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M19.27 4.58c-1.3-.6-2.7-.8-4.1-.8l-.2.2c1.3.4 2.5 1 3.6 1.8-1.5-.8-3.1-1.3-4.8-1.5-1.1-.1-2.2-.1-3.3 0-1.7.2-3.3.7-4.8 1.5 1.1-.8 2.3-1.4 3.6-1.8l-.2-.2c-1.4 0-2.8.2-4.1.8-1.7 3.3-2.3 6.5-1.8 9.7 1.1 1.6 2.7 2.6 4.4 3.1l.9-1.1c-1.1-.3-2.1-.8-3.1-1.5.3.2.6.4.9.6 1.6.8 3.4 1.3 5.3 1.3 1.9 0 3.7-.5 5.3-1.3.3-.2.6-.4.9-.6-1 .7-2 1.2-3.1 1.5l.9 1.1c1.7-.5 3.3-1.5 4.4-3.1.5-3.2-.1-6.4-1.8-9.7zM8.5 13c-.8 0-1.5-.7-1.5-1.5S7.7 10 8.5 10s1.5.7 1.5 1.5-.7 1.5-1.5 1.5zm7 0c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5z"/></svg></a>
+<div class="botoes-flutuantes" id="botoesFlutuantesContainer">
+    <a href="https://api.whatsapp.com/send?phone=SEU_NUMERO_AQUI" target="_blank" id="flutWhatsapp" class="btn-flutuante btn-whatsapp" title="WhatsApp"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0012.04 2z"/></svg></a>
+    <a href="https://t.me/+JvpOBzJB9K1lMzMx" target="_blank" id="flutTelegram" class="btn-flutuante btn-telegram" title="Telegram"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.28-.89-.88.19-1.33L19.74 4.33c.75-.28 1.4.17 1.15 1.22l-2.72 12.85c-.19.91-.74 1.13-1.5.71L12.4 16.1l-2.11 2.03c-.24.24-.44.44-.9.44z"/></svg></a>
+    <a href="https://instagram.com/SEU_USUARIO_AQUI" target="_blank" id="flutInstagram" class="btn-flutuante btn-instagram" title="Instagram"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 01-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 017.8 2m-.2 2A3.6 3.6 0 004 7.6v8.8A3.6 3.6 0 007.6 20h8.8a3.6 3.6 0 003.6-3.6V7.6A3.6 3.6 0 0016.4 4H7.6m12.4 2.25c.41 0 .75.34.75.75s-.34.75-.75.75-.75-.34-.75-.75.34-.75.75-.75M12 7a5 5 0 110 10 5 5 0 010-10m0 2a3 3 0 100 6 3 3 0 000-6z"/></svg></a>
+    <a href="https://discord.gg/SEU_CONVITE_AQUI" target="_blank" id="flutDiscord" class="btn-flutuante btn-discord" title="Discord"><svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M19.27 4.58c-1.3-.6-2.7-.8-4.1-.8l-.2.2c1.3.4 2.5 1 3.6 1.8-1.5-.8-3.1-1.3-4.8-1.5-1.1-.1-2.2-.1-3.3 0-1.7.2-3.3.7-4.8 1.5 1.1-.8 2.3-1.4 3.6-1.8l-.2-.2c-1.4 0-2.8.2-4.1.8-1.7 3.3-2.3 6.5-1.8 9.7 1.1 1.6 2.7 2.6 4.4 3.1l.9-1.1c-1.1-.3-2.1-.8-3.1-1.5.3.2.6.4.9.6 1.6.8 3.4 1.3 5.3 1.3 1.9 0 3.7-.5 5.3-1.3.3-.2.6-.4.9-.6-1 .7-2 1.2-3.1 1.5l.9 1.1c1.7-.5 3.3-1.5 4.4-3.1.5-3.2-.1-6.4-1.8-9.7zM8.5 13c-.8 0-1.5-.7-1.5-1.5S7.7 10 8.5 10s1.5.7 1.5 1.5-.7 1.5-1.5 1.5zm7 0c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5z"/></svg></a>
 </div>
 
 <div class="watch-page" id="watchPage">
@@ -11696,6 +11721,7 @@ document.head.appendChild(sensitivityStyle);
             <div class="admin-nav-item" onclick="adminNav('maintenance')"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.5 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg> Manutenção</div>
             <div class="admin-nav-item" onclick="adminNav('verification')"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg> Verificação</div>
             <div class="admin-nav-item" onclick="adminNav('support')"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M22 10V6c0-1.1-.9-2-2-2H4c-1.1 0-1.99.9-1.99 2v4c1.1 0 2 .9 2 2s-.9 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c-1.1 0-2-.9-2-2s.9-2 2-2zm-9 7.5h-2v-2h2v2zm0-4.5h-2v-2h2v2zm0-4.5h-2v-2h2v2z"/></svg> Suporte</div>
+            <div class="admin-nav-item" onclick="adminNav('sociallinks')"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg> Botões Flutuantes</div>
             <div class="admin-nav-item" onclick="adminNav('backup')"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg> Backup de Dados</div>
             <div class="admin-nav-item" onclick="adminNav('security')"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg> Segurança / IP</div>
             <div class="admin-nav-item" onclick="adminNav('theme')"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9s1.5.67 1.5 1.5S7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5S18.33 12 17.5 12z"/></svg> Tema Global</div>
@@ -12118,6 +12144,63 @@ body { }
                     </button>
                 </div>
             </div>
+
+            <!-- BOTOES FLUTUANTES / REDES SOCIAIS -->
+            <div class="admin-section" id="adminSec-sociallinks">
+                <div class="admin-section-title">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
+                    Links dos Botões Flutuantes
+                </div>
+                <div class="admin-card">
+                    <p style="color:#888; font-size:13px; margin:0 0 15px;">Configure os links das redes sociais exibidos nos botões flutuantes. Os links são salvos permanentemente e não somem.</p>
+
+                    <label class="admin-label">WhatsApp (número com DDI, ex: 5511999999999) ou URL completa</label>
+                    <input type="text" id="socialWhatsappInput" class="admin-input" placeholder="5511999999999 ou https://wa.me/...">
+
+                    <label class="admin-label" style="margin-top:12px;">Telegram (URL do canal/grupo/usuário)</label>
+                    <input type="text" id="socialTelegramInput" class="admin-input" placeholder="https://t.me/seu_usuario">
+
+                    <label class="admin-label" style="margin-top:12px;">Instagram (URL do perfil)</label>
+                    <input type="text" id="socialInstagramInput" class="admin-input" placeholder="https://instagram.com/seu_usuario">
+
+                    <label class="admin-label" style="margin-top:12px;">Discord (URL do convite)</label>
+                    <input type="text" id="socialDiscordInput" class="admin-input" placeholder="https://discord.gg/seu_convite">
+
+                    <hr class="admin-divider">
+
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        <label style="color:#e2e8f0; font-size:14px; display:flex; align-items:center; gap:8px;"><input type="checkbox" id="socialShowWhatsapp" checked> Mostrar botão WhatsApp</label>
+                        <label style="color:#e2e8f0; font-size:14px; display:flex; align-items:center; gap:8px;"><input type="checkbox" id="socialShowTelegram" checked> Mostrar botão Telegram</label>
+                        <label style="color:#e2e8f0; font-size:14px; display:flex; align-items:center; gap:8px;"><input type="checkbox" id="socialShowInstagram" checked> Mostrar botão Instagram</label>
+                        <label style="color:#e2e8f0; font-size:14px; display:flex; align-items:center; gap:8px;"><input type="checkbox" id="socialShowDiscord" checked> Mostrar botão Discord</label>
+                    </div>
+
+                    <hr class="admin-divider">
+
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <hr class="admin-divider">
+
+                    <label class="admin-label" style="font-size:15px;color:#22c55e;">Botões personalizados (thumbnail + link externo)</label>
+                    <p style="color:#888; font-size:13px; margin:6px 0 12px;">Adicione quantos botões flutuantes quiser. Informe uma imagem (thumbnail) e o link externo. Ficam salvos no navegador.</p>
+                    <div id="customSocialListAdmin" class="custom-social-list-admin"></div>
+                    <div class="custom-social-add-row-admin">
+                        <input type="text" id="newCustomSocialLabel" class="admin-input" placeholder="Nome (ex: YouTube)">
+                        <input type="url"  id="newCustomSocialThumb" class="admin-input" placeholder="URL da thumbnail (imagem)">
+                        <input type="url"  id="newCustomSocialLink"  class="admin-input" placeholder="Link externo (https://...)">
+                        <button class="admin-btn admin-btn-secondary" onclick="adminAddCustomSocial()">+ Adicionar</button>
+                    </div>
+
+                    <hr class="admin-divider">
+
+                    <button class="admin-btn admin-btn-primary" onclick="adminSaveSocialLinks()">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/></svg>
+                            Salvar Links
+                        </button>
+                        <button class="admin-btn admin-btn-secondary" onclick="adminResetSocialLinks()">Restaurar padrão</button>
+                    </div>
+                </div>
+            </div>
+
 
         
             <!-- SEGURANÇA PRO -->
@@ -17205,6 +17288,163 @@ function exportCreatorData(type) {
             obs.observe(adminOv, { attributes:true, attributeFilter:['class'] });
         }
     }
+})();
+</script>
+
+
+<script>
+/* === Botões Flutuantes / Redes Sociais (Admin) === */
+(function(){
+  const KEY = 'kawe_social_links_v1';
+  const CUSTOM_KEY = 'kawe_custom_social_v1';
+  const DEFAULTS = {
+    whatsapp: 'https://api.whatsapp.com/send?phone=SEU_NUMERO_AQUI',
+    telegram: 'https://t.me/+JvpOBzJB9K1lMzMx',
+    instagram: 'https://instagram.com/SEU_USUARIO_AQUI',
+    discord: 'https://discord.gg/SEU_CONVITE_AQUI',
+    showWhatsapp: true, showTelegram: true, showInstagram: true, showDiscord: true
+  };
+  function load(){
+    try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY)||'{}')); }
+    catch(e){ return Object.assign({}, DEFAULTS); }
+  }
+  function loadCustom(){
+    try { return JSON.parse(localStorage.getItem(CUSTOM_KEY)||'[]') || []; }
+    catch(e){ return []; }
+  }
+  function saveCustom(list){ localStorage.setItem(CUSTOM_KEY, JSON.stringify(list)); }
+  function escAttr(v){ return String(v==null?'':v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function normalizeWhats(v){
+    v = (v||'').trim();
+    if(!v) return DEFAULTS.whatsapp;
+    if(/^https?:\/\//i.test(v)) return v;
+    const digits = v.replace(/\D/g,'');
+    return 'https://api.whatsapp.com/send?phone=' + digits;
+  }
+  function apply(){
+    const d = load();
+    const map = [
+      ['flutWhatsapp',  normalizeWhats(d.whatsapp), d.showWhatsapp],
+      ['flutTelegram',  d.telegram || DEFAULTS.telegram, d.showTelegram],
+      ['flutInstagram', d.instagram || DEFAULTS.instagram, d.showInstagram],
+      ['flutDiscord',   d.discord || DEFAULTS.discord, d.showDiscord]
+    ];
+    map.forEach(([id, href, show])=>{
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.href = href;
+      el.style.display = show ? '' : 'none';
+    });
+    applyCustom();
+  }
+  function applyCustom(){
+    const container = document.getElementById('botoesFlutuantesContainer');
+    if(!container) return;
+    container.querySelectorAll('.btn-flutuante.btn-custom').forEach(n => n.remove());
+    loadCustom().forEach(item => {
+      if(!item || !item.link) return;
+      const a = document.createElement('a');
+      a.className = 'btn-flutuante btn-custom';
+      a.href = item.link;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.title = item.label || 'Link';
+      if(item.thumb){
+        const img = document.createElement('img');
+        img.src = item.thumb;
+        img.alt = item.label || '';
+        a.appendChild(img);
+      }
+      container.appendChild(a);
+    });
+  }
+  function renderCustomAdmin(){
+    const wrap = document.getElementById('customSocialListAdmin');
+    if(!wrap) return;
+    const list = loadCustom();
+    if(!list.length){
+      wrap.innerHTML = '<div style="color:#666;font-size:13px;padding:6px 2px;">Nenhum botão personalizado ainda.</div>';
+      return;
+    }
+    wrap.innerHTML = list.map((it, idx) => (
+      '<div class="custom-social-item-admin">' +
+        '<img src="' + escAttr(it.thumb||'') + '" alt="" onerror="this.style.opacity=0.2">' +
+        '<div><b style="color:#e2e8f0;">' + escAttr(it.label||'(sem nome)') + '</b><br><small>' + escAttr(it.link||'') + '</small></div>' +
+        '<small>' + escAttr(it.thumb||'') + '</small>' +
+        '<button class="admin-btn admin-btn-danger" onclick="adminRemoveCustomSocial(' + idx + ')">Remover</button>' +
+      '</div>'
+    )).join('');
+  }
+  window.adminAddCustomSocial = function(){
+    const label = (document.getElementById('newCustomSocialLabel').value||'').trim();
+    const thumb = (document.getElementById('newCustomSocialThumb').value||'').trim();
+    const link  = (document.getElementById('newCustomSocialLink').value ||'').trim();
+    if(!link){ alert('Informe o link externo.'); return; }
+    if(!thumb){ alert('Informe a URL da thumbnail.'); return; }
+    const list = loadCustom();
+    list.push({ label: label || 'Link', thumb, link });
+    saveCustom(list);
+    document.getElementById('newCustomSocialLabel').value = '';
+    document.getElementById('newCustomSocialThumb').value = '';
+    document.getElementById('newCustomSocialLink').value  = '';
+    renderCustomAdmin();
+    applyCustom();
+    try { (window.showFeedback||function(){})('Botão adicionado!'); } catch(e){}
+  };
+  window.adminRemoveCustomSocial = function(idx){
+    if(!confirm('Remover este botão?')) return;
+    const list = loadCustom();
+    list.splice(idx, 1);
+    saveCustom(list);
+    renderCustomAdmin();
+    applyCustom();
+  };
+
+  function fillInputs(){
+    const d = load();
+    const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.value = val; };
+    const chk = (id,val)=>{ const el=document.getElementById(id); if(el) el.checked = !!val; };
+    set('socialWhatsappInput', d.whatsapp);
+    set('socialTelegramInput', d.telegram);
+    set('socialInstagramInput', d.instagram);
+    set('socialDiscordInput', d.discord);
+    chk('socialShowWhatsapp', d.showWhatsapp);
+    chk('socialShowTelegram', d.showTelegram);
+    chk('socialShowInstagram', d.showInstagram);
+    chk('socialShowDiscord', d.showDiscord);
+    renderCustomAdmin();
+  }
+  window.adminSaveSocialLinks = function(){
+    const get = id => (document.getElementById(id)||{}).value || '';
+    const chk = id => !!(document.getElementById(id)||{}).checked;
+    const data = {
+      whatsapp: get('socialWhatsappInput').trim(),
+      telegram: get('socialTelegramInput').trim(),
+      instagram: get('socialInstagramInput').trim(),
+      discord: get('socialDiscordInput').trim(),
+      showWhatsapp: chk('socialShowWhatsapp'),
+      showTelegram: chk('socialShowTelegram'),
+      showInstagram: chk('socialShowInstagram'),
+      showDiscord: chk('socialShowDiscord')
+    };
+    localStorage.setItem(KEY, JSON.stringify(data));
+    apply();
+    try { (window.showFeedback||alert)('Links das redes sociais salvos!'); } catch(e){ alert('Links salvos!'); }
+  };
+  window.adminResetSocialLinks = function(){
+    if(!confirm('Restaurar links padrão? (Os botões personalizados não serão apagados.)')) return;
+    localStorage.removeItem(KEY);
+    fillInputs(); apply();
+  };
+  const _origNav = window.adminNav;
+  window.adminNav = function(sec){
+    if(typeof _origNav === 'function') _origNav(sec);
+    if(sec === 'sociallinks') fillInputs();
+  };
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', apply);
+  } else { apply(); }
 })();
 </script>
 

@@ -5431,6 +5431,93 @@ body.claro .video-info h3 {
 * { -webkit-overflow-scrolling: touch; }
 
 </style>
+
+<!-- Firebase SDKs (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+/* =========================================================================
+   FIREBASE + LOCALSTORAGE SYNC SHIM (usa a tela de login existente #authGate)
+   ========================================================================= */
+(function () {
+  const firebaseConfig = {
+    apiKey: "AIzaSyBe8EiY0k3JVqnnokn-sNhf2klTiehuO10",
+    authDomain: "kawe-pornografia-oficial.firebaseapp.com",
+    databaseURL: "https://kawe-pornografia-oficial-default-rtdb.firebaseio.com",
+    projectId: "kawe-pornografia-oficial",
+    storageBucket: "kawe-pornografia-oficial.firebasestorage.app",
+    messagingSenderId: "681674350644",
+    appId: "1:681674350644:web:f674b9e3211ca101afaa61",
+    measurementId: "G-8BHQXFNQ22"
+  };
+  firebase.initializeApp(firebaseConfig);
+  window.KaweAuth = firebase.auth();
+  window.KaweDB = firebase.database();
+
+  const SYNC_PREFIX = 'kawe_';
+  const MAX_SYNC_BYTES = 256 * 1024;
+
+  const pendingWrites = new Map();
+  function scheduleWrite(key, value) {
+    if (pendingWrites.has(key)) clearTimeout(pendingWrites.get(key));
+    const t = setTimeout(() => {
+      pendingWrites.delete(key);
+      const user = window.KaweAuth.currentUser;
+      if (!user) return;
+      const ref = window.KaweDB.ref('users/' + user.uid + '/kawe/' + encodeKey(key));
+      if (value === null) { ref.remove().catch(e=>console.warn('[sync] remove', key, e)); return; }
+      if (value.length > MAX_SYNC_BYTES) { console.warn('[sync] valor grande, só local:', key, value.length); return; }
+      ref.set(value).catch(e => console.warn('[sync] set', key, e));
+    }, 400);
+    pendingWrites.set(key, t);
+  }
+  function encodeKey(k) { return k.replace(/[.#$/\[\]]/g, '_'); }
+
+  const nativeLS = window.localStorage;
+  const nativeSet = nativeLS.setItem.bind(nativeLS);
+  const nativeRemove = nativeLS.removeItem.bind(nativeLS);
+  const nativeClear = nativeLS.clear.bind(nativeLS);
+
+  Storage.prototype.setItem = function (key, value) {
+    nativeSet(key, value);
+    if (this === nativeLS && typeof key === 'string' && key.indexOf(SYNC_PREFIX) === 0) scheduleWrite(key, String(value));
+  };
+  Storage.prototype.removeItem = function (key) {
+    nativeRemove(key);
+    if (this === nativeLS && typeof key === 'string' && key.indexOf(SYNC_PREFIX) === 0) scheduleWrite(key, null);
+  };
+  Storage.prototype.clear = function () {
+    if (this === nativeLS) {
+      const user = window.KaweAuth && window.KaweAuth.currentUser;
+      if (user) window.KaweDB.ref('users/' + user.uid + '/kawe').remove().catch(()=>{});
+    }
+    nativeClear();
+  };
+
+  window.KaweHydrate = async function (uid) {
+    try {
+      const snap = await window.KaweDB.ref('users/' + uid + '/kawe').once('value');
+      const data = snap.val() || {};
+      const toRemove = [];
+      for (let i = 0; i < nativeLS.length; i++) {
+        const k = nativeLS.key(i);
+        if (k && k.indexOf(SYNC_PREFIX) === 0) toRemove.push(k);
+      }
+      toRemove.forEach(k => nativeRemove(k));
+      Object.keys(data).forEach(k => { try { nativeSet(k, data[k]); } catch(e){} });
+      console.log('[Firebase] Hidratado:', Object.keys(data).length, 'chaves');
+    } catch (e) { console.error('[hydrate] erro', e); }
+  };
+})();
+</script>
+<style>
+#kawe-logout-fab{position:fixed;bottom:16px;left:16px;z-index:99998;background:rgba(0,0,0,.75);color:#22c55e;border:1px solid rgba(34,197,94,.4);padding:6px 12px;border-radius:20px;font-size:11px;cursor:pointer;font-family:'Inter',sans-serif;backdrop-filter:blur(8px)}
+#kawe-logout-fab:hover{background:rgba(34,197,94,.15)}
+#authGate .kawe-auth-msg{margin-top:10px;font-size:12px;min-height:16px;text-align:center;color:#f87171}
+#authGate .kawe-auth-msg.ok{color:#22c55e}
+</style>
+
 </head>
 <body>
 
@@ -17445,6 +17532,174 @@ function exportCreatorData(type) {
   if(document.readyState === 'loading'){
     document.addEventListener('DOMContentLoaded', apply);
   } else { apply(); }
+})();
+</script>
+
+
+<script>
+/* Integração Firebase com a tela de login existente (#authGate) */
+(function () {
+  function $(sel, root){ return (root||document).querySelector(sel); }
+
+  function ensureMsgEl(){
+    let m = document.getElementById('kaweAuthMsg');
+    if (!m) {
+      m = document.createElement('div');
+      m.id = 'kaweAuthMsg';
+      m.className = 'kawe-auth-msg';
+      const modal = document.querySelector('#authGate .auth-modal');
+      if (modal) modal.appendChild(m);
+    }
+    return m;
+  }
+  function setMsg(txt, ok){
+    const m = ensureMsgEl();
+    m.textContent = txt || '';
+    m.className = 'kawe-auth-msg' + (ok ? ' ok' : '');
+  }
+  function errMap(e){
+    const map={'auth/invalid-email':'E-mail inválido','auth/user-not-found':'Usuário não encontrado','auth/wrong-password':'Senha incorreta','auth/email-already-in-use':'E-mail já cadastrado','auth/weak-password':'Senha muito fraca (mín 6 caracteres)','auth/popup-closed-by-user':'Janela fechada','auth/invalid-credential':'Credenciais inválidas','auth/network-request-failed':'Sem conexão','auth/too-many-requests':'Muitas tentativas, aguarde'};
+    return map[e && e.code] || (e && e.message) || 'Erro';
+  }
+
+  // Guarda a função original de fade-out do gate
+  let originalFade = null;
+  function fadeOutGate(){
+    if (originalFade) return originalFade();
+    // Fallback simples
+    const g = document.getElementById('authGate');
+    if (g) g.style.display = 'none';
+    const sc = document.getElementById('siteContent');
+    if (sc) sc.style.display = 'block';
+  }
+
+  async function afterLogin(user){
+    setMsg('Sincronizando dados...', true);
+    try { await window.KaweHydrate(user.uid); } catch(e) {}
+    fadeOutGate();
+    addLogoutFab(user);
+  }
+
+  function addLogoutFab(user){
+    if (document.getElementById('kawe-logout-fab')) return;
+    const b = document.createElement('button');
+    b.id = 'kawe-logout-fab';
+    b.textContent = user.isAnonymous ? '👤 Anônimo · Sair' : '👤 ' + (user.email || 'Usuário') + ' · Sair';
+    b.onclick = function(){
+      if (!confirm('Sair da conta?')) return;
+      window.KaweAuth.signOut().then(()=>location.reload());
+    };
+    document.body.appendChild(b);
+  }
+
+  // Override entrarNoSite: ao invés de só fechar, faz Firebase Auth
+  const tryInstall = () => {
+    if (typeof window.entrarNoSite !== 'function') return false;
+    originalFade = window.entrarNoSite;
+
+    window.entrarNoSite = async function(mode){
+      // mode: 'google' | 'anon' | undefined (usa aba ativa)
+      if (window.KaweAuth.currentUser) { fadeOutGate(); addLogoutFab(window.KaweAuth.currentUser); return; }
+
+      try {
+        if (mode === 'google'){
+          setMsg('Abrindo Google...', true);
+          const cred = await window.KaweAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+          await afterLogin(cred.user);
+          return;
+        }
+        if (mode === 'anon'){
+          setMsg('Entrando como visitante...', true);
+          const cred = await window.KaweAuth.signInAnonymously();
+          await afterLogin(cred.user);
+          return;
+        }
+
+        // Email/senha — detecta aba ativa
+        const isRegister = document.getElementById('tabRegisterGate') && document.getElementById('tabRegisterGate').classList.contains('active');
+        const form = isRegister ? document.getElementById('formRegisterGate') : document.getElementById('formLoginGate');
+        if (!form) { setMsg('Formulário não encontrado'); return; }
+        const inputs = form.querySelectorAll('input');
+        let email='', pass='';
+        inputs.forEach(i => {
+          if (i.type === 'password') pass = i.value;
+          else if (i.type === 'email' || i.type === 'text') {
+            // Registro: primeiro é usuário, segundo é email. Login: só um campo (usuário/email).
+            if (!email || i.type === 'email') email = i.value.trim();
+          }
+        });
+        if (isRegister) {
+          // form registro: [usuário, email, senha] → pega o input type=email
+          const em = form.querySelector('input[type=email]');
+          if (em) email = em.value.trim();
+        }
+        if (!email || !pass) { setMsg('Preencha e-mail e senha'); return; }
+        if (isRegister) {
+          setMsg('Criando conta...', true);
+          const cred = await window.KaweAuth.createUserWithEmailAndPassword(email, pass);
+          await afterLogin(cred.user);
+        } else {
+          setMsg('Entrando...', true);
+          const cred = await window.KaweAuth.signInWithEmailAndPassword(email, pass);
+          await afterLogin(cred.user);
+        }
+      } catch (e) {
+        console.error('[auth]', e);
+        setMsg(errMap(e));
+      }
+    };
+
+    // Rewire dos botões sociais e do visitante
+    const rewire = () => {
+      const gate = document.getElementById('authGate');
+      if (!gate) return;
+      gate.querySelectorAll('.social-item').forEach(el => {
+        const title = (el.getAttribute('title') || '').toLowerCase();
+        if (title === 'google') {
+          el.onclick = () => window.entrarNoSite('google');
+        } else {
+          el.onclick = () => setMsg('Este provedor não está habilitado. Use Google, e-mail/senha ou Visitante.');
+        }
+      });
+      // Botão "Continuar sem conta (Modo Visitante)"
+      gate.querySelectorAll('button').forEach(b => {
+        const t = (b.textContent || '').toLowerCase();
+        if (t.includes('visitante') || t.includes('sem conta')) {
+          b.onclick = () => window.entrarNoSite('anon');
+        }
+      });
+    };
+    rewire();
+    // Rewire de novo depois que o gate for exibido (caso seja renderizado depois)
+    setTimeout(rewire, 500);
+    setTimeout(rewire, 2000);
+    return true;
+  };
+
+  // Tenta instalar quando entrarNoSite existir
+  const iv = setInterval(() => { if (tryInstall()) clearInterval(iv); }, 100);
+  setTimeout(() => clearInterval(iv), 15000);
+
+  // Se o usuário já estiver logado de sessão anterior, pula o gate assim que ele aparecer
+  window.KaweAuth.onAuthStateChanged(async (user) => {
+    if (!user) return;
+    await window.KaweHydrate(user.uid);
+    addLogoutFab(user);
+    // Espera o gate aparecer e fecha
+    const waitAndClose = () => {
+      const g = document.getElementById('authGate');
+      if (g && g.style.display !== 'none' && getComputedStyle(g).display !== 'none') {
+        fadeOutGate();
+      } else if (!g || g.style.display === 'none') {
+        return; // ainda não apareceu ou já fechou
+      }
+    };
+    const iv2 = setInterval(() => {
+      const g = document.getElementById('authGate');
+      if (g && getComputedStyle(g).display !== 'none') { fadeOutGate(); clearInterval(iv2); }
+    }, 200);
+    setTimeout(() => clearInterval(iv2), 30000);
+  });
 })();
 </script>
 

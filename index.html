@@ -1,5 +1,6 @@
 
 
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5442,7 +5443,7 @@ body.claro .video-info h3 {
    ========================================================================= */
 (function () {
   const firebaseConfig = {
-    apiKey: "AIzaSyBe8EiY0k3JVqnnokn-sNhf2klTiehuO10",
+    apiKey: "@secret:GOOGLE_API_KEY",
     authDomain: "kawe-pornografia-oficial.firebaseapp.com",
     databaseURL: "https://kawe-pornografia-oficial-default-rtdb.firebaseio.com",
     projectId: "kawe-pornografia-oficial",
@@ -5451,9 +5452,105 @@ body.claro .video-info h3 {
     appId: "1:681674350644:web:f674b9e3211ca101afaa61",
     measurementId: "G-8BHQXFNQ22"
   };
-  firebase.initializeApp(firebaseConfig);
-  window.KaweAuth = firebase.auth();
-  window.KaweDB = firebase.database();
+
+  // Detecta chave inválida / placeholder → usa MOCK LOCAL (login funciona offline)
+  const hasValidKey = typeof firebaseConfig.apiKey === 'string'
+    && firebaseConfig.apiKey.length > 10
+    && firebaseConfig.apiKey.indexOf('@secret') !== 0
+    && firebaseConfig.apiKey.indexOf('AIza') === 0;
+
+  let usingMock = false;
+  if (hasValidKey && typeof firebase !== 'undefined') {
+    try {
+      firebase.initializeApp(firebaseConfig);
+      window.KaweAuth = firebase.auth();
+      try { window.KaweDB = firebase.database ? firebase.database() : null; } catch(e){ window.KaweDB = null; }
+    } catch (e) {
+      console.warn('[KAWE] Firebase init falhou, usando mock local:', e);
+      usingMock = true;
+    }
+  } else {
+    usingMock = true;
+  }
+
+  if (usingMock) {
+    console.warn('[KAWE] Rodando em MODO LOCAL (sem Firebase). Login/cadastro salvos em localStorage.');
+    const LS_USER = 'kawe_mock_current_user';
+    const LS_USERS = 'kawe_mock_users_db';
+    const listeners = [];
+    function readUsers(){ try { return JSON.parse(localStorage.getItem(LS_USERS)||'{}'); } catch(e){ return {}; } }
+    function writeUsers(u){ try { localStorage.setItem(LS_USERS, JSON.stringify(u)); } catch(e){} }
+    function readCurrent(){
+      try { return JSON.parse(localStorage.getItem(LS_USER)||'null'); } catch(e){ return null; }
+    }
+    function setCurrent(u){
+      if (u) localStorage.setItem(LS_USER, JSON.stringify(u));
+      else localStorage.removeItem(LS_USER);
+      MockAuth.currentUser = u;
+      listeners.forEach(function(cb){ try { cb(u); } catch(e){} });
+    }
+    const MockAuth = {
+      currentUser: readCurrent(),
+      onAuthStateChanged: function(cb){
+        listeners.push(cb);
+        setTimeout(function(){ try { cb(MockAuth.currentUser); } catch(e){} }, 0);
+        return function(){ const i=listeners.indexOf(cb); if(i>=0) listeners.splice(i,1); };
+      },
+      signInWithEmailAndPassword: function(email, pass){
+        return new Promise(function(res, rej){
+          const db = readUsers();
+          const rec = db[email.toLowerCase()];
+          if (!rec) return rej({ code:'auth/user-not-found', message:'Usuário não encontrado' });
+          if (rec.pass !== pass) return rej({ code:'auth/wrong-password', message:'Senha incorreta' });
+          const user = { uid: rec.uid, email: email, isAnonymous:false };
+          setCurrent(user); res({ user: user });
+        });
+      },
+      createUserWithEmailAndPassword: function(email, pass){
+        return new Promise(function(res, rej){
+          const db = readUsers();
+          const key = email.toLowerCase();
+          if (db[key]) return rej({ code:'auth/email-already-in-use', message:'E-mail já cadastrado' });
+          const uid = 'mock_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+          db[key] = { uid: uid, pass: pass };
+          writeUsers(db);
+          const user = { uid: uid, email: email, isAnonymous:false };
+          setCurrent(user); res({ user: user });
+        });
+      },
+      signInAnonymously: function(){
+        return new Promise(function(res){
+          const uid = 'anon_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+          const user = { uid: uid, email: null, isAnonymous: true };
+          setCurrent(user); res({ user: user });
+        });
+      },
+      signInWithPopup: function(){
+        return new Promise(function(res){
+          const uid = 'google_mock_' + Date.now().toString(36);
+          const user = { uid: uid, email: 'usuario@google.local', isAnonymous:false, displayName:'Usuário Google' };
+          setCurrent(user); res({ user: user });
+        });
+      },
+      signOut: function(){ return new Promise(function(res){ setCurrent(null); res(); }); }
+    };
+    window.KaweAuth = MockAuth;
+    // Mock mínimo do GoogleAuthProvider para compatibilidade
+    if (typeof firebase !== 'undefined') {
+      try { firebase.auth = firebase.auth || function(){ return MockAuth; }; firebase.auth.GoogleAuthProvider = function(){}; } catch(e){}
+    } else {
+      window.firebase = { auth: Object.assign(function(){ return MockAuth; }, { GoogleAuthProvider: function(){} }) };
+    }
+    window.KaweDB = {
+      ref: function(){
+        return {
+          set: function(){ return Promise.resolve(); },
+          remove: function(){ return Promise.resolve(); },
+          once: function(){ return Promise.resolve({ val: function(){ return {}; } }); }
+        };
+      }
+    };
+  }
 
   const SYNC_PREFIX = 'kawe_';
   const MAX_SYNC_BYTES = 256 * 1024;
@@ -5463,12 +5560,14 @@ body.claro .video-info h3 {
     if (pendingWrites.has(key)) clearTimeout(pendingWrites.get(key));
     const t = setTimeout(() => {
       pendingWrites.delete(key);
-      const user = window.KaweAuth.currentUser;
-      if (!user) return;
-      const ref = window.KaweDB.ref('users/' + user.uid + '/kawe/' + encodeKey(key));
-      if (value === null) { ref.remove().catch(e=>console.warn('[sync] remove', key, e)); return; }
-      if (value.length > MAX_SYNC_BYTES) { console.warn('[sync] valor grande, só local:', key, value.length); return; }
-      ref.set(value).catch(e => console.warn('[sync] set', key, e));
+      const user = window.KaweAuth && window.KaweAuth.currentUser;
+      if (!user || !window.KaweDB) return;
+      try {
+        const ref = window.KaweDB.ref('users/' + user.uid + '/kawe/' + encodeKey(key));
+        if (value === null) { ref.remove().catch(e=>console.warn('[sync] remove', key, e)); return; }
+        if (value.length > MAX_SYNC_BYTES) { console.warn('[sync] valor grande, só local:', key, value.length); return; }
+        ref.set(value).catch(e => console.warn('[sync] set', key, e));
+      } catch(e){ console.warn('[sync] erro', e); }
     }, 400);
     pendingWrites.set(key, t);
   }
@@ -5489,14 +5588,17 @@ body.claro .video-info h3 {
   };
   Storage.prototype.clear = function () {
     if (this === nativeLS) {
-      const user = window.KaweAuth && window.KaweAuth.currentUser;
-      if (user) window.KaweDB.ref('users/' + user.uid + '/kawe').remove().catch(()=>{});
+      try {
+        const user = window.KaweAuth && window.KaweAuth.currentUser;
+        if (user && window.KaweDB) window.KaweDB.ref('users/' + user.uid + '/kawe').remove().catch(()=>{});
+      } catch(e){}
     }
     nativeClear();
   };
 
   window.KaweHydrate = async function (uid) {
     try {
+      if (!window.KaweDB) return;
       const snap = await window.KaweDB.ref('users/' + uid + '/kawe').once('value');
       const data = snap.val() || {};
       const toRemove = [];
@@ -5506,7 +5608,7 @@ body.claro .video-info h3 {
       }
       toRemove.forEach(k => nativeRemove(k));
       Object.keys(data).forEach(k => { try { nativeSet(k, data[k]); } catch(e){} });
-      console.log('[Firebase] Hidratado:', Object.keys(data).length, 'chaves');
+      console.log('[KAWE] Hidratado:', Object.keys(data).length, 'chaves');
     } catch (e) { console.error('[hydrate] erro', e); }
   };
 })();
@@ -5520,6 +5622,38 @@ body.claro .video-info h3 {
 
 </head>
 <body>
+<div id="kawe-safety-placeholders" aria-hidden="true" style="display:none !important;position:absolute;left:-9999px;top:-9999px;width:0;height:0;overflow:hidden;pointer-events:none;">
+<div id="adOverlay"></div>
+<div id="ambilightGlow"></div>
+<div id="chaptersPanel"></div>
+<div id="customPIPWindow"></div>
+<div id="eq"></div>
+<div id="membersList"></div>
+<div id="nightModeOverlay"></div>
+<div id="pipMuteBtn"></div>
+<div id="resumeTimeText"></div>
+<div id="resumeToast"></div>
+<canvas id="retentionChart" width="1" height="1"></canvas>
+<div id="skipAdBtn"></div>
+<div id="skipAdTimer"></div>
+<div id="snapshotGallery"></div>
+<div id="snapshotList"></div>
+<canvas id="trafficChart" width="1" height="1"></canvas>
+<div id="typingIndicator"></div>
+<div id="userXPDisplay"></div>
+<div id="earningsHistory"></div>
+<div id="fanClubMemberList"></div>
+<div id="monetizationStatus"></div>
+<div id="adminTotalVideos"></div>
+<div id="adminTotalViews"></div>
+<input id="adminGlobalLogo" value="">
+<input id="adminGlobalColor" value="">
+<input id="adminAnnounceText" value="">
+<input id="adminAnnounceColor" value="">
+<input id="adminAdLink" value="">
+<input id="adminAdTime" value="">
+<input id="adminAdUrl" value="">
+</div>
 
 <!-- ===== INTRO 1: KAWE DESENVOLVEDOR ===== -->
 <div class="intro-screen" id="intro1">
@@ -5728,8 +5862,9 @@ body.claro .video-info h3 {
 <input id="search" placeholder="Buscar vídeos..." oninput="filtrarVideos()">
 
 <div class="auth-buttons">
-    <button class="auth-btn btn-login" onclick="openAuthModal('login')">Login</button>
-    <button class="auth-btn btn-register" onclick="openAuthModal('register')">Cadastro</button>
+    <button class="auth-btn btn-login" id="btnHeaderLogin" onclick="openAuthModal('login')">Login</button>
+    <button class="auth-btn btn-register" id="btnHeaderRegister" onclick="openAuthModal('register')">Cadastro</button>
+    <button class="auth-btn btn-login" id="btnHeaderLogout" style="display:none; background: linear-gradient(135deg,#ef4444,#b91c1c); color:#fff; border:1px solid #ef4444;" onclick="kaweHeaderLogout()">Sair</button>
     <button class="auth-btn btn-creator" onclick="openCreatorModal()">Se Tornar Criador</button>
     <button class="auth-btn" onclick="abrirPainelCriador()" style="background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; border: 1px solid #a855f7; font-size:12px;" title="Painel do Criador">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle; margin-right:4px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
@@ -6605,7 +6740,7 @@ body.claro .video-info h3 {
                     <div id="sleepTimerIndicator">💤 --:--</div>
                     
                     <!-- STATS FOR NERDS 2.0 -->
-                    <div id="statsForNerds" style="display:none;"></div>
+                    <div id="statsForNerds2" style="display:none;"></div>
                     
                     <!-- PAINEL DE FILTROS DE COR -->
                     <div class="color-filter-panel" id="colorFilterPanel">
@@ -16139,14 +16274,14 @@ function exportCreatorData(type) {
                 <div class="creator-card">
                     <p style="color:#888; font-size:13px; margin-bottom:15px;">Envie uma mensagem para todos os seus seguidores.</p>
                     <label class="creator-label">Assunto</label>
-                    <input class="creator-input" id="massMsgSubject" placeholder="Ex: Novo vídeo disponível!">
+                    <input class="creator-input" id="massMsgSubjectAlt" placeholder="Ex: Novo vídeo disponível!">
                     <label class="creator-label" style="margin-top:10px;">Mensagem</label>
-                    <textarea class="creator-input" id="massMsgBody" placeholder="Escreva sua mensagem aqui..." style="min-height:100px;"></textarea>
+                    <textarea class="creator-input" id="massMsgBodyAlt" placeholder="Escreva sua mensagem aqui..." style="min-height:100px;"></textarea>
                     <div style="display:flex; gap:10px; margin-top:10px;">
                         <button class="creator-btn creator-btn-primary" onclick="sendMassMessage('all')">Enviar para Todos</button>
                         <button class="creator-btn creator-btn-secondary" onclick="sendMassMessage('vip')">Apenas VIPs</button>
                     </div>
-                    <div id="massMsgStatus" style="margin-top:10px; font-size:13px;"></div>
+                    <div id="massMsgStatusAlt" style="margin-top:10px; font-size:13px;"></div>
                 </div>
             </div>
 
@@ -17700,6 +17835,42 @@ function exportCreatorData(type) {
     }, 200);
     setTimeout(() => clearInterval(iv2), 30000);
   });
+})();
+</script>
+
+
+<script>
+/* KAWE: alterna Login/Cadastro <-> Sair no header conforme sessão Firebase */
+(function(){
+  function apply(user){
+    var l = document.getElementById('btnHeaderLogin');
+    var r = document.getElementById('btnHeaderRegister');
+    var o = document.getElementById('btnHeaderLogout');
+    if (!l || !r || !o) return;
+    if (user){
+      l.style.display = 'none';
+      r.style.display = 'none';
+      o.style.display = '';
+      o.textContent = user.isAnonymous ? 'Sair (Visitante)' : ('Sair' + (user.email ? ' (' + user.email + ')' : ''));
+    } else {
+      l.style.display = '';
+      r.style.display = '';
+      o.style.display = 'none';
+    }
+  }
+  window.kaweHeaderLogout = function(){
+    if (!confirm('Deseja sair da conta?')) return;
+    try {
+      window.KaweAuth.signOut().then(function(){ location.reload(); });
+    } catch(e){ location.reload(); }
+  };
+  function boot(){
+    if (!window.KaweAuth) { setTimeout(boot, 200); return; }
+    apply(window.KaweAuth.currentUser);
+    window.KaweAuth.onAuthStateChanged(apply);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 })();
 </script>
 

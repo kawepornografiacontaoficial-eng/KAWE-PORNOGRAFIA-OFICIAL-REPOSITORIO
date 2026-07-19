@@ -5437,13 +5437,14 @@ body.claro .video-info h3 {
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <script>
 /* =========================================================================
    FIREBASE + LOCALSTORAGE SYNC SHIM (usa a tela de login existente #authGate)
    ========================================================================= */
 (function () {
   const firebaseConfig = {
-    apiKey: "@secret:GOOGLE_API_KEY",
+    apiKey: "AIzaSyBe8EiY0k3JVqnnokn-sNhf2klTiehuO10",
     authDomain: "kawe-pornografia-oficial.firebaseapp.com",
     databaseURL: "https://kawe-pornografia-oficial-default-rtdb.firebaseio.com",
     projectId: "kawe-pornografia-oficial",
@@ -5465,6 +5466,7 @@ body.claro .video-info h3 {
       firebase.initializeApp(firebaseConfig);
       window.KaweAuth = firebase.auth();
       try { window.KaweDB = firebase.database ? firebase.database() : null; } catch(e){ window.KaweDB = null; }
+      try { window.KaweStorage = firebase.storage ? firebase.storage() : null; } catch(e){ window.KaweStorage = null; }
     } catch (e) {
       console.warn('[KAWE] Firebase init falhou, usando mock local:', e);
       usingMock = true;
@@ -7632,98 +7634,127 @@ body.claro .video-info h3 {
 
 <script>
 
-// ===== SISTEMA DE BANCO DE DADOS LOCAL (INDEXEDDB) =====
-var DB_NAME = 'KaweDB';
-var DB_VERSION = 1;
-var STORE_NAME = 'videos_permanentes';
-let db;
+// ===== SISTEMA DE BANCO DE DADOS EM NUVEM (FIREBASE STORAGE + REALTIME DATABASE) =====
+// Substitui o antigo IndexedDB. Vídeos permanentes agora ficam salvos no Firebase Storage
+// (arquivo binário) e seus metadados no Realtime Database em /videos_permanentes/{id}.
+// Assim os vídeos sincronizam entre dispositivos e não somem ao limpar o navegador.
 
-function initDB() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-        request.onerror = (event) => reject('Erro ao abrir banco de dados');
-        request.onsuccess = (event) => {
-            db = event.target.result;
-            resolve(db);
-        };
-        request.onupgradeneeded = (event) => {
-            const db = event.target.result;
-            if (!db.objectStoreNames.contains(STORE_NAME)) {
-                db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
-            }
-        };
+var DB_STORE_PATH = 'videos_permanentes';
+
+function _waitForFirebase(timeoutMs) {
+    timeoutMs = timeoutMs || 8000;
+    return new Promise(function(resolve, reject){
+        var t0 = Date.now();
+        (function check(){
+            if (window.KaweDB && window.KaweStorage) return resolve();
+            if (Date.now() - t0 > timeoutMs) return reject('Firebase (DB/Storage) não inicializou');
+            setTimeout(check, 150);
+        })();
     });
 }
 
+// base64 "data:video/mp4;base64,AAA..." -> Blob
+function _dataURLtoBlob(dataURL) {
+    if (!dataURL || typeof dataURL !== 'string') return null;
+    if (dataURL.indexOf('data:') !== 0) return null;
+    var parts = dataURL.split(',');
+    var meta = parts[0]; var b64 = parts[1] || '';
+    var mimeMatch = meta.match(/data:([^;]+);base64/);
+    var mime = mimeMatch ? mimeMatch[1] : 'application/octet-stream';
+    var bin = atob(b64);
+    var len = bin.length;
+    var arr = new Uint8Array(len);
+    for (var i=0;i<len;i++) arr[i] = bin.charCodeAt(i);
+    return new Blob([arr], { type: mime });
+}
+
+// Salva vídeo permanente na nuvem. Retorna o id (chave do RTDB).
 async function saveVideoToDB(videoObj) {
-    return new Promise((resolve, reject) => {
-        if (!db) {
-            reject('Banco de dados não inicializado. Tente novamente em instantes.');
-            return;
-        }
+    await _waitForFirebase();
+    var storage = window.KaweStorage;
+    var dbRef = window.KaweDB.ref(DB_STORE_PATH);
+    var newRef = dbRef.push();
+    var id = newRef.key;
+
+    var srcValue = videoObj.src;
+    var uploadedURL = srcValue;
+
+    // Se o src é um data URL (base64), sobe pro Storage e troca pela download URL.
+    // Se já for URL http(s), mantém.
+    if (srcValue && typeof srcValue === 'string' && srcValue.indexOf('data:') === 0) {
+        var blob = _dataURLtoBlob(srcValue);
+        if (!blob) throw 'Falha ao converter base64 em Blob';
+        var ext = (blob.type.split('/')[1] || 'bin').split(';')[0];
+        var path = DB_STORE_PATH + '/' + id + '.' + ext;
+        var fileRef = storage.ref(path);
+        var snap = await fileRef.put(blob);
+        uploadedURL = await snap.ref.getDownloadURL();
+        videoObj._storagePath = path;
+    }
+
+    // Idem para o thumb, se vier em base64
+    if (videoObj.thumb && typeof videoObj.thumb === 'string' && videoObj.thumb.indexOf('data:') === 0) {
         try {
-            const transaction = db.transaction([STORE_NAME], 'readwrite');
-            const store = transaction.objectStore(STORE_NAME);
-            const request = store.add(videoObj);
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject('Erro ao salvar no banco: ' + request.error);
-            
-            // Timeout de segurança para a transação
-            setTimeout(() => reject('Tempo limite de salvamento excedido'), 10000);
-        } catch (e) {
-            reject('Falha crítica ao acessar o banco: ' + e.message);
-        }
-    });
+            var tblob = _dataURLtoBlob(videoObj.thumb);
+            var text = (tblob.type.split('/')[1] || 'jpg').split(';')[0];
+            var tpath = DB_STORE_PATH + '/' + id + '_thumb.' + text;
+            var tRef = storage.ref(tpath);
+            var tsnap = await tRef.put(tblob);
+            videoObj.thumb = await tsnap.ref.getDownloadURL();
+            videoObj._thumbPath = tpath;
+        } catch(e){ console.warn('Falha ao subir thumb:', e); }
+    }
+
+    var toSave = Object.assign({}, videoObj, { id: id, src: uploadedURL });
+    await newRef.set(toSave);
+    return id;
 }
 
+// Lista todos os vídeos permanentes salvos na nuvem.
 async function loadVideosFromDB() {
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction([STORE_NAME], 'readonly');
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.getAll();
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject('Erro ao carregar do banco');
+    await _waitForFirebase();
+    var snap = await window.KaweDB.ref(DB_STORE_PATH).once('value');
+    var val = snap.val() || {};
+    return Object.keys(val).map(function(k){
+        var v = val[k]; v.id = k; return v;
     });
 }
 
+// Remove o vídeo permanente (metadados + arquivos no Storage).
 async function deleteVideoFromDB(id) {
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction([STORE_NAME], 'readwrite');
-        const store = transaction.objectStore(STORE_NAME);
-        const request = store.delete(id);
-        request.onsuccess = () => resolve();
-        request.onerror = () => reject('Erro ao deletar do banco');
-    });
+    await _waitForFirebase();
+    try {
+        var snap = await window.KaweDB.ref(DB_STORE_PATH + '/' + id).once('value');
+        var meta = snap.val();
+        if (meta) {
+            if (meta._storagePath) {
+                try { await window.KaweStorage.ref(meta._storagePath).delete(); } catch(e){ console.warn('del storage:', e); }
+            }
+            if (meta._thumbPath) {
+                try { await window.KaweStorage.ref(meta._thumbPath).delete(); } catch(e){ console.warn('del thumb:', e); }
+            }
+        }
+    } catch(e){ console.warn('meta lookup:', e); }
+    await window.KaweDB.ref(DB_STORE_PATH + '/' + id).remove();
 }
 
-// Inicializar banco ao carregar
-// NOTA: initDB é chamado aqui mas videos é declarado mais abaixo.
-// O then() só executa após o evento DOMContentLoaded, quando videos já existe.
-// Para garantir, usamos window.addEventListener('load') como fallback.
-var _dbInitPromise = initDB();
+// Carrega vídeos da nuvem quando a página abre.
 window.addEventListener('load', function() {
-    _dbInitPromise.then(async () => {
+    _waitForFirebase().then(async function(){
         try {
-            const dbVideos = await loadVideosFromDB();
-            if(typeof videos !== 'undefined') {
-                dbVideos.forEach(v => {
-                    // Encontrar o placeholder no array 'videos' (carregado do localStorage sem o 'src')
-                    const index = videos.findIndex(existing => existing.id === v.id && existing.isPermanent);
-                    if (index !== -1) {
-                        // Atualiza o objeto existente com o 'src' vindo do IndexedDB
-                        videos[index] = v;
-                    } else {
-                        // Se não estiver no localStorage por algum motivo, adiciona ao array
-                        videos.push(v);
-                    }
+            var dbVideos = await loadVideosFromDB();
+            if (typeof videos !== 'undefined') {
+                dbVideos.forEach(function(v){
+                    var index = videos.findIndex(function(existing){ return existing.id === v.id && existing.isPermanent; });
+                    if (index !== -1) videos[index] = v;
+                    else videos.push(v);
                 });
-                render();
+                if (typeof render === 'function') render();
             }
-        } catch(e) {
-            console.warn('Erro ao carregar vídeos do IndexedDB:', e);
-        }
-    }).catch(e => console.warn('Erro ao inicializar IndexedDB:', e));
+        } catch(e){ console.warn('Erro ao carregar vídeos da nuvem:', e); }
+    }).catch(function(e){ console.warn('Firebase Storage indisponível:', e); });
 });
+
 
 /* ===== SISTEMA DE INTROS + VERIFICAÇÃO DE IDADE ===== */
 

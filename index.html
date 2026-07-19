@@ -17846,25 +17846,21 @@ function exportCreatorData(type) {
   const iv = setInterval(() => { if (tryInstall()) clearInterval(iv); }, 100);
   setTimeout(() => clearInterval(iv), 15000);
 
-  // Se o usuário já estiver logado de sessão anterior, pula o gate assim que ele aparecer
+  // [FIX] Não fecha o gate automaticamente. Apenas hidrata dados e mostra o
+  // botão de logout. O usuário SEMPRE precisa clicar em "Entrar" / "Visitante"
+  // para passar da tela de login, mesmo com sessão salva.
   window.KaweAuth.onAuthStateChanged(async (user) => {
     if (!user) return;
-    await window.KaweHydrate(user.uid);
+    try { await window.KaweHydrate(user.uid); } catch(e) {}
     addLogoutFab(user);
-    // Espera o gate aparecer e fecha
-    const waitAndClose = () => {
-      const g = document.getElementById('authGate');
-      if (g && g.style.display !== 'none' && getComputedStyle(g).display !== 'none') {
-        fadeOutGate();
-      } else if (!g || g.style.display === 'none') {
-        return; // ainda não apareceu ou já fechou
+    try {
+      const form = document.getElementById('formLoginGate');
+      if (form && user.email) {
+        const em = form.querySelector('input[type=text], input[type=email]');
+        if (em && !em.value) em.value = user.email;
       }
-    };
-    const iv2 = setInterval(() => {
-      const g = document.getElementById('authGate');
-      if (g && getComputedStyle(g).display !== 'none') { fadeOutGate(); clearInterval(iv2); }
-    }, 200);
-    setTimeout(() => clearInterval(iv2), 30000);
+      setMsg('Sessão anterior detectada. Clique em Entrar para continuar.', true);
+    } catch(e) {}
   });
 })();
 </script>

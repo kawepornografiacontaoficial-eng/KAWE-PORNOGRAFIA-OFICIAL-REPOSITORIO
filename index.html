@@ -125,6 +125,30 @@ header{
     font-weight: bold;
 }
 
+/* ===== NOVAS CATEGORIAS COLORIDAS ===== */
+.header-tier-chips { display:flex; gap:6px; align-items:center; overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none; margin-left:6px; flex-shrink:0; max-width:60vw; padding:2px 4px; }
+.header-tier-chips::-webkit-scrollbar { display:none; }
+.header-tier-chips .category-chip { padding:5px 10px; font-size:11.5px; border-radius:16px; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:4px; }
+@media (max-width: 720px) { .header-tier-chips { max-width:55vw; } .header-tier-chips .category-chip { padding:4px 8px; font-size:10.5px; } }
+
+.category-chip.cat-aovivo { background:#ff2400 !important; color:#fff !important; border:1px solid #dc143c !important; font-weight:700; animation: aovivoPulse 1.6s ease-in-out infinite; }
+.category-chip.cat-aovivo.active { background:#dc143c !important; color:#fff !important; box-shadow:0 0 16px rgba(255,36,0,0.85); }
+@keyframes aovivoPulse { 0%,100% { box-shadow:0 0 6px rgba(255,36,0,0.6); } 50% { box-shadow:0 0 18px rgba(255,36,0,0.95); } }
+
+.category-chip.cat-canais { background:#1e3a8a !important; color:#fff !important; border:1px solid #1e40af !important; }
+.category-chip.cat-canais.active { background:#1e40af !important; color:#fff !important; box-shadow:0 0 12px rgba(30,64,175,0.6); }
+.category-chip.cat-bronze { background:#8B4513 !important; color:#fff !important; border:1px solid #a0522d !important; }
+.category-chip.cat-bronze.active { background:#a0522d !important; color:#fff !important; box-shadow:0 0 12px rgba(160,82,45,0.7); }
+.category-chip.cat-prata { background:#f3f4f6 !important; color:#111 !important; border:1px solid #d1d5db !important; }
+.category-chip.cat-prata.active { background:#ffffff !important; color:#111 !important; box-shadow:0 0 12px rgba(255,255,255,0.7); }
+.category-chip.cat-platina { background:#7c3aed !important; color:#fff !important; border:1px solid #8b5cf6 !important; }
+.category-chip.cat-platina.active { background:#8b5cf6 !important; color:#fff !important; box-shadow:0 0 12px rgba(139,92,246,0.7); }
+.category-chip.cat-ouro { background:#facc15 !important; color:#111 !important; border:1px solid #eab308 !important; font-weight:700; }
+.category-chip.cat-ouro.active { background:#fde047 !important; color:#111 !important; box-shadow:0 0 14px rgba(250,204,21,0.85); }
+.category-chip.cat-premium { background:linear-gradient(90deg,#f97316,#fbbf24) !important; color:#fff !important; border:1px solid #f97316 !important; font-weight:700; }
+.category-chip.cat-premium.active { background:linear-gradient(90deg,#fb923c,#fcd34d) !important; color:#fff !important; box-shadow:0 0 16px rgba(249,115,22,0.85); }
+
+
 body.claro .category-bar {
     background: #fff;
 }
@@ -5840,7 +5864,17 @@ body.claro .video-info h3 {
         </svg>
     </button>
     
+    <!-- Chips de categorias especiais (também disponíveis dentro do menu de três barras) -->
+
+    
     <div class="header-shortcuts">
+        <button onclick="filtrarPorCategoria('Ao Vivo Agora', this)" style="background: rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.4);">🔴 <span>Ao Vivo</span></button>
+        <button onclick="filtrarPorCategoria('Canais', this)" style="background: rgba(59,130,246,0.15); color:#3b82f6; border:1px solid rgba(59,130,246,0.4);">📺 <span>Canais</span></button>
+        <button onclick="filtrarPorCategoria('Bronze', this)" style="background: rgba(205,127,50,0.15); color:#cd7f32; border:1px solid rgba(205,127,50,0.4);">🥉 <span>Bronze</span></button>
+        <button onclick="filtrarPorCategoria('Prata', this)" style="background: rgba(192,192,192,0.15); color:#c0c0c0; border:1px solid rgba(192,192,192,0.4);">🥈 <span>Prata</span></button>
+        <button onclick="filtrarPorCategoria('Platina', this)" style="background: rgba(229,228,226,0.15); color:#e5e4e2; border:1px solid rgba(229,228,226,0.4);">💎 <span>Platina</span></button>
+        <button onclick="filtrarPorCategoria('Ouro', this)" style="background: rgba(255,215,0,0.15); color:#ffd700; border:1px solid rgba(255,215,0,0.4);">🥇 <span>Ouro</span></button>
+        <button onclick="filtrarPorCategoria('Premium Dourada', this)" style="background: rgba(250,204,21,0.15); color:#facc15; border:1px solid rgba(250,204,21,0.5);">👑 <span>Premium</span></button>
         <button onclick="show('home')"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> Início</button><button onclick="show('catalogo')" style="background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); padding: 6px 12px; border-radius: 20px; font-size: 13px; white-space: nowrap; display: flex; align-items: center; gap: 6px; transition: all 0.3s;"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg> Catálogo</button>
         <button onclick="show('videos')"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4h-2l2 4h-3l-2-4H7L5 8H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg> Vídeos</button>
         <button onclick="show('emAlta')"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg> Em Alta</button>
@@ -6246,6 +6280,23 @@ body.claro .video-info h3 {
         <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
     </svg>
 </button>
+<div class="divisor" style="display: flex; align-items: center; gap: 8px; margin: 10px 15px 8px;">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="opacity: 0.6;"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+    CATEGORIAS ESPECIAIS
+</div>
+<div id="menuTierChips">
+    <button onclick="filtrarPorCategoria('Ao Vivo Agora', this); toggleMenu();"><span style="display:inline-block; width:18px; text-align:center; margin-right:8px;">🔴</span> Ao Vivo Agora</button>
+    <button onclick="filtrarPorCategoria('Canais', this); toggleMenu();"><span style="display:inline-block; width:18px; text-align:center; margin-right:8px;">📺</span> Canais</button>
+    <button onclick="filtrarPorCategoria('Bronze', this); toggleMenu();"><span style="display:inline-block; width:18px; text-align:center; margin-right:8px;">🥉</span> Bronze</button>
+    <button onclick="filtrarPorCategoria('Prata', this); toggleMenu();"><span style="display:inline-block; width:18px; text-align:center; margin-right:8px;">🥈</span> Prata</button>
+    <button onclick="filtrarPorCategoria('Platina', this); toggleMenu();"><span style="display:inline-block; width:18px; text-align:center; margin-right:8px;">💎</span> Platina</button>
+    <button onclick="filtrarPorCategoria('Ouro', this); toggleMenu();"><span style="display:inline-block; width:18px; text-align:center; margin-right:8px;">🥇</span> Ouro</button>
+    <button onclick="filtrarPorCategoria('Premium Dourada', this); toggleMenu();"><span style="display:inline-block; width:18px; text-align:center; margin-right:8px;">👑</span> Premium Dourada</button>
+</div>
+<div class="divisor" style="display: flex; align-items: center; gap: 8px; margin: 4px 15px 10px;">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="opacity: 0.6;"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+    NAVEGAÇÃO
+</div>
 <button onclick="show('home')"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align: middle; margin-right: 8px;"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> Início</button>
 <button onclick="show('videos')"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align: middle; margin-right: 8px;"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4h-2l2 4h-3l-2-4H7L5 8H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg> Vídeos</button>
 <button onclick="show('emAlta')"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align: middle; margin-right: 8px;"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg> Em Alta</button>
@@ -10701,10 +10752,15 @@ function filtrarPorCategoria(categoria, element) {
     document.querySelectorAll('.category-chip').forEach(chip => {
         chip.classList.remove('active');
     });
-    element.classList.add('active');
+    if(element) element.classList.add('active');
     
+    const tiers = ['Ao Vivo Agora','Canais','Bronze','Prata','Platina','Ouro','Premium Dourada'];
     if(categoria === 'Tudo') {
         show('videos');
+    } else if(tiers.includes(categoria)) {
+        // Renderiza a lista de vídeos filtrada por essa categoria
+        show('videos');
+        if(typeof filtrarVideos === 'function') filtrarVideos();
     } else {
         show(categoria.toLowerCase());
     }
@@ -12134,7 +12190,10 @@ document.head.appendChild(sensitivityStyle);
                     <select class="admin-select" id="adminVideoSourceType" onchange="toggleVideoSourceInput()">
                         <option value="url">URL Direta (MP4, WebM, etc.)</option>
                         <option value="iframe">Iframe (YouTube, Vimeo, etc.)</option>
+                        <option value="upload">📁 Upload do Computador (arquivo local)</option>
                     </select>
+                    <label class="admin-label" id="adminVideoFileLabel" style="display:none;">Arquivo de Vídeo (MP4, WebM) *</label>
+                    <input class="admin-input" type="file" id="adminVideoFileInput" accept="video/*" style="display:none;">
                     
                     <label class="admin-label">URL do Vídeo (MP4, WebM, etc.) *</label>
                     <input class="admin-input" id="adminVideoSrcInput" placeholder="https://exemplo.com/video.mp4">
@@ -12159,6 +12218,13 @@ document.head.appendChild(sensitivityStyle);
                         <option value="Hentai">Hentai</option>
                         <option value="Gay">Gay</option>
                         <option value="Trans">Trans</option>
+                        <option value="Ao Vivo Agora">🔴 Ao Vivo Agora</option>
+                        <option value="Canais">📺 Canais</option>
+                        <option value="Bronze">🥉 Bronze</option>
+                        <option value="Prata">🥈 Prata</option>
+                        <option value="Platina">💎 Platina</option>
+                        <option value="Ouro">🥇 Ouro</option>
+                        <option value="Premium Dourada">👑 Premium Dourada</option>
                     </select>
                     
                     <label class="admin-label">Localização</label>
@@ -12972,6 +13038,16 @@ async function adminSaveVideo(isPermanent = true) {
         src = document.getElementById('adminVideoIframeInput').value.trim();
         if(!src) { alert('O codigo do iframe eh obrigatorio!'); return; }
         isIframe = true;
+    } else if(sourceType === 'upload') {
+        const fi = document.getElementById('adminVideoFileInput');
+        const file = fi && fi.files && fi.files[0];
+        if(!file) { alert('Selecione um arquivo de vídeo!'); return; }
+        src = await new Promise((resolve, reject) => {
+            const r = new FileReader();
+            r.onload = e => resolve(e.target.result);
+            r.onerror = reject;
+            r.readAsDataURL(file);
+        });
     } else {
         src = document.getElementById('adminVideoSrcInput').value.trim();
         if(!src) { alert('A URL do video eh obrigatoria!'); return; }
@@ -13585,25 +13661,33 @@ function toggleVideoSourceInput() {
     const urlInput = document.getElementById('adminVideoSrcInput');
     const iframeInput = document.getElementById('adminVideoIframeInput');
     const iframeLabel = document.getElementById('adminVideoIframeLabel');
+    const fileInput = document.getElementById('adminVideoFileInput');
+    const fileLabel = document.getElementById('adminVideoFileLabel');
     const urlLabels = document.querySelectorAll('.admin-label');
     let urlLabel = null;
     for(let i = 0; i < urlLabels.length; i++) {
-        if(urlLabels[i].textContent.includes('URL do Video')) {
+        if(urlLabels[i].textContent.includes('URL do Vídeo') || urlLabels[i].textContent.includes('URL do Video')) {
             urlLabel = urlLabels[i];
             break;
         }
     }
-    
+    // esconder todos
+    urlInput.style.display = 'none';
+    if(urlLabel) urlLabel.style.display = 'none';
+    iframeInput.style.display = 'none';
+    if(iframeLabel) iframeLabel.style.display = 'none';
+    if(fileInput) fileInput.style.display = 'none';
+    if(fileLabel) fileLabel.style.display = 'none';
+
     if(sourceType === 'iframe') {
-        urlInput.style.display = 'none';
-        if(urlLabel) urlLabel.style.display = 'none';
         iframeInput.style.display = 'block';
         if(iframeLabel) iframeLabel.style.display = 'block';
+    } else if(sourceType === 'upload') {
+        if(fileInput) fileInput.style.display = 'block';
+        if(fileLabel) fileLabel.style.display = 'block';
     } else {
         urlInput.style.display = 'block';
         if(urlLabel) urlLabel.style.display = 'block';
-        iframeInput.style.display = 'none';
-        if(iframeLabel) iframeLabel.style.display = 'none';
     }
 }
 

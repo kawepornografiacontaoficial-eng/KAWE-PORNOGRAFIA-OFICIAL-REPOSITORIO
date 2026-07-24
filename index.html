@@ -1004,6 +1004,108 @@ body.claro .menu button:hover, body.claro .menu a.menu-link:hover {
     text-align: center;
 }
 
+
+/* ===== SISTEMA MODERADOR ===== */
+.mod-split-btn {
+    background: linear-gradient(90deg, #16a34a 0%, #16a34a 50%, #ef4444 50%, #ef4444 100%) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255,255,255,0.25) !important;
+    font-weight: 800 !important;
+    letter-spacing: 1px !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    box-shadow: 0 2px 10px rgba(22,163,74,0.35), 0 2px 10px rgba(239,68,68,0.35);
+}
+.mod-split-btn:hover {
+    filter: brightness(1.15);
+    transform: translateY(-2px);
+}
+.mod-auth-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(20, 0, 40, 0.88);
+    backdrop-filter: blur(16px);
+    z-index: 100000;
+    display: none;
+    align-items: center; justify-content: center;
+    padding: 20px;
+}
+.mod-auth-overlay.active { display: flex; }
+.mod-auth-box {
+    background: linear-gradient(160deg, #2a0a4a 0%, #1a0530 60%, #0a0018 100%);
+    border: 2px solid #a855f7;
+    border-radius: 20px;
+    padding: 35px 30px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 0 60px rgba(168, 85, 247, 0.55), inset 0 0 30px rgba(168,85,247,0.12);
+    text-align: center;
+    color: #fff;
+    animation: modFadeIn 0.3s ease;
+}
+@keyframes modFadeIn { from { opacity:0; transform: translateY(-14px) scale(.97);} to { opacity:1; transform:none; } }
+.mod-auth-title {
+    font-size: 22px; font-weight: 900; letter-spacing: 2px;
+    background: linear-gradient(135deg, #d8b4fe, #a855f7, #7c3aed);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; margin-bottom: 8px;
+}
+.mod-auth-subtitle { color: #d8b4fe; font-size: 13px; opacity: 0.9; margin-bottom: 22px; }
+.mod-auth-input {
+    width: 100%;
+    text-align: center;
+    letter-spacing: 12px;
+    font-size: 26px;
+    font-weight: 900;
+    text-transform: uppercase;
+    background: rgba(168, 85, 247, 0.08);
+    border: 2px solid rgba(168, 85, 247, 0.5);
+    border-radius: 14px;
+    padding: 16px;
+    color: #fff;
+    outline: none;
+    transition: all 0.25s;
+    caret-color: #d8b4fe;
+}
+.mod-auth-input:focus { border-color: #d8b4fe; box-shadow: 0 0 0 4px rgba(168,85,247,0.25); }
+.mod-auth-error { color:#f87171; margin-top:10px; font-size:13px; display:none; font-weight:700; }
+.mod-auth-actions { display:flex; gap:10px; margin-top:18px; }
+.mod-auth-actions button { flex:1; padding:12px; border-radius:10px; font-weight:800; letter-spacing:1px; cursor:pointer; border:none; transition:all .2s; }
+.mod-auth-submit { background: linear-gradient(135deg,#a855f7,#7c3aed); color:#fff; }
+.mod-auth-submit:hover { filter:brightness(1.15); transform:translateY(-2px); }
+.mod-auth-cancel { background: rgba(255,255,255,0.06); color:#d1d5db; border:1px solid rgba(255,255,255,0.12) !important; }
+
+/* Painel admin em modo Moderador: tema roxo premium */
+body.mod-mode .admin-panel-overlay { background: rgba(20, 0, 40, 0.92); }
+body.mod-mode .admin-header {
+    background: linear-gradient(135deg, #3b0764 0%, #6b21a8 55%, #a855f7 100%) !important;
+    border-bottom: 1px solid rgba(216,180,254,0.35) !important;
+    box-shadow: 0 6px 30px rgba(168,85,247,0.4);
+}
+body.mod-mode .admin-header-title {
+    background: linear-gradient(135deg,#fff,#d8b4fe);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    text-shadow: none;
+}
+body.mod-mode .admin-sidebar {
+    background: linear-gradient(180deg, #1a0530, #0f0220) !important;
+    border-right: 1px solid rgba(168,85,247,0.28) !important;
+}
+body.mod-mode .admin-nav-item { color:#e9d5ff !important; }
+body.mod-mode .admin-nav-item:hover { background: rgba(168,85,247,0.18) !important; color:#fff !important; }
+body.mod-mode .admin-nav-item.active {
+    background: linear-gradient(135deg, rgba(168,85,247,0.35), rgba(124,58,237,0.35)) !important;
+    color:#fff !important;
+    border-left: 3px solid #d8b4fe !important;
+}
+body.mod-mode .admin-content { background: linear-gradient(180deg, #150028, #08001a) !important; }
+body.mod-mode .admin-section-title { color:#d8b4fe !important; border-bottom-color: rgba(168,85,247,0.35) !important; }
+body.mod-mode .admin-card { background: rgba(168,85,247,0.06) !important; border:1px solid rgba(168,85,247,0.25) !important; }
+body.mod-mode .admin-input:focus, body.mod-mode .admin-textarea:focus, body.mod-mode .admin-select:focus, body.mod-mode .admin-code-editor:focus { border-color:#a855f7 !important; }
+body.mod-mode .admin-btn-primary { background: linear-gradient(135deg,#a855f7,#7c3aed) !important; color:#fff !important; }
+body.mod-mode .admin-stat-value { color:#d8b4fe !important; }
+body.mod-mode .admin-pin-dot.filled { background:#a855f7 !important; }
+
+/* ===== FIM SISTEMA MODERADOR ===== */
+
 /* ===== PAINEL ADMIN ===== */
 .admin-pin-overlay {
     position: fixed;
@@ -5646,6 +5748,52 @@ body.claro .video-info h3 {
 #authGate .kawe-auth-msg.ok{color:#22c55e}
 </style>
 
+
+<style id="kawe-new-cats-v3">
+.kawe-search-wrap { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.kawe-search-wrap select {
+  padding: 8px 12px; border-radius: 10px; font-size: 13px; font-weight: 700;
+  border: 2px solid transparent; cursor: pointer; outline: none;
+  color: #fff; transition: transform .15s, box-shadow .2s;
+}
+.kawe-search-wrap select:hover { transform: translateY(-1px); }
+.kawe-filter-all-cats {
+  background: linear-gradient(90deg,#ef4444,#f59e0b,#eab308,#22c55e,#3b82f6,#8b5cf6,#ec4899);
+  color:#fff; text-shadow: 0 1px 2px rgba(0,0,0,.5);
+  border-color: rgba(255,255,255,.25);
+}
+.kawe-filter-years {
+  background: linear-gradient(135deg,#000 0%, #000 33%, #6b7280 33%, #6b7280 66%, #fff 66%, #fff 100%);
+  color:#111; text-shadow: 0 0 4px rgba(255,255,255,.8);
+  border-color: #6b7280;
+}
+.kawe-filter-genres {
+  background: linear-gradient(135deg, #22c55e 0%, #22c55e 50%, #1e40af 50%, #1e40af 100%);
+  color:#fff; border-color:#3b82f6;
+}
+.kawe-cat-chip {
+  padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 700;
+  white-space: nowrap; display:inline-flex; align-items:center; gap:6px;
+  border: 1px solid rgba(255,255,255,.15); cursor:pointer;
+  transition: transform .15s, box-shadow .2s, filter .2s; color:#fff;
+}
+.kawe-cat-chip:hover { transform: translateY(-2px); filter: brightness(1.1); }
+.kawe-cat-chip svg { vertical-align:middle; }
+.kcc-filmes     { background: linear-gradient(135deg,#16a34a,#22c55e); box-shadow: 0 0 10px rgba(34,197,94,.35); }
+.kcc-series     { background: linear-gradient(135deg,#b91c1c,#ef4444); box-shadow: 0 0 10px rgba(239,68,68,.35); }
+.kcc-animes     { background: linear-gradient(135deg,#ea580c,#fb923c); box-shadow: 0 0 10px rgba(251,146,60,.4); }
+.kcc-curtas     { background: linear-gradient(135deg,#0ea5e9,#22d3ee); box-shadow: 0 0 10px rgba(34,211,238,.35); }
+.kcc-sitcoms    { background: linear-gradient(135deg,#ec4899,#f472b6); box-shadow: 0 0 10px rgba(236,72,153,.4); }
+.kcc-docs       { background: linear-gradient(135deg,#0b1a4a,#1e3a8a); color:#e0e7ff; box-shadow: 0 0 10px rgba(30,58,138,.5); }
+.kcc-novelas    { background: linear-gradient(135deg,#00ff9d,#39ff14); color:#052e12; box-shadow: 0 0 14px rgba(57,255,20,.55); text-shadow:none; font-weight:800; }
+.kcc-musica     { background: linear-gradient(90deg,#facc15 0%, #facc15 50%, #000 50%, #000 100%); color:#fff; text-shadow: 0 0 3px #000; }
+.kcc-radio      { background: linear-gradient(90deg,#000 0%, #000 50%, #fff 50%, #fff 100%); color:#111; text-shadow: 0 0 3px #fff; border-color:#888; }
+.kcc-livros     { background: linear-gradient(90deg,#ec4899 0%, #ec4899 50%, #22c55e 50%, #22c55e 100%); }
+.kcc-podcast    { background: linear-gradient(135deg,#6b21a8,#a855f7); box-shadow: 0 0 12px rgba(168,85,247,.5); }
+.kcc-terror     { background: linear-gradient(135deg,#7f0000,#c81d1d); color:#ffe4e4; box-shadow: 0 0 12px rgba(200,29,29,.6); }
+.kawe-new-cats-row { display:flex; gap:8px; flex-wrap:wrap; padding: 8px 12px; }
+</style>
+
 </head>
 <body>
 <div id="kawe-safety-placeholders" aria-hidden="true" style="display:none !important;position:absolute;left:-9999px;top:-9999px;width:0;height:0;overflow:hidden;pointer-events:none;">
@@ -5868,13 +6016,13 @@ body.claro .video-info h3 {
 
     
     <div class="header-shortcuts">
-        <button onclick="filtrarPorCategoria('Ao Vivo Agora', this)" style="background: rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.4);">🔴 <span>Ao Vivo</span></button>
-        <button onclick="filtrarPorCategoria('Canais', this)" style="background: rgba(59,130,246,0.15); color:#3b82f6; border:1px solid rgba(59,130,246,0.4);">📺 <span>Canais</span></button>
-        <button onclick="filtrarPorCategoria('Bronze', this)" style="background: rgba(205,127,50,0.15); color:#cd7f32; border:1px solid rgba(205,127,50,0.4);">🥉 <span>Bronze</span></button>
-        <button onclick="filtrarPorCategoria('Prata', this)" style="background: rgba(192,192,192,0.15); color:#c0c0c0; border:1px solid rgba(192,192,192,0.4);">🥈 <span>Prata</span></button>
-        <button onclick="filtrarPorCategoria('Platina', this)" style="background: rgba(229,228,226,0.15); color:#e5e4e2; border:1px solid rgba(229,228,226,0.4);">💎 <span>Platina</span></button>
-        <button onclick="filtrarPorCategoria('Ouro', this)" style="background: rgba(255,215,0,0.15); color:#ffd700; border:1px solid rgba(255,215,0,0.4);">🥇 <span>Ouro</span></button>
-        <button onclick="filtrarPorCategoria('Premium Dourada', this)" style="background: rgba(250,204,21,0.15); color:#facc15; border:1px solid rgba(250,204,21,0.5);">👑 <span>Premium</span></button>
+        <button onclick="filtrarPorCategoria('Ao Vivo Agora', this)" style="background: rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.4);"><svg viewBox="0 0 24 24" width="16" height="16" fill="#ef4444" style="vertical-align:middle;"><circle cx="12" cy="12" r="7"/></svg> <span>Ao Vivo</span></button>
+        <button onclick="filtrarPorCategoria('Canais', this)" style="background: rgba(59,130,246,0.15); color:#3b82f6; border:1px solid rgba(59,130,246,0.4);"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle;"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg> <span>Canais</span></button>
+        <button onclick="filtrarPorCategoria('Bronze', this)" style="background: rgba(205,127,50,0.15); color:#cd7f32; border:1px solid rgba(205,127,50,0.4);"><svg viewBox="0 0 24 24" width="16" height="16" fill="#cd7f32" style="vertical-align:middle;"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.3L12 16.8 6.5 19.5l1-6.3L3 8.9 9 8z"/></svg> <span>Bronze</span></button>
+        <button onclick="filtrarPorCategoria('Prata', this)" style="background: rgba(192,192,192,0.15); color:#c0c0c0; border:1px solid rgba(192,192,192,0.4);"><svg viewBox="0 0 24 24" width="16" height="16" fill="#c0c0c0" style="vertical-align:middle;"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.3L12 16.8 6.5 19.5l1-6.3L3 8.9 9 8z"/></svg> <span>Prata</span></button>
+        <button onclick="filtrarPorCategoria('Platina', this)" style="background: rgba(229,228,226,0.15); color:#e5e4e2; border:1px solid rgba(229,228,226,0.4);"><svg viewBox="0 0 24 24" width="16" height="16" fill="#7dd3fc" style="vertical-align:middle;"><path d="M6 3h12l4 6-10 12L2 9l4-6zm.5 2L4 9h5l2-4H6.5zm11 0H13l2 4h5l-2.5-4zM12 6l-2 3h4l-2-3zm-6 5l5.5 8L10 11H6zm12 0h-4l-1.5 8L18 11z"/></svg> <span>Platina</span></button>
+        <button onclick="filtrarPorCategoria('Ouro', this)" style="background: rgba(255,215,0,0.15); color:#ffd700; border:1px solid rgba(255,215,0,0.4);"><svg viewBox="0 0 24 24" width="16" height="16" fill="#ffd700" style="vertical-align:middle;"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.3L12 16.8 6.5 19.5l1-6.3L3 8.9 9 8z"/></svg> <span>Ouro</span></button>
+        <button onclick="filtrarPorCategoria('Premium Dourada', this)" style="background: rgba(250,204,21,0.15); color:#facc15; border:1px solid rgba(250,204,21,0.5);"><svg viewBox="0 0 24 24" width="16" height="16" fill="#facc15" style="vertical-align:middle;"><path d="M3 18h18v2H3v-2zm2-2l-2-9 5 3 4-6 4 6 5-3-2 9H5z"/></svg> <span>Premium</span></button>
         <button onclick="show('home')"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg> Início</button><button onclick="show('catalogo')" style="background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); padding: 6px 12px; border-radius: 20px; font-size: 13px; white-space: nowrap; display: flex; align-items: center; gap: 6px; transition: all 0.3s;"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg> Catálogo</button>
         <button onclick="show('videos')"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4h-2l2 4h-3l-2-4H7L5 8H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg> Vídeos</button>
         <button onclick="show('emAlta')"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/></svg> Em Alta</button>
@@ -5895,7 +6043,38 @@ body.claro .video-info h3 {
         </svg>
     </div>
 </h2>
-<input id="search" placeholder="Buscar vídeos..." oninput="filtrarVideos()">
+<div class="kawe-search-wrap">
+    <input id="search" placeholder="Buscar vídeos..." oninput="filtrarVideos()">
+    <select class="kawe-filter-all-cats" id="kaweFilterCat" onchange="kaweAplicarFiltros()">
+        <option value="">🎬 Todas as Categorias</option>
+        <option value="Filmes">Filmes</option>
+        <option value="Séries">Séries</option>
+        <option value="Animes">Animes</option>
+        <option value="Curtas">Curtas</option>
+        <option value="Sitcoms">Sitcoms</option>
+        <option value="Documentários">Documentários</option>
+        <option value="Novelas">Novelas</option>
+        <option value="Música">Música</option>
+        <option value="Rádio">Rádio</option>
+        <option value="Livros">Livros</option>
+        <option value="Podcast">Podcast</option>
+        <option value="Terror">Terror</option>
+    </select>
+    <select class="kawe-filter-years" id="kaweFilterAno" onchange="kaweAplicarFiltros()">
+        <option value="">📅 Todos os Anos</option>
+        <option>2026</option><option>2025</option><option>2024</option><option>2023</option>
+        <option>2022</option><option>2021</option><option>2020</option><option>2019</option>
+        <option>2018</option><option>2017</option><option>2016</option><option>2015</option>
+        <option>2010-2014</option><option>2000-2009</option><option>1990-1999</option><option>Anterior a 1990</option>
+    </select>
+    <select class="kawe-filter-genres" id="kaweFilterGen" onchange="kaweAplicarFiltros()">
+        <option value="">🎭 Todos os Gêneros</option>
+        <option>Ação</option><option>Aventura</option><option>Comédia</option><option>Drama</option>
+        <option>Romance</option><option>Terror</option><option>Suspense</option><option>Ficção Científica</option>
+        <option>Fantasia</option><option>Documentário</option><option>Animação</option><option>Musical</option>
+        <option>Crime</option><option>Guerra</option><option>Família</option>
+    </select>
+</div>
 
 <div class="auth-buttons">
     <button class="auth-btn btn-login" id="btnHeaderLogin" onclick="openAuthModal('login')">Login</button>
@@ -5909,6 +6088,10 @@ body.claro .video-info h3 {
     <button class="auth-btn" onclick="abrirAdmin()" style="background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.1)); color: #22c55e; border: 1px solid rgba(34,197,94,0.5); font-size:12px;" title="Painel Admin">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle; margin-right:4px;"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
         Admin
+    </button>
+    <button class="auth-btn mod-split-btn" onclick="abrirModerador()" title="Painel Moderador" style="font-size:12px; padding: 6px 12px;">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle; margin-right:4px;"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 6a3 3 0 013 3 3 3 0 01-3 3 3 3 0 01-3-3 3 3 0 013-3zm0 7c2.67 0 5.33 1.34 5.33 4v1H6.67v-1c0-2.66 2.66-4 5.33-4z"/></svg>
+        MODERADOR
     </button>
     <button class="auth-btn" onclick="abrirVIP()" style="background: linear-gradient(135deg, #facc15, #eab308); color: #000; border: 1px solid #fde047; font-size:12px; font-weight:800; box-shadow: 0 0 12px rgba(250,204,21,0.5);" title="Área VIP">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle; margin-right:4px;"><path d="M12 2l2.39 4.84L20 8l-4 3.9.94 5.5L12 14.8 7.06 17.4 8 11.9 4 8l5.61-1.16L12 2z"/></svg>
@@ -6271,6 +6454,18 @@ body.claro .video-info h3 {
     <div class="category-chip" onclick="filtrarPorCategoria('Teen', this)">Teen</div>
     <div class="category-chip" onclick="filtrarPorCategoria('Hentai', this)">Hentai</div>
     <div class="category-chip" onclick="filtrarPorCategoria('Gay', this)">Gay</div>
+    <div class="category-chip kawe-cat-chip kcc-filmes" onclick="filtrarPorCategoria('Filmes', this)">Filmes</div>
+    <div class="category-chip kawe-cat-chip kcc-series" onclick="filtrarPorCategoria('Séries', this)">Séries</div>
+    <div class="category-chip kawe-cat-chip kcc-animes" onclick="filtrarPorCategoria('Animes', this)">Animes</div>
+    <div class="category-chip kawe-cat-chip kcc-curtas" onclick="filtrarPorCategoria('Curtas', this)">Curtas</div>
+    <div class="category-chip kawe-cat-chip kcc-sitcoms" onclick="filtrarPorCategoria('Sitcoms', this)">Sitcoms</div>
+    <div class="category-chip kawe-cat-chip kcc-docs" onclick="filtrarPorCategoria('Documentários', this)">Documentários</div>
+    <div class="category-chip kawe-cat-chip kcc-novelas" onclick="filtrarPorCategoria('Novelas', this)">Novelas</div>
+    <div class="category-chip kawe-cat-chip kcc-musica" onclick="filtrarPorCategoria('Música', this)">Música</div>
+    <div class="category-chip kawe-cat-chip kcc-radio" onclick="filtrarPorCategoria('Rádio', this)">Rádio</div>
+    <div class="category-chip kawe-cat-chip kcc-livros" onclick="filtrarPorCategoria('Livros', this)">Livros</div>
+    <div class="category-chip kawe-cat-chip kcc-podcast" onclick="filtrarPorCategoria('Podcast', this)">Podcast</div>
+    <div class="category-chip kawe-cat-chip kcc-terror" onclick="filtrarPorCategoria('Terror', this)">Terror</div>
     <div class="category-chip" onclick="filtrarPorCategoria('Trans', this)">Trans</div>
 </div>
 
@@ -6285,13 +6480,31 @@ body.claro .video-info h3 {
     CATEGORIAS ESPECIAIS
 </div>
 <div id="menuTierChips">
-    <button onclick="filtrarPorCategoria('Ao Vivo Agora', this); toggleMenu();"><span style="display:inline-block; width:18px; text-align:center; margin-right:8px;">🔴</span> Ao Vivo Agora</button>
-    <button onclick="filtrarPorCategoria('Canais', this); toggleMenu();"><span style="display:inline-block; width:18px; text-align:center; margin-right:8px;">📺</span> Canais</button>
-    <button onclick="filtrarPorCategoria('Bronze', this); toggleMenu();"><span style="display:inline-block; width:18px; text-align:center; margin-right:8px;">🥉</span> Bronze</button>
-    <button onclick="filtrarPorCategoria('Prata', this); toggleMenu();"><span style="display:inline-block; width:18px; text-align:center; margin-right:8px;">🥈</span> Prata</button>
-    <button onclick="filtrarPorCategoria('Platina', this); toggleMenu();"><span style="display:inline-block; width:18px; text-align:center; margin-right:8px;">💎</span> Platina</button>
-    <button onclick="filtrarPorCategoria('Ouro', this); toggleMenu();"><span style="display:inline-block; width:18px; text-align:center; margin-right:8px;">🥇</span> Ouro</button>
-    <button onclick="filtrarPorCategoria('Premium Dourada', this); toggleMenu();"><span style="display:inline-block; width:18px; text-align:center; margin-right:8px;">👑</span> Premium Dourada</button>
+    <button onclick="filtrarPorCategoria('Ao Vivo Agora', this); toggleMenu();"><svg viewBox="0 0 24 24" width="16" height="16" fill="#ef4444" style="vertical-align:middle;"><circle cx="12" cy="12" r="7"/></svg><span style="display:inline-block; width:4px;"></span> Ao Vivo Agora</button>
+    <button onclick="filtrarPorCategoria('Canais', this); toggleMenu();"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle;"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg><span style="display:inline-block; width:4px;"></span> Canais</button>
+    <button onclick="filtrarPorCategoria('Bronze', this); toggleMenu();"><svg viewBox="0 0 24 24" width="16" height="16" fill="#cd7f32" style="vertical-align:middle;"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.3L12 16.8 6.5 19.5l1-6.3L3 8.9 9 8z"/></svg><span style="display:inline-block; width:4px;"></span> Bronze</button>
+    <button onclick="filtrarPorCategoria('Prata', this); toggleMenu();"><svg viewBox="0 0 24 24" width="16" height="16" fill="#c0c0c0" style="vertical-align:middle;"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.3L12 16.8 6.5 19.5l1-6.3L3 8.9 9 8z"/></svg><span style="display:inline-block; width:4px;"></span> Prata</button>
+    <button onclick="filtrarPorCategoria('Platina', this); toggleMenu();"><svg viewBox="0 0 24 24" width="16" height="16" fill="#7dd3fc" style="vertical-align:middle;"><path d="M6 3h12l4 6-10 12L2 9l4-6zm.5 2L4 9h5l2-4H6.5zm11 0H13l2 4h5l-2.5-4zM12 6l-2 3h4l-2-3zm-6 5l5.5 8L10 11H6zm12 0h-4l-1.5 8L18 11z"/></svg><span style="display:inline-block; width:4px;"></span> Platina</button>
+    <button onclick="filtrarPorCategoria('Ouro', this); toggleMenu();"><svg viewBox="0 0 24 24" width="16" height="16" fill="#ffd700" style="vertical-align:middle;"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.3L12 16.8 6.5 19.5l1-6.3L3 8.9 9 8z"/></svg><span style="display:inline-block; width:4px;"></span> Ouro</button>
+    <button onclick="filtrarPorCategoria('Premium Dourada', this); toggleMenu();"><svg viewBox="0 0 24 24" width="16" height="16" fill="#facc15" style="vertical-align:middle;"><path d="M3 18h18v2H3v-2zm2-2l-2-9 5 3 4-6 4 6 5-3-2 9H5z"/></svg><span style="display:inline-block; width:4px;"></span> Premium Dourada</button>
+</div>
+<div class="divisor" style="display: flex; align-items: center; gap: 8px; margin: 10px 15px 8px;">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="opacity: 0.6;"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4h-2l2 4h-3l-2-4H7L5 8H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>
+    CATEGORIAS DE CONTEÚDO
+</div>
+<div id="menuContentCats">
+    <button onclick="filtrarPorCategoria('Filmes', this); toggleMenu();"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle;"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4h-2l2 4h-3l-2-4H7L5 8H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg><span style="display:inline-block; width:4px;"></span> Filmes</button>
+    <button onclick="filtrarPorCategoria('Séries', this); toggleMenu();"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle;"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg><span style="display:inline-block; width:4px;"></span> Séries</button>
+    <button onclick="filtrarPorCategoria('Animes', this); toggleMenu();"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle;"><path d="M12 2l2 5h5l-4 3 1.5 5L12 12l-4.5 3L9 10 5 7h5z"/></svg><span style="display:inline-block; width:4px;"></span> Animes</button>
+    <button onclick="filtrarPorCategoria('Curtas', this); toggleMenu();"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle;"><path d="M8 5v14l11-7z"/></svg><span style="display:inline-block; width:4px;"></span> Curtas</button>
+    <button onclick="filtrarPorCategoria('Sitcoms', this); toggleMenu();"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle;"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/></svg><span style="display:inline-block; width:4px;"></span> Sitcoms</button>
+    <button onclick="filtrarPorCategoria('Documentários', this); toggleMenu();"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle;"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/></svg><span style="display:inline-block; width:4px;"></span> Documentários</button>
+    <button onclick="filtrarPorCategoria('Novelas', this); toggleMenu();"><svg viewBox="0 0 24 24" width="16" height="16" fill="#ec4899" style="vertical-align:middle;"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg><span style="display:inline-block; width:4px;"></span> Novelas</button>
+    <button onclick="filtrarPorCategoria('Música', this); toggleMenu();"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle;"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg><span style="display:inline-block; width:4px;"></span> Música</button>
+    <button onclick="filtrarPorCategoria('Rádio', this); toggleMenu();"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle;"><path d="M3.24 6.15C2.51 6.43 2 7.17 2 8v12c0 1.1.9 2 2 2h16c1.11 0 2-.9 2-2V8c0-1.11-.89-2-2-2H8.3l8.26-3.34L15.88 1 3.24 6.15z"/></svg><span style="display:inline-block; width:4px;"></span> Rádio</button>
+    <button onclick="filtrarPorCategoria('Livros', this); toggleMenu();"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle;"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg><span style="display:inline-block; width:4px;"></span> Livros</button>
+    <button onclick="filtrarPorCategoria('Podcast', this); toggleMenu();"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align:middle;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/></svg><span style="display:inline-block; width:4px;"></span> Podcast</button>
+    <button onclick="filtrarPorCategoria('Terror', this); toggleMenu();"><svg viewBox="0 0 24 24" width="16" height="16" fill="#dc2626" style="vertical-align:middle;"><path d="M12 2C7.58 2 4 5.58 4 10v6c0 1.66 1.34 3 3 3h1v3l2-2 2 2 2-2 2 2v-3h1c1.66 0 3-1.34 3-3v-6c0-4.42-3.58-8-8-8z"/></svg><span style="display:inline-block; width:4px;"></span> Terror</button>
 </div>
 <div class="divisor" style="display: flex; align-items: center; gap: 8px; margin: 4px 15px 10px;">
     <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="opacity: 0.6;"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
@@ -6325,6 +6538,10 @@ body.claro .video-info h3 {
 <button onclick="abrirAdmin()" style="background: linear-gradient(135deg, rgba(34,197,94,0.15), rgba(34,197,94,0.05)); color: #22c55e; border: 1px solid rgba(34,197,94,0.4); font-weight: 700; letter-spacing: 1px;">
     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align: middle; margin-right: 8px;"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
     Painel Admin
+</button>
+<button class="mod-split-btn" onclick="abrirModerador(); toggleMenu();" style="font-weight: 800; letter-spacing: 1px;">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align: middle; margin-right: 8px;"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 6a3 3 0 013 3 3 3 0 01-3 3 3 3 0 01-3-3 3 3 0 013-3zm0 7c2.67 0 5.33 1.34 5.33 4v1H6.67v-1c0-2.66 2.66-4 5.33-4z"/></svg>
+    Painel Moderador
 </button>
 <button onclick="abrirChatGeral()" style="background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(59,130,246,0.08)); color: #3b82f6; border: 1px solid rgba(59,130,246,0.5); font-weight: 700; letter-spacing: 1px;">
     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align: middle; margin-right: 8px;"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
@@ -11957,6 +12174,88 @@ document.head.appendChild(sensitivityStyle);
         Galeria de Capturas
     </div>
 </div>
+
+
+<!-- ===== MODAL AUTENTICAÇÃO MODERADOR ===== -->
+<div class="mod-auth-overlay" id="modAuthOverlay">
+    <div class="mod-auth-box">
+        <div class="mod-auth-title">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="#d8b4fe" style="vertical-align:middle; margin-right:8px;"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 6a3 3 0 013 3 3 3 0 01-3 3 3 3 0 01-3-3 3 3 0 013-3zm0 7c2.67 0 5.33 1.34 5.33 4v1H6.67v-1c0-2.66 2.66-4 5.33-4z"/></svg>
+            PAINEL MODERADOR
+        </div>
+        <div class="mod-auth-subtitle">Digite a senha de 4 dígitos para acessar</div>
+        <input type="password" id="modAuthInput" class="mod-auth-input" maxlength="4" placeholder="••••" autocomplete="off" onkeydown="if(event.key==='Enter') validarModerador();">
+        <div class="mod-auth-error" id="modAuthError">Senha incorreta! Tente novamente.</div>
+        <div class="mod-auth-actions">
+            <button class="mod-auth-cancel" onclick="fecharModerador()">Cancelar</button>
+            <button class="mod-auth-submit" onclick="validarModerador()">Entrar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+var MOD_PASSWORD = 'MOD1';
+function abrirModerador() {
+    var ov = document.getElementById('modAuthOverlay');
+    var inp = document.getElementById('modAuthInput');
+    var err = document.getElementById('modAuthError');
+    if(!ov) return;
+    if(inp) inp.value = '';
+    if(err) err.style.display = 'none';
+    ov.classList.add('active');
+    setTimeout(function(){ if(inp) inp.focus(); }, 80);
+    var menu = document.getElementById('menu');
+    if(menu) menu.classList.remove('ativo');
+}
+function fecharModerador() {
+    var ov = document.getElementById('modAuthOverlay');
+    if(ov) ov.classList.remove('active');
+}
+function validarModerador() {
+    var inp = document.getElementById('modAuthInput');
+    var err = document.getElementById('modAuthError');
+    if(!inp) return;
+    if((inp.value || '').toUpperCase() === MOD_PASSWORD.toUpperCase()) {
+        fecharModerador();
+        document.body.classList.add('mod-mode');
+        try { if(typeof abrirPainelAdmin === 'function') abrirPainelAdmin(); } catch(e){ console.error(e); }
+        var t = document.querySelector('#adminPanelOverlay .admin-header-title');
+        if(t) {
+            t.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 6a3 3 0 013 3 3 3 0 01-3 3 3 3 0 01-3-3 3 3 0 013-3zm0 7c2.67 0 5.33 1.34 5.33 4v1H6.67v-1c0-2.66 2.66-4 5.33-4z"/></svg> PAINEL MODERADOR';
+        }
+        var lbl = document.querySelector('#adminPanelOverlay .admin-header span');
+        if(lbl && /Logado/i.test(lbl.textContent||'')) lbl.textContent = 'Logado como Moderador';
+    } else {
+        if(err) err.style.display = 'block';
+        var box = document.querySelector('.mod-auth-box');
+        if(box) {
+            box.style.animation = 'none';
+            box.offsetHeight;
+            box.style.animation = 'shake 0.4s ease';
+        }
+        inp.value = '';
+        inp.focus();
+    }
+}
+// Ao fechar o painel, remove modo moderador
+(function(){
+    var origFechar = window.fecharPainelAdmin;
+    window.fecharPainelAdmin = function(){
+        document.body.classList.remove('mod-mode');
+        var t = document.querySelector('#adminPanelOverlay .admin-header-title');
+        if(t) t.innerHTML = '<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg> PAINEL ADMINISTRATIVO';
+        var lbl = document.querySelector('#adminPanelOverlay .admin-header span');
+        if(lbl) lbl.textContent = 'Logado como Admin';
+        if(typeof origFechar === 'function') return origFechar.apply(this, arguments);
+        var ov = document.getElementById('adminPanelOverlay');
+        if(ov) ov.classList.remove('active');
+    };
+})();
+document.addEventListener('keydown', function(e){
+    var ov = document.getElementById('modAuthOverlay');
+    if(ov && ov.classList.contains('active') && e.key === 'Escape') fecharModerador();
+});
+</script>
 
 <!-- ===== MODAL PIN ADMIN ===== -->
 <div class="admin-pin-overlay" id="adminPinOverlay">
@@ -17982,6 +18281,50 @@ function exportCreatorData(type) {
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
+})();
+</script>
+
+
+<script id="kawe-new-cats-v3-js">
+window.kaweAplicarFiltros = function(){
+  try {
+    var cat = document.getElementById('kaweFilterCat');
+    var ano = document.getElementById('kaweFilterAno');
+    var gen = document.getElementById('kaweFilterGen');
+    var termo = (document.getElementById('search')||{}).value || '';
+    var c = cat && cat.value ? cat.value : '';
+    var a = ano && ano.value ? ano.value : '';
+    var g = gen && gen.value ? gen.value : '';
+    // Se uma categoria estiver selecionada, aciona o filtro existente
+    if (c && typeof filtrarPorCategoria === 'function') {
+      filtrarPorCategoria(c);
+    } else if (typeof filtrarVideos === 'function') {
+      filtrarVideos();
+    }
+    // Filtro adicional por ano/gênero via atributos data-*
+    var cards = document.querySelectorAll('.video-card, .card, [data-ano], [data-genero]');
+    cards.forEach(function(el){
+      var okAno = !a || (el.getAttribute('data-ano')||'').indexOf(a) !== -1;
+      var okGen = !g || (el.getAttribute('data-genero')||'').toLowerCase().indexOf(g.toLowerCase()) !== -1;
+      if (!okAno || !okGen) el.style.display = 'none';
+    });
+  } catch(e) { console.warn('kaweAplicarFiltros:', e); }
+};
+
+// Adiciona as novas categorias no painel Admin/Moderador se existirem os arrays
+(function(){
+  var novas = ['Filmes','Séries','Animes','Curtas','Sitcoms','Documentários','Novelas','Música','Rádio','Livros','Podcast','Terror'];
+  try {
+    if (typeof ADMIN_CATEGORIES !== 'undefined' && Array.isArray(ADMIN_CATEGORIES)) {
+      novas.forEach(function(n){ if(ADMIN_CATEGORIES.indexOf(n)===-1) ADMIN_CATEGORIES.push(n); });
+    }
+    if (typeof CATALOG_DATA !== 'undefined' && CATALOG_DATA && typeof CATALOG_DATA === 'object') {
+      novas.forEach(function(n){ if(!CATALOG_DATA[n]) CATALOG_DATA[n] = []; });
+    }
+    if (typeof categorias !== 'undefined' && Array.isArray(categorias)) {
+      novas.forEach(function(n){ if(categorias.indexOf(n)===-1) categorias.push(n); });
+    }
+  } catch(e) {}
 })();
 </script>
 

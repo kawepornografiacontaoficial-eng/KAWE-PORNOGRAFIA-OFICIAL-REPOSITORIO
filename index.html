@@ -7909,6 +7909,67 @@ body.claro .video-info h3 {
 
 var DB_STORE_PATH = 'videos_permanentes';
 
+// ===== FALLBACK LOCAL (IndexedDB) — garante que o src do vídeo permanente
+// nunca se perca quando o Firebase estiver offline / em MODO LOCAL. =====
+var KAWE_IDB_NAME = 'kawe_videos_db';
+var KAWE_IDB_STORE = 'video_blobs';
+function _kaweOpenIDB(){
+    return new Promise(function(resolve, reject){
+        try {
+            var req = indexedDB.open(KAWE_IDB_NAME, 1);
+            req.onupgradeneeded = function(e){
+                var db = e.target.result;
+                if (!db.objectStoreNames.contains(KAWE_IDB_STORE)) {
+                    db.createObjectStore(KAWE_IDB_STORE);
+                }
+            };
+            req.onsuccess = function(e){ resolve(e.target.result); };
+            req.onerror = function(e){ reject(e); };
+        } catch(err){ reject(err); }
+    });
+}
+async function kaweIdbPut(id, dataURL){
+    var db = await _kaweOpenIDB();
+    return new Promise(function(resolve, reject){
+        var tx = db.transaction(KAWE_IDB_STORE, 'readwrite');
+        tx.objectStore(KAWE_IDB_STORE).put(dataURL, id);
+        tx.oncomplete = function(){ resolve(); };
+        tx.onerror = function(e){ reject(e); };
+    });
+}
+async function kaweIdbGet(id){
+    var db = await _kaweOpenIDB();
+    return new Promise(function(resolve, reject){
+        var tx = db.transaction(KAWE_IDB_STORE, 'readonly');
+        var r = tx.objectStore(KAWE_IDB_STORE).get(id);
+        r.onsuccess = function(){ resolve(r.result || null); };
+        r.onerror = function(e){ reject(e); };
+    });
+}
+async function kaweIdbDel(id){
+    var db = await _kaweOpenIDB();
+    return new Promise(function(resolve, reject){
+        var tx = db.transaction(KAWE_IDB_STORE, 'readwrite');
+        tx.objectStore(KAWE_IDB_STORE).delete(id);
+        tx.oncomplete = function(){ resolve(); };
+        tx.onerror = function(e){ reject(e); };
+    });
+}
+async function kaweHydrateLocalSrcs(){
+    if (typeof videos === 'undefined' || !Array.isArray(videos)) return;
+    for (var i=0;i<videos.length;i++){
+        var v = videos[i];
+        if (v && v.isPermanent && !v.src && v.id){
+            try {
+                var data = await kaweIdbGet(v.id);
+                if (data) v.src = data;
+            } catch(e){ console.warn('IDB hydrate:', e); }
+        }
+    }
+    if (typeof render === 'function') { try { render(); } catch(e){} }
+}
+
+
 function _waitForFirebase(timeoutMs) {
     timeoutMs = timeoutMs || 8000;
     return new Promise(function(resolve, reject){
@@ -8021,6 +8082,11 @@ window.addEventListener('load', function() {
             }
         } catch(e){ console.warn('Erro ao carregar vídeos da nuvem:', e); }
     }).catch(function(e){ console.warn('Firebase Storage indisponível:', e); });
+});
+
+// Hidrata src de vídeos permanentes a partir do IndexedDB local (funciona sem Firebase).
+window.addEventListener('load', function(){
+    try { kaweHydrateLocalSrcs(); } catch(e){ console.warn('hydrate local:', e); }
 });
 
 
@@ -10697,14 +10763,35 @@ window.finishUpload = async function(isPermanent = false) {
                 isPermanent: isPermanent
             };
 
+            // Helper: persiste array no localStorage tratando QuotaExceededError.
+            function _persistVideos(arr){
+                try {
+                    localStorage.setItem("kawe_videos", JSON.stringify(arr));
+                    return true;
+                } catch(err){
+                    console.error('localStorage cheio:', err);
+                    alert('Aviso: o armazenamento local do navegador está cheio.\nO vídeo continua disponível nesta sessão, mas pode não persistir após recarregar.\nDica: publique como "Para Sempre" para salvar no banco de dados.');
+                    return false;
+                }
+            }
+
+            let _pushed = false;
             try {
                 if (isPermanent) {
-                    // Salvar no IndexedDB (Banco Local)
-                    const dbId = await saveVideoToDB(videoObj);
+                    // 1) Tenta salvar no Firebase (nuvem). Se falhar, cai no IndexedDB local.
+                    let dbId = null;
+                    try {
+                        dbId = await saveVideoToDB(videoObj);
+                    } catch(cloudErr){
+                        console.warn('Firebase indisponível, usando IndexedDB local:', cloudErr);
+                        dbId = 'local_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+                        try { await kaweIdbPut(dbId, base64Data); }
+                        catch(idbErr){ throw 'Falha ao salvar localmente: ' + idbErr; }
+                    }
                     videoObj.id = dbId;
-                    videos.push(videoObj);
-                    
-                    // Salvar no localStorage (apenas metadados para vídeos permanentes, o src fica no IndexedDB)
+                    videos.push(videoObj); _pushed = true;
+
+                    // Persiste no localStorage SEM o src (o src vive no Firebase ou no IndexedDB).
                     const videosParaStorage = videos.map(v => {
                         if (v.isPermanent) {
                             const { src, ...metadata } = v;
@@ -10712,19 +10799,25 @@ window.finishUpload = async function(isPermanent = false) {
                         }
                         return v;
                     });
-                    localStorage.setItem("kawe_videos", JSON.stringify(videosParaStorage));
+                    _persistVideos(videosParaStorage);
                 } else {
-                    // Temporário: Apenas no array em memória e localStorage (vídeos temporários são pequenos ou o usuário aceita o risco)
-                    videos.push(videoObj);
-                    localStorage.setItem("kawe_videos", JSON.stringify(videos));
+                    // Temporário: mantém o src em memória; persiste metadata leve no localStorage.
+                    videos.push(videoObj); _pushed = true;
+                    const videosParaStorage = videos.map(v => {
+                        if (typeof v.src === 'string' && v.src.indexOf('data:') === 0) {
+                            const { src, ...metadata } = v;
+                            return metadata;
+                        }
+                        return v;
+                    });
+                    _persistVideos(videosParaStorage);
                 }
             } catch (saveErr) {
                 console.error(saveErr);
-                alert("Atenção: " + saveErr + "\nO vídeo será publicado apenas temporariamente devido a este erro.");
+                alert("Atenção: " + saveErr + "\nO vídeo ficará disponível apenas nesta sessão.");
                 isPermanent = false;
                 videoObj.isPermanent = false;
-                videos.push(videoObj);
-                localStorage.setItem("kawe_videos", JSON.stringify(videos));
+                if (!_pushed) { videos.push(videoObj); _pushed = true; }
             }
             
             // Reset e redirecionamento

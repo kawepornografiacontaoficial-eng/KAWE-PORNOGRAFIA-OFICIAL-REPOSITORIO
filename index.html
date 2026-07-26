@@ -7955,11 +7955,58 @@ async function kaweIdbDel(id){
         tx.onerror = function(e){ reject(e); };
     });
 }
+// Lista de vídeos "fonte da verdade": prefere a memória (tem o src real),
+// cai para o localStorage só quando a memória ainda não foi montada.
+function kaweGetVideoList(){
+    if (typeof videos !== 'undefined' && Array.isArray(videos) && videos.length) return videos;
+    try { return JSON.parse(localStorage.getItem('kawe_videos')) || []; } catch(e){ return []; }
+}
+
+// Grava a lista no localStorage SEM base64 (evita QuotaExceededError silencioso).
+function kawePersistList(arr){
+    try {
+        var leve = arr.map(function(v){
+            if (v && typeof v.src === 'string' && v.src.indexOf('data:') === 0) {
+                var c = Object.assign({}, v); delete c.src; return c;
+            }
+            return v;
+        });
+        localStorage.setItem("kawe_videos", JSON.stringify(leve));
+        return true;
+    } catch(err){
+        console.error('[KAWE] localStorage cheio:', err);
+        return false;
+    }
+}
+
+// Persistência universal: tenta a nuvem, SEMPRE guarda uma cópia no IndexedDB.
+// Nunca lança erro — o vídeo sempre fica utilizável.
+async function kawePersistVideo(videoObj){
+    var srcData = videoObj.src;
+    var isDataURL = (typeof srcData === 'string' && srcData.indexOf('data:') === 0);
+    var id = videoObj.id || null;
+    var cloud = false;
+
+    if (videoObj.isPermanent) {
+        try { id = await saveVideoToDB(videoObj); cloud = true; }
+        catch(e){ console.warn('[KAWE] Nuvem indisponível, salvando localmente:', e); }
+    }
+    if (!id) id = 'local_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+    if (isDataURL) {
+        try { await kaweIdbPut(id, srcData); }
+        catch(e){ console.warn('[KAWE] IndexedDB indisponível:', e); }
+    }
+    videoObj.id = id;
+    if (cloud && videoObj.src !== srcData) { /* mantém o src local para tocar agora */ }
+    videoObj.src = videoObj.src || srcData;
+    return { id: id, cloud: cloud };
+}
+
 async function kaweHydrateLocalSrcs(){
     if (typeof videos === 'undefined' || !Array.isArray(videos)) return;
     for (var i=0;i<videos.length;i++){
         var v = videos[i];
-        if (v && v.isPermanent && !v.src && v.id){
+        if (v && !v.src && v.id){
             try {
                 var data = await kaweIdbGet(v.id);
                 if (data) v.src = data;
@@ -7971,12 +8018,13 @@ async function kaweHydrateLocalSrcs(){
 
 
 function _waitForFirebase(timeoutMs) {
-    timeoutMs = timeoutMs || 8000;
+    timeoutMs = timeoutMs || 3000;
     return new Promise(function(resolve, reject){
         var t0 = Date.now();
         (function check(){
-            if (window.KaweDB && window.KaweStorage) return resolve();
-            if (Date.now() - t0 > timeoutMs) return reject('Firebase (DB/Storage) não inicializou');
+            // Só o Database é obrigatório aqui. O Storage é checado no momento do upload.
+            if (window.KaweDB) return resolve();
+            if (Date.now() - t0 > timeoutMs) return reject('Firebase (DB) não inicializou');
             setTimeout(check, 150);
         })();
     });
@@ -8002,6 +8050,7 @@ async function saveVideoToDB(videoObj) {
     await _waitForFirebase();
     var storage = window.KaweStorage;
     var dbRef = window.KaweDB.ref(DB_STORE_PATH);
+    if (!dbRef || typeof dbRef.push !== 'function') throw 'Banco de dados na nuvem indisponível (modo local)';
     var newRef = dbRef.push();
     var id = newRef.key;
 
@@ -8011,6 +8060,7 @@ async function saveVideoToDB(videoObj) {
     // Se o src é um data URL (base64), sobe pro Storage e troca pela download URL.
     // Se já for URL http(s), mantém.
     if (srcValue && typeof srcValue === 'string' && srcValue.indexOf('data:') === 0) {
+        if (!storage) throw 'Firebase Storage não está ativado neste projeto';
         var blob = _dataURLtoBlob(srcValue);
         if (!blob) throw 'Falha ao converter base64 em Blob';
         var ext = (blob.type.split('/')[1] || 'bin').split(';')[0];
@@ -10518,22 +10568,10 @@ window.uploadSingleFile = async function(file, title, category, desc, isPermanen
             };
             
             try {
-                if (isPermanent) {
-                    const dbId = await saveVideoToDB(videoObj);
-                    videoObj.id = dbId;
-                    videos.push(videoObj);
-                    const videosParaStorage = videos.map(v => {
-                        if (v.isPermanent) {
-                            const { src, ...metadata } = v;
-                            return metadata;
-                        }
-                        return v;
-                    });
-                    localStorage.setItem("kawe_videos", JSON.stringify(videosParaStorage));
-                } else {
-                    videos.push(videoObj);
-                    localStorage.setItem("kawe_videos", JSON.stringify(videos));
-                }
+                // Nunca falha por causa do Firebase: cai para o IndexedDB local.
+                await kawePersistVideo(videoObj);
+                videos.push(videoObj);
+                kawePersistList(videos);
                 resolve();
             } catch (err) {
                 reject(err);
@@ -10776,47 +10814,21 @@ window.finishUpload = async function(isPermanent = false) {
             }
 
             let _pushed = false;
+            let _res = { cloud: false };
             try {
-                if (isPermanent) {
-                    // 1) Tenta salvar no Firebase (nuvem). Se falhar, cai no IndexedDB local.
-                    let dbId = null;
-                    try {
-                        dbId = await saveVideoToDB(videoObj);
-                    } catch(cloudErr){
-                        console.warn('Firebase indisponível, usando IndexedDB local:', cloudErr);
-                        dbId = 'local_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
-                        try { await kaweIdbPut(dbId, base64Data); }
-                        catch(idbErr){ throw 'Falha ao salvar localmente: ' + idbErr; }
+                // Nuvem (se der) + cópia SEMPRE no IndexedDB, para o vídeo carregar após o F5.
+                _res = await kawePersistVideo(videoObj);
+                videos.push(videoObj); _pushed = true;
+                _persistVideos(videos.map(v => {
+                    if (v && typeof v.src === 'string' && v.src.indexOf('data:') === 0) {
+                        const { src, ...metadata } = v;
+                        return metadata;
                     }
-                    videoObj.id = dbId;
-                    videos.push(videoObj); _pushed = true;
-
-                    // Persiste no localStorage SEM o src (o src vive no Firebase ou no IndexedDB).
-                    const videosParaStorage = videos.map(v => {
-                        if (v.isPermanent) {
-                            const { src, ...metadata } = v;
-                            return metadata;
-                        }
-                        return v;
-                    });
-                    _persistVideos(videosParaStorage);
-                } else {
-                    // Temporário: mantém o src em memória; persiste metadata leve no localStorage.
-                    videos.push(videoObj); _pushed = true;
-                    const videosParaStorage = videos.map(v => {
-                        if (typeof v.src === 'string' && v.src.indexOf('data:') === 0) {
-                            const { src, ...metadata } = v;
-                            return metadata;
-                        }
-                        return v;
-                    });
-                    _persistVideos(videosParaStorage);
-                }
+                    return v;
+                }));
             } catch (saveErr) {
                 console.error(saveErr);
                 alert("Atenção: " + saveErr + "\nO vídeo ficará disponível apenas nesta sessão.");
-                isPermanent = false;
-                videoObj.isPermanent = false;
                 if (!_pushed) { videos.push(videoObj); _pushed = true; }
             }
             
@@ -10834,7 +10846,9 @@ window.finishUpload = async function(isPermanent = false) {
 
             render();
             show('home');
-            alert(isPermanent ? "Salvo permanentemente no Banco de Dados Local!" : "Publicado temporariamente (será removido ao fechar o site).");
+            alert(isPermanent
+                ? (_res.cloud ? "Salvo permanentemente na Nuvem!" : "Salvo permanentemente neste dispositivo (nuvem indisponível).")
+                : "Publicado! O vídeo continua disponível neste navegador.");
         };
 
         reader.onerror = function() {
@@ -11011,11 +11025,12 @@ function excluir(i){
 
 async function adminExcluirPermanente(index) {
     const v = videos[index];
-    if (v && v.isPermanent && v.id) {
-        await deleteVideoFromDB(v.id);
+    if (v && v.id) {
+        try { await deleteVideoFromDB(v.id); } catch(e){ console.warn(e); }
+        try { await kaweIdbDel(v.id); } catch(e){ console.warn(e); }
     }
     videos.splice(index, 1);
-    localStorage.setItem("kawe_videos", JSON.stringify(videos));
+    kawePersistList(videos);
     render();
     if(typeof adminRenderVideos === 'function') adminRenderVideos();
     alert("Vídeo removido permanentemente pelo Admin.");
@@ -12027,9 +12042,7 @@ document.head.appendChild(focusModeStyle);
 
 // Adicionar controles de velocidade no player
 (function() {
-    con
-// [toggleFocusMode - definição anterior removida, versão mais recente mantida abaixo]
-
+// [controles de velocidade: definição consolidada mais abaixo]
 })();
 
 
@@ -12080,7 +12093,7 @@ document.head.appendChild(theaterModeStyle);
     const currentXP = parseInt(localStorage.getItem('kawe_user_xp') || '0') % 100;
     xpBar.style.width = currentXP + '%';
     xpContainer.appendChild(xpBar);
-    document.body.appendChild(xpContainer);
+    if(!document.getElementById('kaweXpBar')) { xpContainer.id='kaweXpBar'; document.body.appendChild(xpContainer); }
 })();
 
 
@@ -12090,6 +12103,8 @@ document.head.appendChild(theaterModeStyle);
 
 
 // Atalhos de Teclado
+if (!window.__kaweShortcutsBound) {
+window.__kaweShortcutsBound = true;
 document.addEventListener('keydown', function(e) {
     const video = document.getElementById('watchVideo');
     if(!video || document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
@@ -12113,6 +12128,7 @@ document.addEventListener('keydown', function(e) {
             break;
     }
 });
+}
 
 // Estilo Economia de Energia
 var energySaverStyle = document.createElement('style');
@@ -12125,9 +12141,10 @@ document.head.appendChild(energySaverStyle);
 // Injetar botão de Economia no cabeçalho
 (function() {
     const shortcuts = document.querySelector('.header-shortcuts');
-    if(shortcuts) {
+    if(shortcuts && !document.getElementById('kaweEnergyBtn')) {
         const energyBtn = document.createElement('button');
-        energyBtn.onclick = toggleEnergySaver;
+        energyBtn.id = 'kaweEnergyBtn';
+        energyBtn.onclick = function(){ if(typeof toggleEnergySaver === 'function') toggleEnergySaver(); };
         energyBtn.innerHTML = '🔋';
         energyBtn.title = 'Economia de Energia';
         shortcuts.appendChild(energyBtn);
@@ -12190,10 +12207,12 @@ document.head.appendChild(sensitivityStyle);
 (function() {
     const playerHeader = document.querySelector('.win-header');
     if(playerHeader) {
+        if (playerHeader.querySelector('.kawe-party-btn')) return;
         const partyBtn = document.createElement('button');
-        partyBtn.onclick = createWatchParty;
+        partyBtn.className = 'kawe-party-btn';
+        partyBtn.onclick = function(){ if(typeof createWatchParty === 'function') createWatchParty(); };
         partyBtn.style.cssText = 'background:#a855f7; color:#fff; border:none; padding:2px 8px; border-radius:4px; font-size:10px; margin-right:10px; cursor:pointer;';
-        partyBtn.textContent = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg> Watch Party';
+        partyBtn.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg> Watch Party';
         playerHeader.insertBefore(partyBtn, playerHeader.lastChild);
     }
 })();
@@ -13317,10 +13336,10 @@ function adminRenderVideos() {
     const container = document.getElementById('adminVideoList');
     if(!container) return;
     
-    const vids = JSON.parse(localStorage.getItem('kawe_videos')) || (typeof videos !== 'undefined' ? videos : []);
+    const vids = kaweGetVideoList();
     const search = (document.getElementById('adminSearchVideo') ? document.getElementById('adminSearchVideo').value : '').toLowerCase();
     
-    const filtered = search ? vids.filter(v => v.title.toLowerCase().includes(search)) : vids;
+    const filtered = search ? vids.filter(v => String(v.title || '').toLowerCase().includes(search)) : vids;
     
     if(filtered.length === 0) {
         container.innerHTML = '<p style="color:#666; padding:20px; text-align:center;">Nenhum vídeo encontrado.</p>';
@@ -13356,7 +13375,7 @@ function adminRenderVideos() {
 }
 
 function adminEditVideo(index) {
-    const vids = JSON.parse(localStorage.getItem('kawe_videos')) || (typeof videos !== 'undefined' ? videos : []);
+    const vids = kaweGetVideoList();
     const v = vids[index];
     if(!v) return;
     
@@ -13366,7 +13385,7 @@ function adminEditVideo(index) {
     document.getElementById('adminVideoThumbInput').value = v.thumb || '';
     document.getElementById('adminVideoCatInput').value = v.category || 'Tudo';
     document.getElementById('adminVideoLocInput').value = v.location || '';
-    document.getElementById('adminVideoTagsInput').value = (v.tags || []).join(', ');
+    document.getElementById('adminVideoTagsInput').value = Array.isArray(v.tags) ? v.tags.join(', ') : (v.tags || '');
     document.getElementById('adminAddVideoTitle').textContent = 'Editar Vídeo';
     
     if(v.isIframe || (v.src && v.src.includes('<iframe'))) {
@@ -13387,22 +13406,28 @@ function adminEditVideo(index) {
 async function adminDeleteVideo(index) {
     if(!confirm('Deseja realmente excluir este vídeo?')) return;
     
-    let vids = JSON.parse(localStorage.getItem('kawe_videos')) || (typeof videos !== 'undefined' ? videos : []);
+    const vids = kaweGetVideoList();
     const videoToDelete = vids[index];
+    if (!videoToDelete) return;
     
-    if (videoToDelete && videoToDelete.id) {
-        try {
-            await deleteVideoFromDB(videoToDelete.id);
-        } catch(e) { console.error(e); }
+    if (videoToDelete.id) {
+        try { await deleteVideoFromDB(videoToDelete.id); } catch(e) { console.warn(e); }
+        try { await kaweIdbDel(videoToDelete.id); } catch(e) { console.warn(e); }
     }
     
-    vids.splice(index, 1);
-    localStorage.setItem('kawe_videos', JSON.stringify(vids));
-
+    // Remove pelo OBJETO (não pelo título) para nunca apagar o vídeo errado.
     if(typeof videos !== 'undefined') {
-        const globalIndex = videos.findIndex(v => v.title === videoToDelete.title);
-        if(globalIndex !== -1) videos.splice(globalIndex, 1);
+        const gi = videos.indexOf(videoToDelete);
+        if (gi !== -1) videos.splice(gi, 1);
+        else {
+            const gi2 = videos.findIndex(v => videoToDelete.id ? v.id === videoToDelete.id : v.title === videoToDelete.title);
+            if (gi2 !== -1) videos.splice(gi2, 1);
+        }
+        kawePersistList(videos);
         if(typeof render === 'function') render();
+    } else {
+        vids.splice(index, 1);
+        kawePersistList(vids);
     }
     
     adminRenderVideos();
@@ -13445,25 +13470,39 @@ async function adminSaveVideo(isPermanent = true) {
         if(!src) { alert('A URL do video eh obrigatoria!'); return; }
     }
     
-    const videoObj = { title, desc, src, thumb: thumb || null, category, location, tags, isIframe };
-    
-    let vids = JSON.parse(localStorage.getItem('kawe_videos')) || (typeof videos !== 'undefined' ? [...videos] : []);
-    
-    if(editIndex >= 0 && editIndex < vids.length) {
+    const lista = kaweGetVideoList();
+    const anterior = (editIndex >= 0 && editIndex < lista.length) ? lista[editIndex] : null;
+
+    const videoObj = {
+        title, desc, src, thumb: thumb || null, category, location, tags, isIframe,
+        isPermanent: !!isPermanent,
+        type: (anterior && anterior.type) ? anterior.type : 'video',
+        creator: anterior ? (anterior.creator || '') : '',
+        ageRating: anterior ? (anterior.ageRating || '18+') : '18+'
+    };
+    // Ao editar, se nenhum arquivo/URL novo foi informado, preserva a fonte antiga.
+    if (!videoObj.src && anterior && anterior.src) videoObj.src = anterior.src;
+    if (anterior && anterior.id) videoObj.id = anterior.id;
+
+    let vids = lista.slice();
+    if(anterior) {
         vids[editIndex] = videoObj;
-        adminShowToast('Vídeo atualizado com sucesso!');
     } else {
         vids.unshift(videoObj);
-        adminShowToast('Vídeo adicionado com sucesso!');
     }
-    
-    
-        if (isPermanent) {
-            await saveVideoToDB(videoObj);
-        }
-        localStorage.setItem('kawe_videos', JSON.stringify(vids));
 
-    
+    // NUNCA deixa uma falha da nuvem apagar o vídeo: grava sempre o local.
+    let _r = { cloud: false };
+    try {
+        _r = await kawePersistVideo(videoObj);
+    } catch(e) {
+        console.error('[KAWE] admin save:', e);
+    }
+    kawePersistList(vids);
+    adminShowToast(anterior
+        ? ('Vídeo atualizado' + (_r.cloud ? ' e sincronizado na nuvem!' : ' (salvo neste dispositivo).'))
+        : ('Vídeo adicionado' + (_r.cloud ? ' e sincronizado na nuvem!' : ' (salvo neste dispositivo).')));
+
     if(typeof videos !== 'undefined') {
         videos.length = 0;
         vids.forEach(v => videos.push(v));
@@ -14749,7 +14788,7 @@ document.head.appendChild(theaterModeStyle);
     const currentXP = parseInt(localStorage.getItem('kawe_user_xp') || '0') % 100;
     xpBar.style.width = currentXP + '%';
     xpContainer.appendChild(xpBar);
-    document.body.appendChild(xpContainer);
+    if(!document.getElementById('kaweXpBar')) { xpContainer.id='kaweXpBar'; document.body.appendChild(xpContainer); }
 })();
 
 
@@ -14766,6 +14805,8 @@ function toggleEnergySaver() {
 }
 
 // Atalhos de Teclado
+if (!window.__kaweShortcutsBound) {
+window.__kaweShortcutsBound = true;
 document.addEventListener('keydown', function(e) {
     const video = document.getElementById('watchVideo');
     if(!video || document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
@@ -14789,6 +14830,7 @@ document.addEventListener('keydown', function(e) {
             break;
     }
 });
+}
 
 // Estilo Economia de Energia
 var energySaverStyle = document.createElement('style');
@@ -14801,9 +14843,10 @@ document.head.appendChild(energySaverStyle);
 // Injetar botão de Economia no cabeçalho
 (function() {
     const shortcuts = document.querySelector('.header-shortcuts');
-    if(shortcuts) {
+    if(shortcuts && !document.getElementById('kaweEnergyBtn')) {
         const energyBtn = document.createElement('button');
-        energyBtn.onclick = toggleEnergySaver;
+        energyBtn.id = 'kaweEnergyBtn';
+        energyBtn.onclick = function(){ if(typeof toggleEnergySaver === 'function') toggleEnergySaver(); };
         energyBtn.innerHTML = '🔋';
         energyBtn.title = 'Economia de Energia';
         shortcuts.appendChild(energyBtn);
@@ -14862,10 +14905,12 @@ function addToCollection(collectionName) {
 (function() {
     const playerHeader = document.querySelector('.win-header');
     if(playerHeader) {
+        if (playerHeader.querySelector('.kawe-party-btn')) return;
         const partyBtn = document.createElement('button');
-        partyBtn.onclick = createWatchParty;
+        partyBtn.className = 'kawe-party-btn';
+        partyBtn.onclick = function(){ if(typeof createWatchParty === 'function') createWatchParty(); };
         partyBtn.style.cssText = 'background:#a855f7; color:#fff; border:none; padding:2px 8px; border-radius:4px; font-size:10px; margin-right:10px; cursor:pointer;';
-        partyBtn.textContent = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg> Watch Party';
+        partyBtn.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align:middle;margin-right:8px;"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg> Watch Party';
         playerHeader.insertBefore(partyBtn, playerHeader.lastChild);
     }
 })();
@@ -18421,5 +18466,75 @@ window.kaweAplicarFiltros = function(){
 })();
 </script>
 
+
+<style id="kawe-ui-fix-v1">
+/* ===== CORREÇÃO DE LAYOUT DO CABEÇALHO (botões sobrepostos) ===== */
+header {
+  flex-wrap: wrap !important;
+  align-items: center;
+  overflow: visible !important;
+  row-gap: 8px;
+}
+header > div:first-child {
+  order: 4;
+  flex: 1 1 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+header .header-shortcuts {
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+header .header-shortcuts > button { flex: 0 0 auto; }
+header h2 {
+  order: 1;
+  flex: 0 1 auto;
+  min-width: 0;
+  font-size: 18px;
+  gap: 10px !important;
+}
+header h2 span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+header .kawe-search-wrap {
+  order: 2;
+  flex: 1 1 300px;
+  min-width: 200px;
+}
+header .kawe-search-wrap #search { flex: 1 1 150px; min-width: 130px; }
+header .kawe-search-wrap select { max-width: 100%; }
+header .auth-buttons {
+  order: 3;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-left: auto;
+  row-gap: 6px;
+}
+header .auth-buttons .auth-btn { flex: 0 0 auto; white-space: nowrap; }
+/* a barra de categorias acompanha a altura real do cabeçalho */
+.category-bar { top: var(--kawe-header-h, 65px) !important; }
+@media (max-width: 768px) {
+  html, body { overflow-x: hidden; max-width: 100%; }
+  header, header > div:first-child, header .kawe-search-wrap, header .auth-buttons { max-width: 100%; }
+  header h2 { font-size: 15px; flex: 1 1 100%; order: 1; }
+  header h2 img { width: 34px !important; height: 34px !important; }
+  header .kawe-search-wrap { flex: 1 1 100%; order: 2; }
+  header .auth-buttons { flex: 1 1 100%; order: 3; justify-content: flex-start; margin-left: 0; }
+  header .auth-buttons .auth-btn { padding: 6px 10px; font-size: 11px; letter-spacing: .5px; }
+}
+</style>
+<script>
+(function(){
+  function syncHeaderHeight(){
+    var h = document.querySelector('header');
+    if(h) document.documentElement.style.setProperty('--kawe-header-h', h.offsetHeight + 'px');
+  }
+  window.addEventListener('resize', syncHeaderHeight);
+  window.addEventListener('load', syncHeaderHeight);
+  document.addEventListener('DOMContentLoaded', syncHeaderHeight);
+  setInterval(syncHeaderHeight, 1500);
+})();
+</script>
 </body>
 </html>

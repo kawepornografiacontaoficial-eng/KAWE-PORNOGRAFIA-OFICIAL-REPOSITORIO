@@ -18536,5 +18536,288 @@ header .auth-buttons .auth-btn { flex: 0 0 auto; white-space: nowrap; }
   setInterval(syncHeaderHeight, 1500);
 })();
 </script>
+<!-- ============ MÓDULOS KAWE: EMBED / LOJA / CE SISTEMA ============ -->
+<style>
+.kawe-mod-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);backdrop-filter:blur(8px);z-index:99999;display:none;overflow-y:auto;padding:20px}
+.kawe-mod-overlay.active{display:block}
+.kawe-mod-box{max-width:1000px;margin:0 auto;background:#0b0f0b;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 60px rgba(0,0,0,.7)}
+.kawe-mod-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;color:#fff;font-weight:800;font-size:18px}
+.kawe-mod-head button{background:rgba(0,0,0,.3);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:6px 12px;cursor:pointer;font-weight:700}
+.kawe-mod-body{padding:20px;color:#e2e8f0}
+.kawe-mod-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:16px;margin-bottom:14px}
+.kawe-mod-body input,.kawe-mod-body select,.kawe-mod-body textarea{width:100%;padding:11px 13px;margin:6px 0;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.45);color:#fff;font-size:14px;font-family:inherit}
+.kawe-mod-body label{font-size:12px;opacity:.75;text-transform:uppercase;letter-spacing:.5px}
+.kawe-btn{border:none;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;color:#fff;margin:4px 6px 4px 0;font-size:14px}
+.kawe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+/* EMBED - AZUL */
+.kawe-embed-head{background:linear-gradient(135deg,#1d4ed8,#3b82f6)}
+.kawe-btn-embed{background:linear-gradient(135deg,#2563eb,#60a5fa)}
+.kawe-nav-embed{color:#60a5fa !important}
+/* LOJA - VERDE SIENA + LARANJA */
+.kawe-loja-head{background:linear-gradient(135deg,#2e7d32,#a0522d 55%,#f97316)}
+.kawe-btn-loja{background:linear-gradient(135deg,#a0522d,#f97316)}
+.kawe-nav-loja{color:#f9a03f !important}
+.kawe-prod{background:linear-gradient(160deg,rgba(46,125,50,.14),rgba(249,115,22,.10));border:1px solid rgba(160,82,45,.5);border-radius:14px;padding:14px}
+.kawe-prod h4{margin:0 0 6px;color:#fbbf24;font-size:15px}
+.kawe-preco{font-size:20px;font-weight:900;color:#4ade80;margin:8px 0}
+/* CE SISTEMA - VERMELHO + LARANJA */
+.kawe-sis-head{background:linear-gradient(135deg,#b91c1c,#ef4444 50%,#f97316)}
+.kawe-btn-sis{background:linear-gradient(135deg,#dc2626,#f97316)}
+.kawe-nav-sis{color:#f87171 !important}
+.kawe-stat{background:linear-gradient(160deg,rgba(220,38,38,.14),rgba(249,115,22,.10));border:1px solid rgba(239,68,68,.35);border-radius:14px;padding:14px;text-align:center}
+.kawe-stat b{display:block;font-size:22px;color:#fb923c;margin-bottom:4px}
+.kawe-stat span{font-size:12px;opacity:.8}
+.kawe-badge-ok{color:#22c55e;font-weight:800}
+.kawe-badge-bad{color:#ef4444;font-weight:800}
+.kawe-bar{height:10px;border-radius:6px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:6px}
+.kawe-bar i{display:block;height:100%;background:linear-gradient(90deg,#dc2626,#f97316)}
+</style>
+
+<!-- ===== EMBED ===== -->
+<div class="kawe-mod-overlay" id="kaweEmbedOverlay">
+  <div class="kawe-mod-box">
+    <div class="kawe-mod-head kawe-embed-head"><span>🔗 EMBED — Incorporar Conteúdo</span><button onclick="kaweFecharEmbed()">✕ Fechar</button></div>
+    <div class="kawe-mod-body">
+      <div class="kawe-mod-card">
+        <label>Escolher vídeo do site</label>
+        <select id="kaweEmbedVideo" onchange="kaweEmbedGerar()"></select>
+        <label>Ou cole uma URL / ID (YouTube, MP4, M3U8, Drive...)</label>
+        <input id="kaweEmbedUrl" placeholder="https://..." oninput="kaweEmbedGerar()">
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <div style="flex:1;min-width:120px"><label>Largura</label><input id="kaweEmbedW" value="640" oninput="kaweEmbedGerar()"></div>
+          <div style="flex:1;min-width:120px"><label>Altura</label><input id="kaweEmbedH" value="360" oninput="kaweEmbedGerar()"></div>
+        </div>
+        <label>Tipo de código</label>
+        <select id="kaweEmbedTipo" onchange="kaweEmbedGerar()">
+          <option value="iframe">iFrame (padrão)</option>
+          <option value="video">Player HTML5 &lt;video&gt;</option>
+          <option value="responsivo">iFrame Responsivo (16:9)</option>
+          <option value="link">Link direto</option>
+        </select>
+      </div>
+      <div class="kawe-mod-card">
+        <label>Código gerado</label>
+        <textarea id="kaweEmbedCode" rows="6" readonly></textarea>
+        <button class="kawe-btn kawe-btn-embed" onclick="kaweEmbedCopiar()">📋 Copiar código</button>
+        <button class="kawe-btn kawe-btn-embed" onclick="kaweEmbedPreview()">▶️ Testar preview</button>
+      </div>
+      <div class="kawe-mod-card"><label>Pré-visualização</label><div id="kaweEmbedPreview" style="margin-top:8px"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LOJA ===== -->
+<div class="kawe-mod-overlay" id="kaweLojaOverlay">
+  <div class="kawe-mod-box">
+    <div class="kawe-mod-head kawe-loja-head"><span>🛒 LOJA — Arquivos JSON &amp; Pacotes</span><button onclick="kaweFecharLoja()">✕ Fechar</button></div>
+    <div class="kawe-mod-body">
+      <div class="kawe-mod-card">
+        <label>Chave PIX da loja</label>
+        <input id="kaweLojaPix" placeholder="sua chave pix" oninput="kaweLojaSalvarPix()">
+        <button class="kawe-btn kawe-btn-loja" onclick="kaweLojaToggleAdmin()">⚙️ Adicionar / Gerenciar Produtos</button>
+        <button class="kawe-btn kawe-btn-loja" onclick="kaweLojaExportar()">⬇️ Exportar catálogo JSON</button>
+      </div>
+      <div class="kawe-mod-card" id="kaweLojaAdmin" style="display:none">
+        <label>Nome do produto</label><input id="kaweLojaNome" placeholder="Ex: Pacote JSON 5.000 Vídeos">
+        <label>Descrição</label><input id="kaweLojaDesc" placeholder="O que o comprador recebe">
+        <label>Preço (R$)</label><input id="kaweLojaPreco" type="number" value="19.90">
+        <label>Tipo</label>
+        <select id="kaweLojaTipo"><option>JSON</option><option>M3U / Lista</option><option>Pacote de Vídeos</option><option>Pacote de Fotos</option><option>Script / Código</option><option>Outro</option></select>
+        <label>Link de download / entrega</label><input id="kaweLojaLink" placeholder="https://...">
+        <label>Conteúdo JSON embutido (opcional)</label><textarea id="kaweLojaJson" rows="4" placeholder='{"videos":[...]}'></textarea>
+        <button class="kawe-btn kawe-btn-loja" onclick="kaweLojaAdd()">➕ Publicar produto</button>
+      </div>
+      <div class="kawe-grid" id="kaweLojaLista"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CE SISTEMA ===== -->
+<div class="kawe-mod-overlay" id="kaweSisOverlay">
+  <div class="kawe-mod-box">
+    <div class="kawe-mod-head kawe-sis-head"><span>🧯 CE SISTEMA — Status do Site</span><button onclick="kaweFecharSis()">✕ Fechar</button></div>
+    <div class="kawe-mod-body">
+      <div class="kawe-grid" id="kaweSisStats"></div>
+      <div class="kawe-mod-card" style="margin-top:14px">
+        <label>Armazenamento local usado</label>
+        <div class="kawe-bar"><i id="kaweSisBar" style="width:0%"></i></div>
+        <div id="kaweSisStorage" style="margin-top:6px;font-size:13px"></div>
+      </div>
+      <div class="kawe-mod-card">
+        <label>Diagnóstico de funções</label>
+        <div id="kaweSisDiag" style="font-size:13px;line-height:1.9"></div>
+      </div>
+      <div class="kawe-mod-card">
+        <label>Ambiente</label>
+        <div id="kaweSisEnv" style="font-size:13px;line-height:1.9"></div>
+        <button class="kawe-btn kawe-btn-sis" onclick="kaweSisAtualizar()">🔄 Atualizar status</button>
+        <button class="kawe-btn kawe-btn-sis" onclick="kaweSisBackup()">💾 Baixar backup do sistema</button>
+        <button class="kawe-btn kawe-btn-sis" onclick="kaweSisLimparCache()">🧹 Limpar cache temporário</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============ EMBED ============ */
+function kaweAbrirEmbed(){document.getElementById('kaweEmbedOverlay').classList.add('active');kaweEmbedPopular();kaweEmbedGerar();}
+function kaweFecharEmbed(){document.getElementById('kaweEmbedOverlay').classList.remove('active');}
+function kaweEmbedPopular(){
+  var s=document.getElementById('kaweEmbedVideo');if(!s)return;
+  var lista=(typeof videos!=='undefined'&&Array.isArray(videos))?videos:[];
+  s.innerHTML='<option value="">— Escolher manualmente —</option>'+lista.map(function(v,i){
+    return '<option value="'+String(v.url||v.link||v.src||'').replace(/"/g,'&quot;')+'">'+((v.titulo||v.title||('Vídeo '+(i+1)))+'').substring(0,60)+'</option>';}).join('');
+}
+function kaweEmbedFonte(){
+  var sel=document.getElementById('kaweEmbedVideo').value;
+  var man=document.getElementById('kaweEmbedUrl').value.trim();
+  var u=man||sel;
+  if(/youtube\.com\/watch\?v=/.test(u))u='https://www.youtube.com/embed/'+u.split('v=')[1].split('&')[0];
+  else if(/youtu\.be\//.test(u))u='https://www.youtube.com/embed/'+u.split('youtu.be/')[1].split('?')[0];
+  return u;
+}
+function kaweEmbedGerar(){
+  var u=kaweEmbedFonte(),w=document.getElementById('kaweEmbedW').value||640,h=document.getElementById('kaweEmbedH').value||360,t=document.getElementById('kaweEmbedTipo').value,c='';
+  if(!u){document.getElementById('kaweEmbedCode').value='';return;}
+  if(t==='iframe')c='<iframe src="'+u+'" width="'+w+'" height="'+h+'" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>';
+  if(t==='video')c='<video src="'+u+'" width="'+w+'" height="'+h+'" controls playsinline></video>';
+  if(t==='responsivo')c='<div style="position:relative;padding-top:56.25%"><iframe src="'+u+'" style="position:absolute;inset:0;width:100%;height:100%;border:0" allowfullscreen></iframe></div>';
+  if(t==='link')c=u;
+  document.getElementById('kaweEmbedCode').value=c;
+}
+function kaweEmbedCopiar(){
+  var t=document.getElementById('kaweEmbedCode');if(!t.value)return alert('Gere um código primeiro.');
+  t.select();try{document.execCommand('copy');}catch(e){}
+  if(navigator.clipboard)navigator.clipboard.writeText(t.value);
+  alert('✅ Código EMBED copiado!');
+}
+function kaweEmbedPreview(){document.getElementById('kaweEmbedPreview').innerHTML=document.getElementById('kaweEmbedCode').value;}
+
+/* ============ LOJA ============ */
+var kaweLojaProdutos=JSON.parse(localStorage.getItem('kawe_loja_produtos')||'null')||[
+ {id:1,nome:'Pacote JSON — 1.000 Vídeos',desc:'Arquivo .json pronto para importar no painel admin.',preco:19.9,tipo:'JSON',link:'',json:''},
+ {id:2,nome:'Lista M3U Premium',desc:'Canais e lives organizados por categoria.',preco:29.9,tipo:'M3U / Lista',link:'',json:''},
+ {id:3,nome:'Pacote de Fotos HD',desc:'Galeria completa em alta resolução.',preco:14.9,tipo:'Pacote de Fotos',link:'',json:''}
+];
+function kaweLojaSalvar(){localStorage.setItem('kawe_loja_produtos',JSON.stringify(kaweLojaProdutos));}
+function kaweLojaSalvarPix(){localStorage.setItem('kawe_loja_pix',document.getElementById('kaweLojaPix').value);}
+function kaweAbrirLoja(){document.getElementById('kaweLojaOverlay').classList.add('active');document.getElementById('kaweLojaPix').value=localStorage.getItem('kawe_loja_pix')||'';kaweLojaRender();}
+function kaweFecharLoja(){document.getElementById('kaweLojaOverlay').classList.remove('active');}
+function kaweLojaToggleAdmin(){var e=document.getElementById('kaweLojaAdmin');e.style.display=e.style.display==='none'?'block':'none';}
+function kaweLojaAdd(){
+  var n=document.getElementById('kaweLojaNome').value.trim();if(!n)return alert('Informe o nome do produto.');
+  kaweLojaProdutos.push({id:Date.now(),nome:n,desc:document.getElementById('kaweLojaDesc').value,preco:parseFloat(document.getElementById('kaweLojaPreco').value)||0,tipo:document.getElementById('kaweLojaTipo').value,link:document.getElementById('kaweLojaLink').value,json:document.getElementById('kaweLojaJson').value});
+  kaweLojaSalvar();kaweLojaRender();document.getElementById('kaweLojaNome').value='';alert('✅ Produto publicado na loja!');
+}
+function kaweLojaRemover(id){if(!confirm('Remover este produto?'))return;kaweLojaProdutos=kaweLojaProdutos.filter(function(p){return p.id!==id;});kaweLojaSalvar();kaweLojaRender();}
+function kaweLojaRender(){
+  document.getElementById('kaweLojaLista').innerHTML=kaweLojaProdutos.map(function(p){
+    return '<div class="kawe-prod"><h4>'+p.nome+'</h4><div style="font-size:12px;opacity:.8">'+(p.desc||'')+'</div>'+
+    '<div style="font-size:11px;color:#f97316;margin-top:6px">'+p.tipo+'</div>'+
+    '<div class="kawe-preco">R$ '+Number(p.preco).toFixed(2).replace('.',',')+'</div>'+
+    '<button class="kawe-btn kawe-btn-loja" onclick="kaweLojaComprar('+p.id+')">🛒 Comprar</button>'+
+    '<button class="kawe-btn" style="background:rgba(239,68,68,.25)" onclick="kaweLojaRemover('+p.id+')">🗑</button></div>';
+  }).join('')||'<div style="opacity:.6">Nenhum produto na loja ainda.</div>';
+}
+function kaweLojaComprar(id){
+  var p=kaweLojaProdutos.filter(function(x){return x.id===id;})[0];if(!p)return;
+  var pix=localStorage.getItem('kawe_loja_pix')||'(chave PIX não configurada)';
+  if(confirm('Produto: '+p.nome+'\nValor: R$ '+Number(p.preco).toFixed(2)+'\nPIX: '+pix+'\n\nConfirmar pagamento e liberar entrega?')){
+    if(p.json){var b=new Blob([p.json],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=p.nome.replace(/\s+/g,'_')+'.json';a.click();}
+    else if(p.link){window.open(p.link,'_blank');}
+    else alert('Pedido registrado! O vendedor enviará o arquivo.');
+    var v=JSON.parse(localStorage.getItem('kawe_loja_vendas')||'[]');v.push({produto:p.nome,valor:p.preco,data:new Date().toISOString()});localStorage.setItem('kawe_loja_vendas',JSON.stringify(v));
+  }
+}
+function kaweLojaExportar(){var b=new Blob([JSON.stringify(kaweLojaProdutos,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='kawe_loja.json';a.click();}
+
+/* ============ CE SISTEMA ============ */
+function kaweAbrirSis(){document.getElementById('kaweSisOverlay').classList.add('active');kaweSisAtualizar();}
+function kaweFecharSis(){document.getElementById('kaweSisOverlay').classList.remove('active');}
+var kaweSisInicio=Date.now();
+function kaweSisAtualizar(){
+  var nv=(typeof videos!=='undefined'&&videos.length)||0;
+  var fotosN=0;try{fotosN=(JSON.parse(localStorage.getItem('kawe_fotos')||'[]')||[]).length;}catch(e){}
+  var vendas=JSON.parse(localStorage.getItem('kawe_loja_vendas')||'[]');
+  var up=Math.floor((Date.now()-kaweSisInicio)/1000);
+  document.getElementById('kaweSisStats').innerHTML=
+   [['Vídeos',nv],['Fotos',fotosN],['Produtos na Loja',kaweLojaProdutos.length],['Vendas',vendas.length],
+    ['Sessão (s)',up],['Status',navigator.onLine?'ONLINE':'OFFLINE']]
+   .map(function(s){return '<div class="kawe-stat"><b>'+s[1]+'</b><span>'+s[0]+'</span></div>';}).join('');
+  var bytes=0;for(var k in localStorage){if(Object.prototype.hasOwnProperty.call(localStorage,k))bytes+=((localStorage[k]||'').length+k.length)*2;}
+  var mb=(bytes/1048576),pct=Math.min(100,(mb/5)*100);
+  document.getElementById('kaweSisBar').style.width=pct.toFixed(1)+'%';
+  document.getElementById('kaweSisStorage').textContent=mb.toFixed(2)+' MB de ~5 MB ('+pct.toFixed(1)+'%) — '+Object.keys(localStorage).length+' chaves salvas';
+  var fns=['show','render','toggleMenu','adminNav','filtrarVideos','filtrarPorCategoria','kaweAbrirEmbed','kaweAbrirLoja'];
+  document.getElementById('kaweSisDiag').innerHTML=fns.map(function(f){
+    var ok=typeof window[f]==='function';
+    return (ok?'<span class="kawe-badge-ok">✔</span> ':'<span class="kawe-badge-bad">✘</span> ')+f+'()';}).join('<br>');
+  document.getElementById('kaweSisEnv').innerHTML=
+   'Navegador: '+navigator.userAgent.substring(0,80)+'<br>'+
+   'Idioma: '+navigator.language+' • Tela: '+screen.width+'x'+screen.height+'<br>'+
+   'Conexão: '+(navigator.onLine?'<span class="kawe-badge-ok">Online</span>':'<span class="kawe-badge-bad">Offline</span>')+
+   ' • Última verificação: '+new Date().toLocaleString('pt-BR');
+}
+function kaweSisBackup(){
+  var d={};for(var k in localStorage){if(Object.prototype.hasOwnProperty.call(localStorage,k))d[k]=localStorage[k];}
+  var b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'}),a=document.createElement('a');
+  a.href=URL.createObjectURL(b);a.download='kawe_backup_'+Date.now()+'.json';a.click();
+}
+function kaweSisLimparCache(){
+  if(!confirm('Limpar apenas dados temporários (histórico/cache)?'))return;
+  ['kawe_historico','kawe_cache','kawe_temp'].forEach(function(k){localStorage.removeItem(k);});
+  kaweSisAtualizar();alert('🧹 Cache temporário limpo.');
+}
+
+/* ============ INJEÇÃO DOS BOTÕES ============ */
+(function(){
+  function btn(txt,cls,fn){
+    var b=document.createElement('button');b.innerHTML=txt;b.className=cls;b.onclick=fn;return b;
+  }
+  function injetar(){
+    // CABEÇALHO
+    var hs=document.querySelector('.header-shortcuts');
+    if(hs&&!hs.querySelector('.kawe-h-embed')){
+      var e=btn('🔗 <span>Embed</span>','kawe-h-embed',kaweAbrirEmbed);
+      e.style.cssText='background:rgba(59,130,246,.18);color:#60a5fa;border:1px solid rgba(59,130,246,.5);padding:6px 12px;border-radius:20px;font-size:13px;white-space:nowrap;';
+      var l=btn('🛒 <span>Loja</span>','kawe-h-loja',kaweAbrirLoja);
+      l.style.cssText='background:linear-gradient(135deg,rgba(46,125,50,.25),rgba(249,115,22,.25));color:#f9a03f;border:1px solid rgba(160,82,45,.6);padding:6px 12px;border-radius:20px;font-size:13px;white-space:nowrap;';
+      var s=btn('🧯 <span>CE Sistema</span>','kawe-h-sis',kaweAbrirSis);
+      s.style.cssText='background:linear-gradient(135deg,rgba(220,38,38,.25),rgba(249,115,22,.25));color:#f87171;border:1px solid rgba(239,68,68,.5);padding:6px 12px;border-radius:20px;font-size:13px;white-space:nowrap;';
+      hs.insertBefore(s,hs.firstChild);hs.insertBefore(l,hs.firstChild);hs.insertBefore(e,hs.firstChild);
+    }
+    // MENU DE TRÊS BARRAS
+    var menuEl=document.getElementById('menu');
+    if(menuEl&&!menuEl.querySelector('.kawe-m-embed')){
+      var div=document.createElement('div');
+      div.className='divisor';div.style.cssText='display:flex;align-items:center;gap:8px;margin:10px 15px 8px;';
+      div.textContent='⚡ FERRAMENTAS';
+      menuEl.appendChild(div);
+      var me=btn('🔗 Embed','kawe-m-embed',function(){kaweAbrirEmbed();if(typeof toggleMenu==='function')toggleMenu();});
+      me.style.cssText='color:#60a5fa;font-weight:700;';
+      var ml=btn('🛒 Loja','kawe-m-loja',function(){kaweAbrirLoja();if(typeof toggleMenu==='function')toggleMenu();});
+      ml.style.cssText='color:#f9a03f;font-weight:700;';
+      var ms=btn('🧯 CE Sistema','kawe-m-sis',function(){kaweAbrirSis();if(typeof toggleMenu==='function')toggleMenu();});
+      ms.style.cssText='color:#f87171;font-weight:700;';
+      menuEl.appendChild(me);menuEl.appendChild(ml);menuEl.appendChild(ms);
+    }
+    // PAINEL ADMIN
+    document.querySelectorAll('.admin-sidebar').forEach(function(sb){
+      if(sb.querySelector('.kawe-a-embed'))return;
+      function nav(txt,cls,color,fn){
+        var d=document.createElement('div');d.className='admin-nav-item '+cls;d.innerHTML=txt;
+        d.style.color=color;d.style.fontWeight='700';d.onclick=fn;sb.appendChild(d);
+      }
+      nav('🔗 Embed','kawe-a-embed','#60a5fa',kaweAbrirEmbed);
+      nav('🛒 Loja (JSON &amp; Arquivos)','kawe-a-loja','#f9a03f',kaweAbrirLoja);
+      nav('🧯 CE Sistema','kawe-a-sis','#f87171',kaweAbrirSis);
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',injetar);else injetar();
+  setInterval(injetar,2000);
+})();
+</script>
+<!-- ============ FIM MÓDULOS KAWE ============ -->
+
 </body>
 </html>

@@ -1177,6 +1177,7 @@ function homeSpecialRows(){const top=[...videos].sort((a,b)=>(b.views||0)-(a.vie
         const credential=await window.kaweFirebase.auth.signInWithEmailAndPassword(email,pass);
         if(credential.user.uid!==ADMIN_UID){await window.kaweFirebase.auth.signOut();throw new Error('UID não autorizado');}
         closeAuth();openPanel('admin');
+        try{if(window.kaweFirebase.loadCatalog)await window.kaweFirebase.loadCatalog();}catch(loadErr){console.warn('[KAWE] catálogo Firestore após login',loadErr)}
       }catch(_){error.textContent='E-mail, senha ou UID administrativo não autorizado pelo Firebase.';error.classList.add('show');}
     }
     function openVipGate(category){pendingVipCategory=category;document.getElementById('vipGateCategory').textContent=category;document.getElementById('vipGateCode').value='';setPasswordHidden('vipGateCode');document.getElementById('vipGateError').classList.remove('show');document.getElementById('vipGateModal').classList.add('open');document.body.style.overflow='hidden';setTimeout(()=>document.getElementById('vipGateCode').focus(),60)}
@@ -3674,7 +3675,7 @@ body.kawe-warm-view:after{position:fixed;inset:0;z-index:999999;pointer-events:n
   const CONFIG_KEY='kawe_firebase_web_config_v1';
   const DEFAULT_UID='kxXy42OffKTeEP12ffWB9pUDhMF3';
   const DEFAULT_FIREBASE_CONFIG={apiKey:'AIzaSyBe8EiY0k3JVqnnokn-sNhf2klTiehuO10',authDomain:'kawe-pornografia-oficial.firebaseapp.com',databaseURL:'https://kawe-pornografia-oficial-default-rtdb.firebaseio.com',projectId:'kawe-pornografia-oficial',storageBucket:'kawe-pornografia-oficial.firebasestorage.app',messagingSenderId:'681674350644',appId:'1:681674350644:web:f674b9e3211ca101afaa61',measurementId:'G-8BHQXFNQ22'};
-  let db=null, auth=null, initialized=false;
+  let db=null, auth=null, fs=null, initialized=false;
   const readConfig=()=>{try{return JSON.parse(localStorage.getItem(CONFIG_KEY)||'null')||DEFAULT_FIREBASE_CONFIG}catch(_){return DEFAULT_FIREBASE_CONFIG}};
   const saveConfig=c=>localStorage.setItem(CONFIG_KEY,JSON.stringify(c));
   const validConfig=c=>c&&c.apiKey&&c.authDomain&&c.projectId&&c.databaseURL;
@@ -3686,28 +3687,45 @@ body.kawe-warm-view:after{position:fixed;inset:0;z-index:999999;pointer-events:n
       a.src='https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js';a.onload=done;a.onerror=reject;
       b.src='https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js';b.onload=done;b.onerror=reject;
       document.head.append(a,b);
-    }).then(()=>new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js';s.onload=resolve;s.onerror=reject;document.head.append(s)})).then(()=>new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js';s.onload=resolve;s.onerror=reject;document.head.append(s)}));
+    }).then(()=>new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js';s.onload=resolve;s.onerror=reject;document.head.append(s)})).then(()=>new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js';s.onload=resolve;s.onerror=reject;document.head.append(s)})).then(()=>new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js';s.onload=resolve;s.onerror=reject;document.head.append(s)}));
   }
   async function init(c){
     if(!validConfig(c))return false;
     try{
       await loadSdk();
       if(!firebase.apps.length)firebase.initializeApp(c);
-      auth=firebase.auth();db=firebase.database();initialized=true;
-      window.kaweFirebase.auth=auth;window.kaweFirebase.db=db;
-      db.ref('catalog').on('value',snap=>{
-        const data=snap.val();
-        if(!Array.isArray(data))return;
-        videos.splice(0,videos.length,...data.map(x=>{delete x._rich;return enrich(x)}));
-        renderCategories();renderCatalog();
-      },err=>console.warn('[KAWE] Falha ao ler catalog:',err));
+      auth=firebase.auth();db=firebase.database();fs=firebase.firestore();initialized=true;
+      window.kaweFirebase.auth=auth;window.kaweFirebase.db=db;window.kaweFirebase.fs=fs;
+      loadCatalogFromFirebase();
       return true;
     }catch(err){console.error('[KAWE] Firebase:',err);return false}
   }
-  window.kaweFirebase={auth:null,config:readConfig(),writeCatalog(items){
-    if(!db||!auth?.currentUser||auth.currentUser.uid!==DEFAULT_UID)return Promise.resolve(false);
-    return db.ref('catalog').set(items.map(x=>{const y={...x};delete y._rich;return y})).then(()=>true).catch(err=>{console.error('[KAWE] write catalog',err);toast('Firebase recusou a gravação. Verifique as regras do Realtime Database.');return false});
-  },deleteMediaAssets(item){
+  const CONTENT_COLLECTION='content';
+  function cleanContent(x){const y={...x};delete y._rich;delete y.password;delete y.auth;return y;}
+  function renderRemoteCatalog(items){videos.splice(0,videos.length,...items.map(x=>enrich(cleanContent(x))));renderCategories();renderCatalog();}
+  async function loadCatalogFromFirebase(){
+    if(!fs)return false;
+    try{
+      const snap=await fs.collection(CONTENT_COLLECTION).get();
+      if(!snap.empty){renderRemoteCatalog(snap.docs.map(d=>d.data()));return true;}
+      const legacy=await db.ref('catalog').once('value'), data=legacy.val();
+      if(Array.isArray(data)){renderRemoteCatalog(data);if(auth?.currentUser?.uid===DEFAULT_UID)await window.kaweFirebase.writeCatalog(data);return true;}
+    }catch(err){console.warn('[KAWE] Falha ao carregar Firestore; usando catálogo legado',err);try{const snap=await db.ref('catalog').once('value');if(Array.isArray(snap.val()))renderRemoteCatalog(snap.val());}catch(_){}}
+    return false;
+  }
+  async function writeCatalog(items){
+    if(!fs||!auth?.currentUser||auth.currentUser.uid!==DEFAULT_UID)return false;
+    try{
+      const clean=items.map(cleanContent), existing=await fs.collection(CONTENT_COLLECTION).get(), ids=new Set(clean.map(x=>String(x.id)));
+      let batch=fs.batch(), ops=0, commits=[];
+      existing.forEach(doc=>{if(!ids.has(String(doc.id)))batch.delete(doc.ref),ops++;});
+      clean.forEach(item=>{const ref=fs.collection(CONTENT_COLLECTION).doc(String(item.id));batch.set(ref,item,{merge:true});ops++;if(ops>=450){commits.push(batch.commit());batch=fs.batch();ops=0;}});
+      if(ops)commits.push(batch.commit());
+      await Promise.all(commits);return true;
+    }catch(err){console.error('[KAWE] write Firestore content',err);toast('Firestore recusou a gravação. Verifique as regras do Firestore.');return false}
+  }
+  window.kaweFirebase={auth:null,config:readConfig(),writeCatalog,loadCatalog:loadCatalogFromFirebase,
+    deleteMediaAssets(item){
     if(!window.firebase?.storage||!item)return Promise.resolve([]);
     const urls=[item.image,item.bannerImage,item.videoUrl,item.mediaUrl,item.link].filter(u=>typeof u==='string'&&/^https?:\/\/(firebasestorage\.googleapis\.com|storage\.googleapis\.com|firebasestorage\.app)/i.test(u));
     return Promise.all(urls.map(url=>window.firebase.storage().refFromURL(url).delete().catch(err=>{console.warn('[KAWE] asset not deleted',url,err);return false})));
@@ -3731,7 +3749,7 @@ body.kawe-warm-view:after{position:fixed;inset:0;z-index:999999;pointer-events:n
       <label>messagingSenderId (opcional)</label><input id="fbMessagingSenderId" value="${c.messagingSenderId||''}" />
       <label>appId (opcional)</label><input id="fbAppId" value="${c.appId||''}" />
       <button type="submit">Salvar e conectar Firebase</button></form><p class="admin-media-note">Não cole senha, chave privada ou arquivo service account aqui. A senha do administrador é usada somente pelo Firebase Auth.</p></section>`;
-    document.getElementById('firebaseConfigForm').onsubmit=async e=>{e.preventDefault();const get=id=>document.getElementById(id).value.trim();const cfg={apiKey:get('fbApiKey'),authDomain:get('fbAuthDomain'),databaseURL:get('fbDatabaseURL'),projectId:get('fbProjectId'),storageBucket:get('fbStorageBucket'),messagingSenderId:get('fbMessagingSenderId'),appId:get('fbAppId')};saveConfig(cfg);window.kaweFirebase.config=cfg;const ok=await init(cfg);toast(ok?'Firebase conectado. O catálogo será lido do Realtime Database.':'Não foi possível conectar; revise a configuração.');};
+    document.getElementById('firebaseConfigForm').onsubmit=async e=>{e.preventDefault();const get=id=>document.getElementById(id).value.trim();const cfg={apiKey:get('fbApiKey'),authDomain:get('fbAuthDomain'),databaseURL:get('fbDatabaseURL'),projectId:get('fbProjectId'),storageBucket:get('fbStorageBucket'),messagingSenderId:get('fbMessagingSenderId'),appId:get('fbAppId')};saveConfig(cfg);window.kaweFirebase.config=cfg;const ok=await init(cfg);toast(ok?'Firebase conectado. Catálogo interno no Firestore e estados vivos no Realtime Database.':'Não foi possível conectar; revise a configuração.');};
   };
   const cfg=readConfig(); if(cfg)init(cfg);
 })();
@@ -3744,32 +3762,32 @@ body.kawe-warm-view:after{position:fixed;inset:0;z-index:999999;pointer-events:n
   const originalRemove=Storage.prototype.removeItem;
   let activeUid=null, remoteReady=false, applying=false;
   const keyName=k=>String(k||'').replace(/[.#$\[\]/]/g,'_');
-  const stateRef=()=>window.kaweFirebase?.db&&activeUid?window.kaweFirebase.db.ref('appState/'+activeUid):null;
+  const stateRef=()=>window.kaweFirebase?.fs&&activeUid?window.kaweFirebase.fs.collection('user_state').doc(activeUid).collection('items'):null;
   function push(key,value){
     if(applying||!remoteReady||EXCLUDED.test(key))return;
     const ref=stateRef(); if(!ref)return;
     let parsed=value;
     try{parsed=JSON.parse(value)}catch(_){ }
-    ref.child(keyName(key)).set({key:String(key),value:parsed,updatedAt:Date.now()}).catch(err=>console.warn('[KAWE] sync',err));
+    ref.doc(keyName(key)).set({key:String(key),value:parsed,updatedAt:Date.now()}).catch(err=>console.warn('[KAWE] sync',err));
   }
   Storage.prototype.setItem=function(key,value){originalSet.call(this,key,value);if(this===localStorage)push(key,String(value));};
-  Storage.prototype.removeItem=function(key){originalRemove.call(this,key);if(this===localStorage&&remoteReady&&!EXCLUDED.test(key)){const ref=stateRef();if(ref)ref.child(keyName(key)).remove().catch(()=>{});}};
-  async function attach(auth,db){
-    if(!auth||!db||auth.__kaweStateSync)return;
+  Storage.prototype.removeItem=function(key){originalRemove.call(this,key);if(this===localStorage&&remoteReady&&!EXCLUDED.test(key)){const ref=stateRef();if(ref)ref.doc(keyName(key)).delete().catch(()=>{});}};
+  async function attach(auth,db,fs){
+    if(!auth||!db||!fs||auth.__kaweStateSync)return;
     auth.__kaweStateSync=true;
     auth.onAuthStateChanged(async user=>{
       activeUid=user?.uid||null; remoteReady=false;
       if(!user){try{await auth.signInAnonymously()}catch(err){console.warn('[KAWE] Ative Anonymous Auth no Firebase para sincronizar usuários.',err)}return;}
-      const ref=db.ref('appState/'+user.uid);
+      const ref=fs.collection('user_state').doc(user.uid).collection('items');
       try{
-        const snap=await ref.once('value'); const data=snap.val()||{}; applying=true;
+        const snap=await ref.get(); const data={}; snap.forEach(doc=>data[doc.id]=doc.data()); applying=true;
         Object.values(data).forEach(item=>{if(item?.key&&!EXCLUDED.test(item.key)){try{originalSet.call(localStorage,item.key,typeof item.value==='string'?item.value:JSON.stringify(item.value))}catch(_){}}});
         applying=false; remoteReady=true;
         document.documentElement.dataset.firebaseSync='connected';
       }catch(err){applying=false;console.warn('[KAWE] Não foi possível carregar estado remoto.',err)}
     });
   }
-  function wait(){const f=window.kaweFirebase;if(f?.auth&&f?.db)attach(f.auth,f.db);else setTimeout(wait,500)}
+  function wait(){const f=window.kaweFirebase;if(f?.auth&&f?.db&&f?.fs)attach(f.auth,f.db,f.fs);else setTimeout(wait,500)}
   wait();
 })();
 </script>

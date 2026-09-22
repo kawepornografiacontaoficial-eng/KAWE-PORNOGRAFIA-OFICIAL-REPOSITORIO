@@ -398,44 +398,6 @@
 
 </style>
 
-    <!-- ===== FIREBASE CONFIG ===== -->
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
-    <script>
-      const firebaseConfig = {
-        apiKey: "AIzaSyBe8EiY0k3JVqnnokn-sNhf2klTiehuO10",
-        authDomain: "kawe-pornografia-oficial.firebaseapp.com",
-        databaseURL: "https://kawe-pornografia-oficial-default-rtdb.firebaseio.com",
-        projectId: "kawe-pornografia-oficial",
-        storageBucket: "kawe-pornografia-oficial.firebasestorage.app",
-        messagingSenderId: "681674350644",
-        appId: "1:681674350644:web:f674b9e3211ca101afaa61",
-        measurementId: "G-8BHQXFNQ22"
-      };
-
-      window.kaweFirebaseConfig = firebaseConfig;
-      window.kaweFirebaseApp = null;
-      window.kaweFirebaseAnalytics = null;
-      window.kaweFirebaseReady = false;
-
-      try {
-        if (window.firebase && !firebase.apps.length) {
-          window.kaweFirebaseApp = firebase.initializeApp(firebaseConfig);
-        } else if (window.firebase) {
-          window.kaweFirebaseApp = firebase.app();
-        }
-        if (window.firebase && firebase.analytics) {
-          try { window.kaweFirebaseAnalytics = firebase.analytics(); } catch (analyticsError) {}
-        }
-        window.kaweFirebaseReady = !!window.kaweFirebaseApp;
-        window.dispatchEvent(new CustomEvent('kawe:firebase-ready', { detail: window.kaweFirebaseApp }));
-      } catch (firebaseError) {
-        console.warn('Firebase não pôde ser inicializado nesta origem.', firebaseError);
-      }
-    </script>
-
 <style id="kawe-dynamic-upgrade">
   :root{--kawe-player-max:1060px;--kawe-ease:cubic-bezier(.23,1,.32,1);--studio-accent:#38bdf8;--studio-green:#34d399}
   .kx-watch{background:radial-gradient(900px 500px at 50% -10%,rgba(16,185,129,.09),transparent 65%),#050f08}

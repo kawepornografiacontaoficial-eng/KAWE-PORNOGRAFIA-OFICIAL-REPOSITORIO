@@ -3961,7 +3961,7 @@ Digite EXCLUIR para apagar o registro do catálogo sem possibilidade de restaura
   renderNav();
 })();
 </script>
-<style id="kawe-admin-fullscreen-style">
+<style id="kawe-admin-fullscreen-v2-style">
   /* Painel administrativo em tela cheia: a navegação e o conteúdo rolam separadamente. */
   #panel.panel{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;height:100dvh!important;max-width:none!important;max-height:none!important;margin:0!important;border:0!important;border-radius:0!important;overflow:hidden!important;z-index:9999!important;grid-template-columns:minmax(260px,300px) minmax(0,1fr)!important;background:#050d08!important}
   #panel.panel.open{display:grid!important}
@@ -4070,5 +4070,32 @@ Digite EXCLUIR para apagar o registro do catálogo sem possibilidade de restaura
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
 </script>
+
+  <style id="kawe-modal-centering-fix">
+    /* Mantém o modal de detalhes centralizado no viewport antes da abertura do player. */
+    #kxModal {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+    #kxModal.open {
+      display: flex;
+    }
+    #kxModal .kx-sheet {
+      width: min(1500px, 100%);
+      margin: 30px auto 60px;
+    }
+    @media (max-width: 760px) {
+      #kxModal {
+        align-items: flex-start;
+        justify-content: stretch;
+      }
+      #kxModal .kx-sheet {
+        width: 100%;
+        margin: 0;
+      }
+    }
+  </style>
 </body>
 </html>

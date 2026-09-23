@@ -4093,5 +4093,28 @@ const names=['Visão geral de usuários','Segmentos de audiência','Preferência
 const addAdmin=()=>{if(typeof FUNCS==='undefined')return;names.forEach((n,i)=>FUNCS.push({n,g:'Novas funções administrativas',a:true,v:'kawe_new_admin_'+i}));if(typeof renderFnNav==='function')renderFnNav();const old=window.openFn||((i)=>{});window.openFn=function(i){const f=FUNCS[i];if(!f?.v?.startsWith('kawe_new_admin_'))return old(i);if(typeof currentRole==='undefined'||currentRole!=='admin'){if(typeof toast==='function')toast('Acesso exclusivo do administrador.');return}const body=document.getElementById('panelBody'),key=f.v;body.innerHTML=`<h1>${esc(f.n)}</h1><p class="sub">Configuração administrativa sincronizada com Firebase Firestore.</p><form id="kaweNewAdminForm" class="fn-form"><label>Valor da configuração<textarea id="kaweNewAdminValue" rows="8" placeholder="Informe o valor, regra ou observação"></textarea></label><button type="submit">Salvar no Firebase</button><p id="kaweNewAdminStatus"></p></form>`;body.querySelector('form').onsubmit=async e=>{e.preventDefault();const value=document.getElementById('kaweNewAdminValue').value;try{localStorage.setItem(key,value);if(window.kaweFirebase?.fs)await window.kaweFirebase.fs.collection('admin_settings').doc(key).set({name:f.n,value,updatedAt:Date.now()},{merge:true});document.getElementById('kaweNewAdminStatus').textContent='Salvo no Firebase Firestore.'}catch(err){document.getElementById('kaweNewAdminStatus').textContent='Falha ao salvar no Firebase.'}};};};setTimeout(addAdmin,0);
 })();
 </script>
+<script id="kawe-intro-transition-fix">
+(function(){
+  'use strict';
+  if(window.__kaweIntroTransitionFix)return;window.__kaweIntroTransitionFix=true;
+  function start(){
+    const gate=document.getElementById('kaweGate'), intros=[...document.querySelectorAll('#kaweGate .kawe-intro')], age=document.getElementById('kaweAge');
+    if(!gate||intros.length<2||!age)return;
+    let accepted=false;try{accepted=localStorage.getItem('kawe_age_verified_v2')==='accepted'}catch(_){accepted=false}
+    if(accepted){gate.classList.add('is-hidden');gate.style.display='none';document.body.classList.remove('gate-locked');return}
+    gate.style.display='';document.body.classList.add('gate-locked');
+    const showIntro=i=>{intros.forEach((el,n)=>{el.classList.toggle('is-active',n===i);el.setAttribute('aria-hidden',String(n!==i))});age.classList.remove('is-active');age.setAttribute('aria-hidden','true')};
+    const showAge=()=>{intros.forEach(el=>{el.classList.remove('is-active');el.setAttribute('aria-hidden','true')});age.classList.add('is-active');age.setAttribute('aria-hidden','false')};
+    const active=intros.findIndex(el=>el.classList.contains('is-active'));
+    if(active<0&&!age.classList.contains('is-active'))showIntro(0);
+    if(!age.classList.contains('is-active')){
+      window.setTimeout(()=>{if(!document.body.classList.contains('gate-locked'))return;const current=intros.findIndex(el=>el.classList.contains('is-active'));if(current===0)showIntro(1)},1800);
+      window.setTimeout(()=>{if(!document.body.classList.contains('gate-locked'))return;showAge()},3600);
+    }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+  window.addEventListener('load',()=>setTimeout(start,50),{once:true});
+})();
+</script>
 </body>
 </html>

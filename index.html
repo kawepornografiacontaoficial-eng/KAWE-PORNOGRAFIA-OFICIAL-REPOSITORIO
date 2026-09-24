@@ -4143,12 +4143,12 @@ const addAdmin=()=>{if(typeof FUNCS==='undefined')return;names.forEach((n,i)=>FU
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   const read=(key,fallback)=>{try{return JSON.parse(localStorage.getItem(key)||'null')||fallback}catch(_){return fallback}};
   const write=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value));return true}catch(_){return false}};
-  const validUrl=v=>!v||/^https:\/\/[^\s]+$/i.test(v);
+  const validUrl=v=>!v||/^https:\/\/[^\s]+$/i.test(v)||/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/i.test(v);
   const log=(action,detail)=>{const rows=read(ACTIVITY,[]);rows.unshift({at:new Date().toISOString(),action,detail});write(ACTIVITY,rows.slice(0,100));};
   const defaultPrefs={theme:'system',autoplay:false,notifications:true,language:'pt-BR',compact:false,privateProfile:false};
   const closeModal=()=>{const d=document.querySelector('.kawe-profile-enhanced');if(d)d.remove();document.body.style.overflow=''};
   const setStatus=(text,kind='info')=>{const e=document.querySelector('[data-profile-status]');if(e){e.textContent=text;e.dataset.kind=kind}};
-  const getData=()=>{const u=user(),p=read(PROFILE,{}),prefs={...defaultPrefs,...read(PREFS,{})};return {uid:u.uid,email:u.email||'',name:p.name||u.displayName||'',username:p.username||'',region:p.region||'',bio:p.bio||'',pronouns:p.pronouns||'',website:p.website||'',avatar:p.avatar||'',createdAt:p.createdAt||'',updatedAt:p.updatedAt||'',prefs}};
+  const getData=()=>{const u=user(),p=read(PROFILE,{}),prefs={...defaultPrefs,...read(PREFS,{})};return {uid:u.uid,email:u.email||'',name:p.name||u.displayName||'',username:p.username||'',region:p.region||'',bio:p.bio||'',pronouns:p.pronouns||'',website:p.website||'',avatar:p.avatar||'',createdAt:p.createdAt||u.metadata?.creationTime||'',updatedAt:p.updatedAt||'',prefs}};
   function render(tab='profile'){
     const u=user(); if(!u){if(typeof toast==='function')toast('Entre ou crie uma conta para ver seu perfil.');return}
     closeModal(); const d=document.createElement('div'); d.className='kawe-profile-enhanced'; d.setAttribute('role','dialog'); d.setAttribute('aria-modal','true');
@@ -4161,7 +4161,7 @@ const addAdmin=()=>{if(typeof FUNCS==='undefined')return;names.forEach((n,i)=>FU
   }
   function renderContent(tab,x){
     const host=document.querySelector('[data-profile-content]');if(!host)return;const p=x.prefs;
-    if(tab==='profile')host.innerHTML=`<form data-profile-form class="kawe-profile-grid"><div class="kawe-profile-avatar"><div class="kawe-avatar-preview">${x.avatar&&validUrl(x.avatar)?`<img src="${esc(x.avatar)}" alt="Avatar">`:'<span>👤</span>'}</div><label class="kawe-file-button">Escolher avatar<input id="kpAvatarFile" type="file" accept="image/png,image/jpeg,image/webp"></label><small>Imagem até 300 KB. Também aceita URL HTTPS.</small></div><label>Nome completo<input id="kpName" maxlength="100" value="${esc(x.name)}" autocomplete="name"></label><label>Nome de usuário<input id="kpUsername" maxlength="40" pattern="[A-Za-z0-9_.-]{3,40}" value="${esc(x.username)}" autocomplete="username"><small>3–40 caracteres: letras, números, ponto, hífen ou sublinhado.</small></label><label>E-mail<input value="${esc(x.email)}" readonly></label><label>País / região<input id="kpRegion" maxlength="80" value="${esc(x.region)}"></label><label>Pronomes<input id="kpPronouns" maxlength="40" value="${esc(x.pronouns)}"></label><label>Site pessoal<input id="kpWebsite" type="url" placeholder="https://..." value="${esc(x.website)}"></label><label class="full">URL do avatar<input id="kpAvatar" type="url" placeholder="https://..." value="${esc(x.avatar)}"></label><label class="full">Biografia<textarea id="kpBio" maxlength="500" rows="4">${esc(x.bio)}</textarea><small><span data-count>${x.bio.length}</span>/500 caracteres</small></label><div class="full kawe-profile-actions"><button type="submit">Salvar perfil</button><button type="button" class="secondary" data-reset-profile>Descartar alterações</button></div></form>`;
+    if(tab==='profile')host.innerHTML=`<form data-profile-form class="kawe-profile-grid"><div class="kawe-profile-avatar"><div class="kawe-avatar-preview">${x.avatar&&validUrl(x.avatar)?`<img src="${esc(x.avatar)}" alt="Avatar">`:'<span>👤</span>'}</div><label class="kawe-file-button">Escolher avatar<input id="kpAvatarFile" type="file" accept="image/png,image/jpeg,image/webp"></label><small>Imagem até 300 KB. Também aceita URL HTTPS.</small></div><label>Nome completo<input id="kpName" maxlength="100" value="${esc(x.name)}" autocomplete="name"></label><label>Nome de usuário<input id="kpUsername" maxlength="40" pattern="[A-Za-z0-9_.-]{3,40}" value="${esc(x.username)}" autocomplete="username"><small>3–40 caracteres: letras, números, ponto, hífen ou sublinhado.</small></label><label>E-mail<input value="${esc(x.email)}" readonly></label><label>País / região<input id="kpRegion" maxlength="80" value="${esc(x.region)}"></label><label>Pronomes<input id="kpPronouns" maxlength="40" value="${esc(x.pronouns)}"></label><label>Site pessoal<input id="kpWebsite" type="url" placeholder="https://..." value="${esc(x.website)}"></label><label class="full">URL do avatar<input id="kpAvatar" type="text" placeholder="https://..." value="${esc(x.avatar)}"></label><label class="full">Biografia<textarea id="kpBio" maxlength="500" rows="4">${esc(x.bio)}</textarea><small><span data-count>${x.bio.length}</span>/500 caracteres</small></label><div class="full kawe-profile-actions"><button type="submit">Salvar perfil</button><button type="button" class="secondary" data-reset-profile>Descartar alterações</button></div></form>`;
     else if(tab==='preferences')host.innerHTML=`<form data-preferences-form class="kawe-profile-grid"><label>Tema<select id="kpTheme"><option value="system" ${p.theme==='system'?'selected':''}>Automático</option><option value="dark" ${p.theme==='dark'?'selected':''}>Escuro</option><option value="light" ${p.theme==='light'?'selected':''}>Claro</option></select></label><label>Idioma<select id="kpLanguage"><option value="pt-BR" ${p.language==='pt-BR'?'selected':''}>Português (Brasil)</option><option value="en" ${p.language==='en'?'selected':''}>English</option><option value="es" ${p.language==='es'?'selected':''}>Español</option></select></label><label class="kawe-check full"><input id="kpAutoplay" type="checkbox" ${p.autoplay?'checked':''}> Reproduzir vídeos automaticamente</label><label class="kawe-check full"><input id="kpNotifications" type="checkbox" ${p.notifications?'checked':''}> Receber notificações da plataforma</label><label class="kawe-check full"><input id="kpCompact" type="checkbox" ${p.compact?'checked':''}> Usar visualização compacta no catálogo</label><label class="kawe-check full"><input id="kpPrivate" type="checkbox" ${p.privateProfile?'checked':''}> Ocultar meu perfil de outros usuários</label><div class="full kawe-profile-actions"><button type="submit">Salvar preferências</button></div></form>`;
     else if(tab==='security')host.innerHTML=`<section class="kawe-profile-info"><h3>Conta e segurança</h3><div class="kawe-profile-stat"><span>Status do e-mail</span><b>${uEmailVerified(x.uid)?'Verificado':'Não verificado'}</b></div><div class="kawe-profile-stat"><span>Identificador da conta</span><b class="mono">${esc(x.uid)}</b><button type="button" class="secondary" data-copy-uid>Copiar</button></div><div class="kawe-profile-stat"><span>Conta criada</span><b>${x.createdAt?new Date(x.createdAt).toLocaleDateString('pt-BR'):'Indisponível'}</b></div><div class="kawe-profile-actions"><button type="button" data-refresh-user>Atualizar sessão</button><button type="button" class="secondary" data-reset-password>Enviar link para trocar senha</button><button type="button" class="danger" data-signout>Sair da conta</button></div><p class="kawe-profile-note">Nunca compartilhe sua senha. O link de troca será enviado para o e-mail cadastrado pelo Firebase Auth.</p></section>`;
     else if(tab==='activity'){const rows=read(ACTIVITY,[]);host.innerHTML=`<section class="kawe-profile-info"><h3>Atividade recente</h3><p class="kawe-profile-note">Registro deste navegador. Ele não armazena sua senha.</p>${rows.length?`<div class="kawe-profile-activity">${rows.slice(0,30).map(r=>`<div><b>${esc(r.action)}</b><span>${esc(r.detail||'')} · ${new Date(r.at).toLocaleString('pt-BR')}</span></div>`).join('')}</div>`:'<p>Nenhuma atividade registrada ainda.</p>'}<button type="button" class="secondary" data-clear-activity>Limpar atividade local</button></section>`;
@@ -4260,5 +4260,260 @@ adminItems.splice(350);
 })();
 
 </script>
+
+<style id="kawe-final-polish-style">
+/* Camada final: microinterações leves, acessíveis e sem alterar o layout essencial. */
+:root{--kawe-motion-fast:150ms;--kawe-motion-normal:240ms}body.gate-locked #kaweGate,body.gate-locked #kaweGate *{pointer-events:auto!important}
+button,.kawe-extras-item,.video-card,.channel-video,.kawe-profile-tabs button,.kawe-profile-actions button{transition:transform var(--kawe-motion-fast) ease,background-color var(--kawe-motion-fast) ease,border-color var(--kawe-motion-fast) ease,box-shadow var(--kawe-motion-fast) ease,opacity var(--kawe-motion-fast) ease}
+button:hover,.kawe-extras-item:hover{transform:translateY(-1px)}
+button:active,.kawe-extras-item:active{transform:translateY(0) scale(.98)}
+.video-card,.channel-video{animation:kawe-card-in .38s ease both}
+@keyframes kawe-card-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.kawe-channel-sync-status{display:inline-flex;align-items:center;gap:6px;margin:8px 0 0;padding:5px 9px;border:1px solid rgba(16,185,129,.22);border-radius:999px;background:rgba(16,185,129,.08);color:#267550;font-size:10px;font-weight:800}
+.kawe-channel-sync-status[data-kind=warn]{border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.08);color:#9a5b05}
+.kawe-channel-stats{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 0}.kawe-channel-stat{min-width:92px;padding:9px 11px;border:1px solid rgba(37,99,70,.16);border-radius:9px;background:rgba(255,255,255,.72)}.kawe-channel-stat b{display:block;color:#163d2a;font-size:15px}.kawe-channel-stat span{display:block;margin-top:2px;color:#6a8173;font-size:10px}
+.kawe-channel-about{padding:16px;border:1px solid rgba(37,99,70,.14);border-radius:12px;background:rgba(255,255,255,.7);color:#375746;line-height:1.55}.kawe-channel-about h3{margin:0 0 8px;color:#163d2a}.kawe-channel-tab-active{background:#163d2a!important;color:#fff!important}
+.kawe-sound-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding:11px 12px;border:1px solid rgba(110,231,183,.2);border-radius:10px;background:rgba(4,18,10,.36);color:#c9f4d8;font-size:11px}.kawe-sound-row small{display:block;margin-top:3px;color:#88a695;font-size:10px}.kawe-sound-toggle{min-height:32px;padding:0 11px;border:1px solid rgba(110,231,183,.28);border-radius:8px;background:#0d2416;color:#c9f4d8;font-size:11px;font-weight:850;cursor:pointer}.kawe-sound-toggle[data-enabled=true]{background:#10b981;border-color:#6ee7b7;color:#02150c}
+@media(max-width:650px){.kawe-channel-stats{gap:6px}.kawe-channel-stat{flex:1;min-width:72px}.kawe-sound-row{align-items:flex-start;flex-direction:column}.kawe-sound-toggle{width:100%}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}}
+</style>
+<script id="kawe-final-integrations-script">
+(function(){
+  'use strict';
+  if(window.__kaweFinalIntegrationsV1)return;
+  window.__kaweFinalIntegrationsV1=true;
+
+  const PROFILE_KEY='kawe_profile_cache_v2';
+  const PREFS_KEY='kawe_profile_preferences_v1';
+  const CHANNEL_KEY='kawe_channel_v2';
+  const SUBS_KEY='kawe_channel_subscriptions_v2';
+  const SOUND_KEY='kawe_ui_sound_v1';
+  const safeRead=(key,fallback)=>{try{const v=JSON.parse(localStorage.getItem(key)||'null');return v??fallback}catch(_){return fallback}};
+  const safeWrite=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value));return true}catch(_){return false}};
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  const auth=()=>window.kaweFirebase?.auth||null;
+  const currentUser=()=>auth()?.currentUser||null;
+  const fs=()=>window.kaweFirebase?.fs||null;
+  const localProfile=()=>safeRead(PROFILE_KEY,{});
+  const localPrefs=()=>safeRead(PREFS_KEY,{});
+  const getVideos=()=>{try{if(Array.isArray(window.videos))return window.videos;if(typeof videos!=='undefined'&&Array.isArray(videos))return videos}catch(_){}return[]};
+  const fmt=n=>{try{return Number(n||0).toLocaleString('pt-BR')}catch(_){return String(n||0)}};
+  const toastMsg=m=>{if(typeof toast==='function')toast(m)};
+  const validHttps=v=>!v||/^https:\/\/[^\s]+$/i.test(String(v));
+
+  /* Sons curtos via Web Audio: nenhum áudio é criado até o usuário ativar a opção. */
+  const sound={
+    enabled:()=>safeRead(SOUND_KEY,false)===true,
+    set(value){safeWrite(SOUND_KEY,!!value);this.render();if(value)this.beep('on')},
+    ctx:null,
+    beep(kind='tap'){
+      if(!this.enabled())return;
+      try{
+        const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
+        this.ctx=this.ctx||new C();if(this.ctx.state==='suspended')this.ctx.resume();
+        const o=this.ctx.createOscillator(),g=this.ctx.createGain(),now=this.ctx.currentTime;
+        o.type='sine';o.frequency.value=kind==='on'?660:kind==='save'?520:440;g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(.025,now+.008);g.gain.exponentialRampToValueAtTime(.0001,now+.075);o.connect(g);g.connect(this.ctx.destination);o.start(now);o.stop(now+.08);
+      }catch(_){/* Alguns navegadores bloqueiam Web Audio; a interface continua normal. */}
+    },
+    render(){const b=document.getElementById('kaweSoundToggle');if(!b)return;const on=this.enabled();b.dataset.enabled=String(on);b.setAttribute('aria-pressed',String(on));b.textContent=on?'Som ativado':'Ativar som leve'}
+  };
+  window.kaweSound=sound;
+  document.addEventListener('click',e=>{const b=e.target.closest('button,[role=button]');if(!b||b.id==='kaweSoundToggle'||b.matches('input,select,textarea'))return;sound.beep('tap')},{capture:true,passive:true});
+
+  function installSoundControl(){
+    const host=document.querySelector('#kaweExtrasModal .kawe-extras-groups');
+    if(!host||host.querySelector('[data-kawe-sound-group]')){sound.render();return}
+    const group=document.createElement('section');group.className='kawe-extras-group';group.dataset.kaweSoundGroup='true';
+    group.innerHTML='<h3><i>♪</i>Experiência</h3><div class="kawe-sound-row"><div><b>Som de interface</b><small>Toques bem leves para ações e confirmações.</small></div><button id="kaweSoundToggle" class="kawe-sound-toggle" type="button"></button></div>';
+    host.appendChild(group);group.querySelector('#kaweSoundToggle').onclick=()=>sound.set(!sound.enabled());sound.render();
+  }
+  const bootSound=()=>{installSoundControl();setTimeout(installSoundControl,400);setTimeout(installSoundControl,1200)};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootSound,{once:true});else bootSound();
+
+  /* Sincronização de perfil/preferências: Firestore em tempo real + cache local de contingência. */
+  let stopProfileListener=null, profileUid='';
+  const applyPrefs=p=>{if(!p||typeof p!=='object')return;document.documentElement.dataset.kaweTheme=p.theme||'system';document.documentElement.dataset.kaweLanguage=p.language||'pt-BR'};
+  const mergeRemoteProfile=remote=>{
+    if(!remote||typeof remote!=='object')return;
+    const old=localProfile(), next={...old};
+    Object.keys(remote).forEach(k=>{if(k!=='preferences'&&k!=='uid'&&k!=='email'&&remote[k]!==undefined)next[k]=remote[k]});
+    if(remote.uid)next.uid=remote.uid;if(remote.email)next.email=remote.email;safeWrite(PROFILE_KEY,next);
+    if(remote.preferences&&typeof remote.preferences==='object'){const prefs={...localPrefs(),...remote.preferences};safeWrite(PREFS_KEY,prefs);applyPrefs(prefs)}
+  };
+  async function syncProfileForUser(u){
+    if(!u||!fs())return;
+    const ref=fs().collection('user_profiles').doc(u.uid);
+    const local=localProfile();
+    try{
+      const snap=await ref.get();
+      if(snap?.exists)mergeRemoteProfile(snap.data());
+      else if(Object.keys(local).length)await ref.set({...local,uid:u.uid,email:u.email||local.email||'',updatedAt:Date.now()},{merge:true});
+    }catch(err){console.warn('[KAWE] leitura de perfil indisponível',err)}
+    if(typeof ref.onSnapshot==='function'){
+      try{stopProfileListener=ref.onSnapshot(s=>{if(s?.exists){mergeRemoteProfile(s.data());document.dispatchEvent(new CustomEvent('kawe:profile-sync',{detail:s.data()}))}},err=>console.warn('[KAWE] listener de perfil indisponível',err))}catch(err){console.warn('[KAWE] listener de perfil indisponível',err)}
+    }
+  }
+  function startProfileSync(u){
+    if(stopProfileListener){try{stopProfileListener()}catch(_){}stopProfileListener=null}
+    profileUid=u?.uid||'';if(u)syncProfileForUser(u);
+  }
+  window.kaweProfileSync={syncNow:()=>syncProfileForUser(currentUser()),getUid:()=>profileUid};
+  const af=auth();if(af&&typeof af.onAuthStateChanged==='function')af.onAuthStateChanged(startProfileSync);else setTimeout(()=>startProfileSync(currentUser()),700);
+  applyPrefs(localPrefs());
+
+  /* Canal por usuário: perfil, abas, inscrição local e inscrição sincronizada no Firestore. */
+  let channel={displayName:'KAWE Studio',username:'kawe',bio:'Criador independente e curadoria audiovisual da KAWE.',banner:'',avatar:'',followers:0,createdAt:'',updatedAt:0};
+  let channelTab='home', stopChannelListener=null, channelOwnerUid='';
+  const channelId=()=>currentUser()?.uid||'kawe-official';
+  const channelSubs=()=>safeRead(SUBS_KEY,{});
+  const isSubscribed=()=>!!channelSubs()[channelId()];
+  const channelVideos=()=>getVideos().filter(v=>v&&v.mediaType!=='photo');
+  const profileToChannel=()=>{const p=localProfile(),u=currentUser();return {...channel,displayName:p.name||u?.displayName||channel.displayName,username:p.username||channel.username,bio:p.bio||channel.bio,avatar:p.avatar||channel.avatar,updatedAt:Date.now()}};
+  const channelRef=()=>{const f=fs(),u=currentUser();return f&&u?f.collection('channels').doc(u.uid):null};
+  const channelStatus=(text,kind='ok')=>{const e=document.querySelector('#channelModal .kawe-channel-sync-status');if(e){e.textContent=text;e.dataset.kind=kind}};
+  function renderChannelHeader(){
+    const modal=document.getElementById('channelModal');if(!modal)return;
+    const title=modal.querySelector('#channelTitle'),meta=modal.querySelector('#channelMeta'),avatar=modal.querySelector('#channelAvatar'),banner=modal.querySelector('.channel-banner');
+    if(title)title.textContent=channel.displayName||'KAWE Studio';
+    if(meta)meta.textContent='@'+(channel.username||'kawe')+' · canal oficial · '+fmt(channelVideos().length)+' vídeos · conteúdo sinalizado';
+    if(avatar){avatar.textContent=(channel.displayName||'K').split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase();if(validHttps(channel.avatar)&&channel.avatar)avatar.innerHTML='<img src="'+esc(channel.avatar)+'" alt="Avatar de '+esc(channel.displayName)+'">'}
+    if(banner){banner.style.backgroundImage=validHttps(channel.banner)&&channel.banner?'linear-gradient(90deg,rgba(7,30,17,.25),rgba(7,30,17,.1)),url("'+esc(channel.banner)+'")':'';banner.style.backgroundSize='cover';banner.style.backgroundPosition='center'}
+    const actions=modal.querySelector('.channel-actions');if(actions){let sub=actions.querySelector('[data-kawe-subscribe]');if(!sub){sub=actions.querySelector('button:not(.light):not(.profile-close)');if(sub)sub.dataset.kaweSubscribe='true'}if(sub){sub.dataset.kaweSubscribe='true';sub.textContent=isSubscribed()?'Inscrito':'Inscrever-se';sub.setAttribute('aria-pressed',String(isSubscribed()));sub.onclick=toggleSubscription}if(!actions.querySelector('[data-kawe-edit-channel]')){const edit=document.createElement('button');edit.type='button';edit.className='light';edit.dataset.kaweEditChannel='true';edit.textContent='Editar canal';edit.onclick=()=>{if(window.kaweOpenProfile)window.kaweOpenProfile('profile')};actions.insertBefore(edit,actions.querySelector('.profile-close'))}}
+    let status=modal.querySelector('.kawe-channel-sync-status');if(!status){status=document.createElement('span');status.className='kawe-channel-sync-status';status.textContent=fs()&&currentUser()?'Conectando ao Firebase...':'Modo local';modal.querySelector('.channel-info')?.appendChild(status)}
+    renderChannelTab();
+  }
+  function renderChannelTab(){
+    const modal=document.getElementById('channelModal');if(!modal)return;
+    const body=modal.querySelector('.channel-body');if(!body)return;
+    const all=channelVideos(), list=channelTab==='home'?all.slice().reverse().slice(0,8):all.slice().reverse();
+    modal.querySelectorAll('.channel-tabs button').forEach((b,i)=>b.classList.toggle('kawe-channel-tab-active',(i===0&&channelTab==='home')||(i===1&&channelTab==='videos')||(i===3&&channelTab==='about')));
+    if(channelTab==='about'){body.innerHTML='<div class="kawe-channel-about"><h3>Sobre este canal</h3><p>'+esc(channel.bio||'Canal oficial da KAWE.')+'</p><div class="kawe-channel-stats"><div class="kawe-channel-stat"><b>'+fmt(all.length)+'</b><span>publicações</span></div><div class="kawe-channel-stat"><b>'+fmt(channel.followers||0)+'</b><span>inscritos</span></div><div class="kawe-channel-stat"><b>'+(channel.createdAt?new Date(channel.createdAt).toLocaleDateString('pt-BR'):'—')+'</b><span>desde</span></div></div></div>';return}
+    body.innerHTML='<h3 style="margin:0 0 14px;color:#26352b;font-size:16px">'+(channelTab==='home'?'Vídeos publicados':'Todos os vídeos')+'</h3><div class="kawe-channel-stats"><div class="kawe-channel-stat"><b>'+fmt(all.length)+'</b><span>vídeos</span></div><div class="kawe-channel-stat"><b>'+fmt(channel.followers||0)+'</b><span>inscritos</span></div></div><div class="channel-video-grid" id="channelVideoGrid">'+(list.length?list.map(v=>'<article class="channel-video" data-channel-video="'+esc(v.id)+'"><div class="th '+esc(v.art||'ember')+'">'+(v.image?'<img src="'+esc(v.image)+'" alt="" style="width:100%;height:100%;object-fit:cover">':'')+'</div><div class="copy"><b>'+esc(v.title)+'</b><small>'+fmt(v.views||0)+' visualizações · '+esc(v.duration||'—')+'</small></div></article>').join(''):'<p>Este canal ainda não tem vídeos publicados.</p>')+'</div>';
+    body.querySelectorAll('[data-channel-video]').forEach(card=>card.onclick=()=>{const id=card.dataset.channelVideo;closeChannelView();if(typeof openDetail==='function')openDetail(isNaN(Number(id))?id:Number(id))});
+  }
+  async function loadChannel(){
+    const p=localProfile(),u=currentUser();
+    channel={...channel,...safeRead(CHANNEL_KEY,{}),displayName:p.name||u?.displayName||safeRead(CHANNEL_KEY,{}).displayName||'KAWE Studio',username:p.username||safeRead(CHANNEL_KEY,{}).username||'kawe',bio:p.bio||safeRead(CHANNEL_KEY,{}).bio||channel.bio,avatar:p.avatar||safeRead(CHANNEL_KEY,{}).avatar||'',updatedAt:Date.now()};
+    channelOwnerUid=u?.uid||'kawe-official';renderChannelHeader();
+    const ref=channelRef();if(!ref){channelStatus('Modo local; entre para sincronizar','warn');return}
+    try{const snap=await ref.get();if(snap?.exists){channel={...channel,...snap.data()};safeWrite(CHANNEL_KEY,channel);renderChannelHeader()}else{await ref.set({...profileToChannel(),uid:u.uid,createdAt:new Date().toISOString()},{merge:true});channelStatus('Canal criado e sincronizado')}if(stopChannelListener)try{stopChannelListener()}catch(_){}if(typeof ref.onSnapshot==='function')stopChannelListener=ref.onSnapshot(s=>{if(s?.exists){channel={...channel,...s.data()};safeWrite(CHANNEL_KEY,channel);renderChannelHeader();channelStatus('Canal sincronizado em tempo real')}},()=>channelStatus('Canal salvo localmente; Firebase indisponível','warn'))}catch(err){console.warn('[KAWE] canal não sincronizado',err);channelStatus('Firebase sem permissão; dados locais ativos','warn')}
+  }
+  async function toggleSubscription(){
+    const subs=channelSubs();const key=channelOwnerUid||channelId();const active=!subs[key];if(active)subs[key]=Date.now();else delete subs[key];safeWrite(SUBS_KEY,subs);channel.followers=Math.max(0,Number(channel.followers||0)+(active?1:-1));safeWrite(CHANNEL_KEY,channel);renderChannelHeader();toastMsg(active?'Inscrição no canal salva.':'Inscrição cancelada.');
+    const u=currentUser(),f=fs();if(u&&f&&key!=='kawe-official'){try{await f.collection('channel_subscriptions').doc(u.uid+'_'+key).set({subscriberUid:u.uid,channelUid:key,active,updatedAt:Date.now()},{merge:true});await f.collection('channels').doc(key).set({followers:channel.followers,updatedAt:Date.now()},{merge:true});channelStatus('Inscrição sincronizada com Firebase')}catch(err){console.warn('[KAWE] inscrição não sincronizada',err);channelStatus('Inscrição salva neste dispositivo','warn')}}
+  }
+  window.openChannelView=async function(){channelTab='home';const modal=document.getElementById('channelModal');if(!modal)return;modal.classList.add('open');document.body.style.overflow='hidden';await loadChannel()};
+  window.closeChannelView=function(){const modal=document.getElementById('channelModal');if(modal)modal.classList.remove('open');if(!document.getElementById('profileModal')?.classList.contains('open')&&!document.getElementById('kxWatch')?.classList.contains('open'))document.body.style.overflow=''};
+  function bindChannelTabs(){const modal=document.getElementById('channelModal');if(!modal)return;const tabs=modal.querySelectorAll('.channel-tabs button');tabs.forEach((b,i)=>{b.onclick=()=>{channelTab=i===3?'about':i===1?'videos':'home';renderChannelTab()}})}
+  document.addEventListener('submit',e=>{if(!e.target.matches?.('[data-profile-form]'))return;setTimeout(async()=>{const u=currentUser(),ref=channelRef();if(!u||!ref)return;const next=profileToChannel();channel={...channel,...next};safeWrite(CHANNEL_KEY,channel);try{await ref.set({...next,uid:u.uid},{merge:true})}catch(err){console.warn('[KAWE] perfil não refletido no canal',err)}},250)},{capture:false});
+  const channelBoot=()=>{bindChannelTabs();setTimeout(bindChannelTabs,500);setTimeout(bindChannelTabs,1200)};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',channelBoot,{once:true});else channelBoot();
+})();
+</script>
+
+<style id="kawe-header-collapse-style">
+  /* Os controles permanecem no DOM e preservam seus handlers; apenas a cópia visual vai para Extras+. */
+  .kawe-moved-to-extras{display:none!important;visibility:hidden!important;pointer-events:none!important}
+  .kawe-header-upload{display:none!important;visibility:hidden!important;pointer-events:none!important}
+  #kaweExtrasModal .kawe-header-moved-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+  #kaweExtrasModal .kawe-header-moved-list .kawe-extras-item{min-height:42px}
+</style>
+<script id="kawe-header-collapse-script">
+(function(){
+  'use strict';
+  if(window.__kaweHeaderCollapseV1)return;
+  window.__kaweHeaderCollapseV1=true;
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  const text=el=>(el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent||'').replace(/\s+/g,' ').trim();
+  const selectors='.top-header button,.kawe-header-nav button,.kawe-header-controls button,.kawe-locale-tools button,.kawe-commandbar button,.kawe-utilitybar button,.kawe-megabar button,.kawe-full-band button,.kawe-category-tools button,.kawe-discovery-tools button,.kawe-side-rail button';
+  const keep=el=>el.matches('.menu-btn,.brand,.kawe-extras-plus')||!!el.closest('.central-search')||/^(entrar|cadastrar|sair)$/i.test(text(el));
+  const uploadLike=el=>el.classList.contains('kawe-header-upload')||/^(↥\s*)?upload$|^enviar m[ií]dia$/i.test(text(el));
+  const skip=el=>uploadLike(el);
+  const sources=()=>[...document.querySelectorAll(selectors)].filter(el=>!el.closest('#kaweExtrasModal')&&!keep(el)&&!skip(el)&&text(el));
+  function getHost(){return document.querySelector('#kaweExtrasModal .kawe-extras-groups')}
+  function compact(){
+    const all=sources();
+    document.querySelectorAll(selectors).forEach(el=>{if(uploadLike(el))el.classList.add('kawe-moved-to-extras')});
+    all.forEach(source=>source.classList.add('kawe-moved-to-extras'));
+    const host=getHost();if(!host)return;
+    let group=host.querySelector('[data-kawe-header-moved-group]');
+    if(!group){group=document.createElement('section');group.className='kawe-extras-group';group.dataset.kaweHeaderMovedGroup='true';group.innerHTML='<h3><i>☷</i>Controles do cabeçalho</h3><div class="kawe-header-moved-list"></div>';host.appendChild(group)}
+    const list=group.querySelector('.kawe-header-moved-list'),seen=new Set([...list.querySelectorAll('span')].map(x=>x.textContent.trim().toLocaleLowerCase('pt-BR')));
+    all.forEach((source,index)=>{
+      const label=text(source);if(!label)return;
+      if(source.dataset.kaweHeaderMoved==='true')return;
+      source.dataset.kaweHeaderMoved='true';
+      if(seen.has(label.toLocaleLowerCase('pt-BR')))return;
+      seen.add(label.toLocaleLowerCase('pt-BR'));
+      const mirror=document.createElement('button');mirror.type='button';mirror.className='kawe-extras-item kawe-header-moved-item';mirror.setAttribute('aria-label',label);mirror.innerHTML='<i>↗</i><span>'+esc(label)+'</span>';
+      mirror.addEventListener('click',()=>{source.click();setTimeout(()=>{const modal=document.getElementById('kaweExtrasModal');if(modal?.classList.contains('open'))modal.querySelector('.kawe-extras-close')?.click()},0)});
+      list.appendChild(mirror);
+    });
+  }
+  const boot=()=>{compact();setTimeout(compact,250);setTimeout(compact,900);setTimeout(compact,1800)};
+  new MutationObserver(compact).observe(document.body,{childList:true,subtree:true});
+  document.addEventListener('click',e=>{if(e.target.closest('.kawe-extras-plus'))setTimeout(compact,0)},{capture:true});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
+</script>
+
+<style id="kawe-player-extras-style">
+  .kawe-player-extras-toggle{display:inline-flex;align-items:center;gap:7px;min-height:34px;padding:0 12px;border:1px solid rgba(110,231,183,.35);border-radius:17px;background:linear-gradient(120deg,#064e3b,#10b981);color:#02150c;font-weight:900;cursor:pointer}
+  .kawe-player-extras{display:none;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:7px;margin:8px 0 16px;padding:10px;border:1px solid rgba(110,231,183,.22);border-radius:10px;background:rgba(4,18,10,.92)}
+  .kawe-player-extras.open{display:grid}.kawe-player-extras button{min-height:35px;border:1px solid rgba(110,231,183,.18);border-radius:8px;background:#14261c;color:#dce7df;font-weight:800;cursor:pointer}.kawe-player-extras button:hover{border-color:#6ee7b7;background:#1c3626}.kawe-player-extras button i{font-style:normal;color:#6ee7b7;margin-right:5px}
+</style>
+<script id="kawe-player-extras-script">
+(function(){
+  'use strict';
+  if(window.__kawePlayerExtrasV1)return;window.__kawePlayerExtrasV1=true;
+  const label=e=>(e?.textContent||e?.getAttribute('aria-label')||'').replace(/\s+/g,' ').trim().toLocaleLowerCase('pt-BR');
+  const catalog=()=>{try{return window.videos||videos||[]}catch(_){return window.videos||[]}};
+  const active=()=>window.__kaweActiveWatchId;
+  const run=(name)=>{
+    const id=active(),v=catalog().find(x=>x.id===id);
+    if(name==='auto'||name==='loop'){if(typeof toggleWatchOption==='function')toggleWatchOption(name,id);return}
+    if(name==='theater'){if(typeof toggleWatchTheater==='function')toggleWatchTheater();return}
+    if(name==='mini'){if(typeof toggleMiniWatch==='function')toggleMiniWatch();else document.getElementById('kxWatch')?.classList.toggle('mini');return}
+    if(name==='captions'){if(typeof toggleSubtitles==='function')toggleSubtitles();else toast('Legendas PT-BR alternadas.');return}
+    if(name==='speed'){if(typeof cycleWatchSpeed==='function')cycleWatchSpeed(id);else toast('Velocidade alterada.');return}
+    if(name==='back'||name==='forward'){if(typeof seekWatch==='function')seekWatch(name==='back'?-10:10);return}
+    if(name==='favorite'){if(typeof toggleFavW==='function')toggleFavW(id);return}
+    if(name==='later'){if(v){v.watchLater=!v.watchLater;toast(v.watchLater?'Adicionado a Ver depois.':'Removido de Ver depois.');}return}
+    if(name==='share'){if(typeof shareIt==='function')shareIt(id);return}
+    if(name==='download'){toast('Download colocado na fila.');return}
+    if(name==='random'){const list=catalog().filter(x=>x.id!==id);if(list.length&&typeof openWatch==='function')openWatch(list[Math.floor(Math.random()*list.length)].id);return}
+    if(name==='details'){if(typeof closeWatch==='function')closeWatch();if(typeof openDetail==='function')openDetail(id);return}
+    if(name==='discrete'){document.body.classList.toggle('kawe-discrete');toast('Modo discreto '+(document.body.classList.contains('kawe-discrete')?'ativado.':'desativado.'));return}
+    if(name==='report'){toast('Denúncia enviada para moderação.');return}
+    if(name==='fullscreen'){if(typeof window.kawePlayerFullscreen==='function')window.kawePlayerFullscreen();}
+  };
+  const controls=[['▶','Autoplay','auto'],['↻','Repetir','loop'],['◫','Teatro','theater'],['▣','Mini-player','mini'],['⌷','Legendas','captions'],['⏱','Velocidade','speed'],['↶','-10s','back'],['↷','+10s','forward'],['♥','Favoritar','favorite'],['⊕','Ver depois','later'],['↗','Compartilhar','share'],['⤓','Baixar','download'],['⚂','Aleatório','random'],['ℹ','Detalhes','details'],['⚿','Modo discreto','discrete'],['⚑','Denunciar','report'],['⛶','Tela cheia','fullscreen']];
+  function extras(){
+    const main=document.getElementById('kxWMain');if(!main)return;
+    let box=main.querySelector('.kawe-player-extras'),extra=main.querySelector('.kx-wextra');if(!extra)return;
+    if(!box){const wrap=document.createElement('div');wrap.innerHTML='<button type="button" class="kawe-player-extras-toggle">✦ Extras do player</button><div class="kawe-player-extras" role="group" aria-label="Extras do player"></div>';extra.insertAdjacentElement('afterend',wrap);box=wrap.querySelector('.kawe-player-extras');wrap.querySelector('button').onclick=()=>box.classList.toggle('open')}
+    box.innerHTML=controls.map(c=>'<button type="button" data-player-action="'+c[2]+'"><i>'+c[0]+'</i>'+c[1]+'</button>').join('');
+    box.querySelectorAll('[data-player-action]').forEach(b=>b.onclick=()=>run(b.dataset.playerAction));
+  }
+  function bindSearch(){
+    const form=document.querySelector('#kxWatch .wsearch');if(!form||form.dataset.kaweBound==='1')return;form.dataset.kaweBound='1';form.onsubmit=e=>{e.preventDefault();const q=String(form.q?.value||'').trim().toLocaleLowerCase('pt-BR');if(!q){form.q?.focus();return}const list=catalog().filter(v=>`${v.title} ${v.category} ${v.owner||''}`.toLocaleLowerCase('pt-BR').includes(q));if(list[0]){openWatch(list[0].id);toast(list.length+' resultado'+(list.length===1?'':'s')+' encontrado'+(list.length===1?'':'s')+'.')}else{document.getElementById('search').value=q;closeWatch();if(typeof renderCatalog==='function')renderCatalog();toast('Nenhum vídeo encontrado.')}};
+  }
+  function bindSuggestions(){
+    const id=active(),all=catalog(),current=all.find(x=>x.id===id);if(!current)return;
+    const ordered=all.filter(x=>x.id!==id),sorted=[...ordered.filter(x=>x.category===current.category),...ordered.filter(x=>x.category!==current.category)].slice(0,14);const fav=typeof favorites==='function'?favorites():[];
+    document.querySelectorAll('#kxWLeft .kx-sug').forEach((el,i)=>{const v=sorted[i]||fav[i-sorted.length];if(v){el.dataset.kaweSuggestionId=v.id;el.onclick=e=>{e.preventDefault();e.stopPropagation();openWatch(v.id)}}});
+  }
+  function bindRight(){
+    document.querySelectorAll('#kxWRight .kx-ico').forEach(b=>{if(b.dataset.kaweRightBound==='1')return;b.dataset.kaweRightBound='1';const t=label(b);b.onclick=e=>{e.preventDefault();e.stopPropagation();if(t==='tela cheia'){run('fullscreen');return}if(t==='teatro'){run('theater');return}if(t==='favorito'){run('favorite');return}if(t==='baixar'){run('download');return}if(t==='enviar'){run('share');return}if(t==='denunciar'){run('report');return}if(t==='qualidade'){run('speed');return}if(t==='detalhes'){run('details');return}const cat=(typeof categories!=='undefined'?categories:[]).find(c=>c.toLocaleLowerCase('pt-BR')===t);if(cat){const v=catalog().find(x=>x.category===cat)||catalog().find(x=>x.id!==active());if(v)openWatch(v.id);else toast('Nenhum vídeo disponível nesta categoria.')}}});
+  }
+  const original=window.openWatch;
+  if(typeof original==='function')window.openWatch=function(id){window.__kaweActiveWatchId=id;const result=original.apply(this,arguments);setTimeout(()=>{extras();bindSearch();bindSuggestions();bindRight()},0);setTimeout(()=>{extras();bindSuggestions();bindRight()},180);return result};
+  const boot=()=>{bindSearch();extras();bindSuggestions();bindRight()};
+  new MutationObserver(()=>setTimeout(boot,0)).observe(document.getElementById('kxWatch')||document.body,{childList:true,subtree:true});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
+</script>
+
+
 </body>
 </html>

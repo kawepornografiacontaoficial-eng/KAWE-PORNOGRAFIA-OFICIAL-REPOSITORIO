@@ -884,7 +884,37 @@
     </section>
     <section id="catalogo" class="catalog"></section>
   </main>
-  <footer class="footer"><span>KAWE PORNOGRAFIA OFICIAL</span><p>Interface de catálogo — acesso restrito a maiores de 18 anos.</p></footer>
+  <footer class="footer kawe-info-footer" id="kaweInfoFooter" aria-label="Informações do KAWE">
+    <div class="kawe-footer-brand">
+      <span class="kawe-footer-mark" aria-hidden="true">K</span>
+      <div><strong>KAWE PORNOGRAFIA OFICIAL</strong><span>Catálogo adulto premium · acesso restrito a maiores de 18 anos</span></div>
+      <b class="kawe-footer-age">18+</b>
+    </div>
+    <nav class="kawe-footer-nav" aria-label="Links institucionais">
+      <span class="kawe-footer-heading">NAVEGAÇÃO</span>
+      <button type="button" data-footer-action="home">Início</button>
+      <button type="button" data-footer-action="catalog">Catálogo</button>
+      <button type="button" data-footer-action="channels">Canais</button>
+      <button type="button" data-footer-action="help">Ajuda</button>
+    </nav>
+    <nav class="kawe-footer-nav" aria-label="Termos e privacidade">
+      <span class="kawe-footer-heading">INFORMAÇÕES</span>
+      <button type="button" data-footer-action="terms">Termos de uso</button>
+      <button type="button" data-footer-action="privacy">Privacidade</button>
+      <button type="button" data-footer-action="guidelines">Diretrizes 18+</button>
+      <button type="button" data-footer-action="contact">Contato</button>
+    </nav>
+    <div class="kawe-footer-social" aria-label="Redes sociais">
+      <span class="kawe-footer-heading">REDES SOCIAIS</span>
+      <div class="kawe-social-row">
+        <button type="button" data-footer-action="instagram" aria-label="Instagram">◎ <span>Instagram</span></button>
+        <button type="button" data-footer-action="x" aria-label="X">𝕏 <span>X</span></button>
+        <button type="button" data-footer-action="tiktok" aria-label="TikTok">♪ <span>TikTok</span></button>
+        <button type="button" data-footer-action="youtube" aria-label="YouTube">▶ <span>YouTube</span></button>
+      </div>
+    </div>
+    <div class="kawe-footer-bottom"><span>© 2026 KAWE. Todos os direitos reservados.</span><span>Você confirma ter 18 anos ou mais ao continuar.</span></div>
+  </footer>
   <script>
     function kaweToggleTheme(){
       document.body.classList.toggle('kawe-light-mode');
@@ -4515,5 +4545,105 @@ button:active,.kawe-extras-item:active{transform:translateY(0) scale(.98)}
 </script>
 
 
+
+<!-- KAWE FINAL UI UPDATE 2026-09-23 -->
+<style id="kawe-final-ui-update-style">
+  /* Barra informativa inferior: conteúdo institucional, redes e termos. */
+  #kaweInfoFooter.kawe-info-footer{display:grid;grid-template-columns:minmax(250px,1.6fr) repeat(2,minmax(150px,1fr)) minmax(220px,1.25fr);gap:22px;align-items:start;margin-top:28px;padding:28px max(18px,calc((100% - 1540px)/2)) 18px;border-top:1px solid rgba(110,231,183,.2);background:linear-gradient(145deg,#020604 0%,#07180f 52%,#071225 100%);color:#dff8e8;box-sizing:border-box}
+  #kaweInfoFooter .kawe-footer-brand{display:flex;align-items:flex-start;gap:10px;min-width:0}
+  #kaweInfoFooter .kawe-footer-mark{display:grid;width:34px;height:34px;flex:0 0 auto;place-items:center;border:1px solid rgba(110,231,183,.55);border-radius:10px;background:linear-gradient(135deg,#10b981,#064e3b);color:#02150c;font:950 16px/1 system-ui,sans-serif;box-shadow:0 8px 20px rgba(16,185,129,.16)}
+  #kaweInfoFooter .kawe-footer-brand div{display:grid;gap:5px;min-width:0}
+  #kaweInfoFooter .kawe-footer-brand strong{font-size:12px;letter-spacing:.03em;color:#f2fff6}
+  #kaweInfoFooter .kawe-footer-brand div span{color:#8eaa99;font-size:10px;line-height:1.45}
+  #kaweInfoFooter .kawe-footer-age{display:grid;min-width:30px;height:25px;place-items:center;margin-left:auto;border:1px solid rgba(248,113,113,.55);border-radius:7px;background:rgba(127,29,29,.3);color:#fda4af;font-size:11px}
+  #kaweInfoFooter .kawe-footer-nav,#kaweInfoFooter .kawe-footer-social{display:grid;align-content:start;gap:7px;min-width:0}
+  #kaweInfoFooter .kawe-footer-heading{margin-bottom:3px;color:#6ee7b7;font-size:9px;font-weight:950;letter-spacing:.16em}
+  #kaweInfoFooter .kawe-footer-nav button{width:max-content;padding:0;border:0;background:transparent;color:#a9c8b5;font:700 10px/1.35 system-ui,sans-serif;text-align:left;cursor:pointer}
+  #kaweInfoFooter .kawe-footer-nav button:hover,#kaweInfoFooter .kawe-footer-nav button:focus-visible{color:#fff;outline:0;text-decoration:underline;text-underline-offset:3px}
+  #kaweInfoFooter .kawe-social-row{display:flex;flex-wrap:wrap;gap:6px}
+  #kaweInfoFooter .kawe-social-row button{display:inline-flex;align-items:center;gap:5px;min-height:29px;padding:0 9px;border:1px solid rgba(110,231,183,.2);border-radius:8px;background:rgba(16,185,129,.08);color:#dff8e8;font:800 10px/1 system-ui,sans-serif;cursor:pointer}
+  #kaweInfoFooter .kawe-social-row button:hover,#kaweInfoFooter .kawe-social-row button:focus-visible{border-color:#6ee7b7;background:#087f5b;color:#02150c;outline:0}
+  #kaweInfoFooter .kawe-footer-bottom{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08);color:#718b7b;font-size:9px;line-height:1.45}
+
+  /* O botão Extras+ fica à direita da busca, sem deslocar os cinco elementos essenciais. */
+  .top-header .header-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;min-width:0}
+  .top-header .header-actions>.kawe-extras-plus{order:-10;flex:0 0 auto}
+  .top-header .header-actions>.kawe-extras-plus b{white-space:nowrap}
+  .kawe-header-moved-final{display:none!important;visibility:hidden!important;pointer-events:none!important}
+  #kaweExtrasModal .kawe-extras-header-group{grid-column:1/-1;padding:12px;border:1px solid rgba(110,231,183,.14);border-radius:12px;background:linear-gradient(120deg,rgba(16,185,129,.07),rgba(37,99,235,.05))}
+  #kaweExtrasModal .kawe-extras-header-group h3{margin-bottom:10px}
+  #kaweExtrasModal .kawe-extras-header-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+  #kaweExtrasModal .kawe-extras-header-list .kawe-extras-item{min-height:42px}
+  #kaweExtrasModal .kawe-extras-header-list .kawe-extras-item.kawe-upload-shortcut{border-color:rgba(52,211,153,.5);background:linear-gradient(120deg,rgba(6,95,70,.65),rgba(16,185,129,.18))}
+  @media(max-width:1050px){#kaweInfoFooter.kawe-info-footer{grid-template-columns:repeat(3,minmax(0,1fr))}#kaweInfoFooter .kawe-footer-brand{grid-column:1/-1}}
+  @media(max-width:680px){#kaweInfoFooter.kawe-info-footer{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;padding:24px 14px 16px}#kaweInfoFooter .kawe-footer-brand,#kaweInfoFooter .kawe-footer-bottom{grid-column:1/-1}#kaweInfoFooter .kawe-footer-bottom{display:grid;gap:5px}.kawe-header-moved-final{display:none!important}#kaweExtrasModal .kawe-extras-header-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:390px){#kaweInfoFooter.kawe-info-footer{grid-template-columns:1fr}#kaweExtrasModal .kawe-extras-header-list{grid-template-columns:1fr}}
+</style>
+<script id="kawe-final-ui-update-script">
+(function(){
+  'use strict';
+  if(window.__kaweFinalUiUpdate)return;
+  window.__kaweFinalUiUpdate=true;
+  const selector='.top-header button,.kawe-header-nav button,.kawe-header-controls button,.kawe-locale-tools button,.kawe-commandbar button,.kawe-utilitybar button,.kawe-megabar button,.kawe-full-band button,.kawe-gap-matrix button,.kawe-category-tools button,.kawe-discovery-tools button,.kawe-side-rail button';
+  const normalize=v=>String(v||'').replace(/\s+/g,' ').trim();
+  const label=el=>normalize(el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent);
+  const protectedButton=el=>el.matches('.menu-btn,.brand,.kawe-extras-plus,.profile-action,.account-register')||!!el.closest('.central-search')||/^(entrar|cadastrar|sair)$/i.test(label(el));
+  const escapeHtml=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  const say=msg=>{if(typeof window.toast==='function')window.toast(msg);};
+  const uploadLabel=name=>/upload|subir\s+(foto|v[ií]deo)|enviar\s+m[ií]dia/i.test(name);
+  function host(){return document.querySelector('#kaweExtrasModal .kawe-extras-groups');}
+  function group(){
+    const root=host(); if(!root)return null;
+    let g=root.querySelector('[data-kawe-final-header-group]');
+    if(!g){
+      g=document.createElement('section');g.className='kawe-extras-group kawe-extras-header-group';g.dataset.kaweFinalHeaderGroup='true';
+      g.innerHTML='<h3><i>☷</i>Controles do cabeçalho</h3><div class="kawe-extras-header-list"></div>';
+      root.prepend(g);
+    }
+    return g.querySelector('.kawe-extras-header-list');
+  }
+  function addMirror(list,source,name){
+    const key=name.toLocaleLowerCase('pt-BR');
+    if([...list.querySelectorAll('span')].some(s=>normalize(s.textContent).toLocaleLowerCase('pt-BR')===key))return;
+    const b=document.createElement('button');b.type='button';b.className='kawe-extras-item';b.setAttribute('aria-label',name);b.innerHTML='<i>↗</i><span>'+escapeHtml(name)+'</span>';
+    if(uploadLabel(name))b.classList.add('kawe-upload-shortcut');
+    b.addEventListener('click',function(){
+      if(uploadLabel(name)&&typeof window.kaweOpenUpload==='function')window.kaweOpenUpload(/foto/i.test(name)?'photo':'video');
+      else if(source)source.click();
+      const modal=document.getElementById('kaweExtrasModal');
+      if(modal&&modal.classList.contains('open')&&!uploadLabel(name))modal.querySelector('.kawe-extras-close')?.click();
+    });
+    list.appendChild(b);
+  }
+  function ensureUpload(list){
+    if(!list||[...list.querySelectorAll('span')].some(s=>/enviar m[ií]dia|upload/i.test(s.textContent)))return;
+    const b=document.createElement('button');b.type='button';b.className='kawe-extras-item kawe-upload-shortcut';b.setAttribute('aria-label','Enviar mídia');b.innerHTML='<i>↥</i><span>Enviar mídia</span>';
+    b.addEventListener('click',function(){
+      document.getElementById('kaweExtrasModal')?.querySelector('.kawe-extras-close')?.click();
+      if(typeof window.kaweOpenUpload==='function')window.kaweOpenUpload('video');
+      else say('A função de upload ainda está carregando.');
+    });
+    list.prepend(b);
+  }
+  function collect(){
+    const list=group(); if(!list)return;
+    document.querySelectorAll(selector).forEach(source=>{
+      if(source.closest('#kaweExtrasModal')||protectedButton(source))return;
+      const name=label(source);if(!name)return;
+      source.classList.add('kawe-header-moved-final');
+      addMirror(list,source,name);
+    });
+    ensureUpload(list);
+  }
+  function footer(){
+    const map={home:['Início','home'],catalog:['Catálogo','catalogo'],channels:['Canais','Canais'],help:['Central de ajuda','help'],terms:['Termos de uso','terms'],privacy:['Privacidade','privacy'],guidelines:['Diretrizes 18+','guidelines'],contact:['Contato','contact'],instagram:['Instagram','Instagram'],x:['X','X'],tiktok:['TikTok','TikTok'],youtube:['YouTube','YouTube']};
+    document.querySelectorAll('[data-footer-action]').forEach(b=>{if(b.dataset.kaweFooterBound)return;b.dataset.kaweFooterBound='1';b.addEventListener('click',function(){const x=map[b.dataset.footerAction];if(!x)return;if(b.dataset.footerAction==='home'){window.scrollTo({top:0,behavior:'smooth'});return}if(b.dataset.footerAction==='catalog'){document.getElementById('catalogo')?.scrollIntoView({behavior:'smooth'});return}if(['channels','help'].includes(b.dataset.footerAction)&&typeof window.kaweHeaderGo==='function'){window.kaweHeaderGo(x[1]);return}say(x[0]+' disponível nesta experiência KAWE.');});});
+  }
+  function boot(){footer();collect();setTimeout(collect,300);setTimeout(collect,1000);setTimeout(collect,2200);}
+  const observer=new MutationObserver(function(){footer();collect();});
+  if(document.body)observer.observe(document.body,{childList:true,subtree:true});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
+</script>
 </body>
 </html>

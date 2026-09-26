@@ -1643,6 +1643,7 @@ function openWatch(id){
     <div class="kx-clist">${commentList(v)}</div>`;
   const watch=document.getElementById('kxWatch');watch.classList.add('open');watch.classList.toggle('theater',watchOptions.theater);watch.classList.toggle('mini',watchOptions.mini);document.body.style.overflow='hidden';
   document.getElementById('kxWMain').scrollTop=0;
+  if(typeof window.mountKaweMultiPlayer==='function')window.mountKaweMultiPlayer(id,v);
 }
 function seekWatch(seconds){toast((seconds<0?'Retrocedendo ':'Avançando ')+Math.abs(seconds)+' segundos.');const bar=document.querySelector('.kx-prog i');if(bar){const current=parseInt(bar.style.width)||22;bar.style.width=Math.max(0,Math.min(100,current+seconds/10))+'%'}}
 function toggleWatchOption(key,id){watchOptions[key]=!watchOptions[key];toast((key==='auto'?'Autoplay ': 'Repetição ')+(watchOptions[key]?'ativado':'desativado'));openWatch(id)}
@@ -1961,36 +1962,41 @@ renderPhotoShowcase();syncAdminMediaForm();menuCats();renderCategories();renderC
 
   fnAddVideo = function (event) {
     event.preventDefault();
-    const get = id => document.getElementById(id)?.value.trim() || '';
+    const get = id => event.currentTarget?.querySelector('#' + id)?.value.trim() || '';
     const title = get('nvTitle');
-    const mediaType = document.getElementById('nvMediaType')?.value || 'video';
+    const mediaType = get('nvMediaType') || 'video';
     const category = get('nvCat') || (mediaType === 'photo' ? PHOTO_MENU_CATS[0] : 'Filmes');
-    const linkType = document.getElementById('nvLinkType')?.value || 'url';
+    const linkType = get('nvLinkType') || 'url';
     const uploadedMedia = safeValue(get('nvMediaData'));
     const typedLink = linkType === 'iframe' ? get('nvLinkIframe') : get('nvLinkUrl');
     const iframeSrc = linkType === 'iframe' ? getIframeSrc(typedLink) : '';
-    const link = uploadedMedia || (linkType === 'iframe' ? iframeSrc : safeValue(typedLink));
     const thumbnail = imageValue(get('nvThumbData') || get('nvThumb'));
     const banner = imageValue(get('nvBannerData') || get('nvBanner'));
     if (!title) { toast('Informe o título do conteúdo.'); return; }
-    if (linkType === 'iframe' && !uploadedMedia && !iframeSrc) { toast('Informe uma URL HTTPS válida ou um código IFrame com src válido.'); return; }
+    const adminServers = window.kaweCollectAdminPlayerServers ? window.kaweCollectAdminPlayerServers(event.currentTarget?.querySelector('.kawe-mp-admin')) : [];
+    if (adminServers === null) return;
+    const primaryServerPlayer = adminServers.find(server => Array.isArray(server.players) && server.players.length)?.players[0] || null;
+    const link = uploadedMedia || (linkType === 'iframe' ? iframeSrc : safeValue(typedLink)) || primaryServerPlayer?.url || '';
+    const resolvedLinkType = uploadedMedia ? 'url' : (typedLink ? linkType : (primaryServerPlayer?.mode === 'embed' ? 'iframe' : 'url'));
+    if (linkType === 'iframe' && typedLink && !uploadedMedia && !iframeSrc) { toast('Informe uma URL HTTPS válida, um código IFrame com src válido ou remova o link principal para usar os players dos servidores.'); return; }
     if (!link && mediaType === 'video') { toast('Informe a URL direta, o embed ou envie um arquivo de vídeo.'); return; }
     if (!link && mediaType === 'photo' && !thumbnail) { toast('Informe a URL ou envie o arquivo da foto.'); return; }
     const item = {
       id: Date.now(), title, mediaType, category,
       duration: mediaType === 'photo' ? 'Foto' : (get('nvDur') || '—'),
       label: get('nvLabel') || (mediaType === 'photo' ? 'Foto' : 'Novo'),
-      link, linkType: uploadedMedia ? 'url' : linkType,
+      link, linkType: resolvedLinkType,
       image: thumbnail || (mediaType === 'photo' ? imageValue(link) : ''),
       bannerImage: banner,
-      embedCode: linkType === 'iframe' && !uploadedMedia ? typedLink : '',
+      embedCode: resolvedLinkType === 'iframe' && !uploadedMedia ? (typedLink || primaryServerPlayer?.url || '') : '',
       year: Number(get('nvYear')) || 2026,
       rating: Math.min(10, Math.max(0, Number.parseFloat(get('nvRate')) || 8)),
       art: get('nvArt') || ARTS[videos.length % ARTS.length],
       genres: get('nvGen') ? get('nvGen').split(',').map(s => s.trim()).filter(Boolean) : undefined,
       cast: get('nvCast') ? get('nvCast').split(',').map((s, i) => ({ n: s.trim(), r: ROLES[i % ROLES.length] })).filter(p => p.n) : undefined,
       synopsis: get('nvSyn') || undefined,
-      owner: 'KAWE Studio'
+      owner: (typeof accountSession !== 'undefined' && accountSession?.fullName) || 'Comunidade',
+      servers: adminServers
     };
     if (!item.genres) delete item.genres;
     if (!item.cast) delete item.cast;
@@ -1999,7 +2005,9 @@ renderPhotoShowcase();syncAdminMediaForm();menuCats();renderCategories();renderC
     persistCatalog();
     logAction('Conteúdo publicado em ' + category + ': ' + title);
     toast('Publicado em ' + category + ': ' + title);
-    refreshAll();
+    if (typeof renderCategories === 'function') renderCategories();
+    if (typeof renderCatalog === 'function') renderCatalog();
+    return true;
   };
 
   card = function (v, index) {
@@ -4819,5 +4827,101 @@ button:active,.kawe-extras-item:active{transform:translateY(0) scale(.98)}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',restore,{once:true});else restore();
 })();
 </script>
+<style id="kawe-multi-player-styles">
+  .kawe-mp-panel,.kawe-mp-viewer{width:min(100%,var(--kawe-player-max,1100px));box-sizing:border-box}
+  .kawe-mp-panel{margin:0 auto 14px;padding:16px;border:1px solid rgba(110,231,183,.2);border-radius:14px;background:linear-gradient(145deg,rgba(10,29,18,.98),rgba(4,13,8,.98));box-shadow:0 12px 32px rgba(0,0,0,.2)}
+  .kawe-mp-head h2{margin:0 0 5px;color:#e8fff3;font-size:17px}.kawe-mp-head p,.kawe-mp-note{margin:0;color:#92a99a;font-size:12px;line-height:1.5}
+  .kawe-mp-label{display:block;margin:12px 0 7px;color:#8fa99a;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+  .kawe-mp-server-row,.kawe-mp-player-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .kawe-mp-panel button,.kawe-mp-admin button,.kawe-mp-admin input,.kawe-mp-admin select{font:inherit}
+  .kawe-mp-chip,.kawe-mp-submit{min-height:36px;border:1px solid rgba(255,255,255,.12);border-radius:9px;background:#11251a;color:#dcebe1;padding:0 11px;font-size:12px;font-weight:750;cursor:pointer}
+  .kawe-mp-chip:hover,.kawe-mp-submit:hover{border-color:rgba(110,231,183,.55);background:#163622}.kawe-mp-chip.active{border-color:#34d399;background:#34d399;color:#04120a}
+  .kawe-mp-empty{padding:11px;border:1px dashed rgba(255,255,255,.15);border-radius:9px;color:#9bb0a2;font-size:12px}
+  .kawe-mp-viewer{display:none;position:relative;margin:0 auto 10px;overflow:hidden;border:1px solid rgba(110,231,183,.2);border-radius:14px;background:#000;aspect-ratio:16/9;min-height:220px}
+  .kawe-mp-viewer.active{display:block}.kawe-mp-viewer iframe,.kawe-mp-viewer video{display:block;width:100%;height:100%;min-height:inherit;border:0;background:#000;object-fit:contain}
+  .kawe-mp-caption{margin:0 auto 14px;width:min(100%,var(--kawe-player-max,1100px));color:#8fa99a;font-size:11px}
+  .kawe-mp-admin{margin:16px 0;padding:16px;border:1px solid rgba(52,211,153,.3);border-radius:12px;background:rgba(4,18,11,.82)}
+  .kawe-mp-admin h3{margin:0 0 5px;color:#e8fff3;font-size:16px}.kawe-mp-admin>p{margin:0 0 12px;color:#8fa99a;font-size:12px;line-height:1.5}
+  .kawe-mp-admin-toolbar{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+  .kawe-mp-admin-server{margin:10px 0;padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:#09170f}
+  .kawe-mp-admin-server-head{display:flex;gap:8px;align-items:center;margin-bottom:9px}.kawe-mp-admin-server-head input{flex:1}
+  .kawe-mp-admin-players{display:grid;gap:8px}.kawe-mp-admin-player{display:grid;grid-template-columns:minmax(100px,1fr) minmax(180px,2fr) minmax(150px,1.2fr) auto;gap:7px;align-items:center}
+  .kawe-mp-admin input,.kawe-mp-admin select{box-sizing:border-box;width:100%;min-width:0;min-height:38px;border:1px solid rgba(255,255,255,.14);border-radius:8px;background:#07130c;color:#e8fff3;padding:0 10px;font-size:12px}
+  .kawe-mp-admin .kawe-mp-remove{min-height:32px;border:1px solid rgba(248,113,113,.25);border-radius:8px;background:rgba(127,29,29,.26);color:#fecaca;padding:0 10px;font-size:11px;font-weight:750;cursor:pointer}
+  .kawe-mp-admin .kawe-mp-submit{background:#173421!important;color:#e8fff3!important;border-color:rgba(110,231,183,.28)}.kawe-mp-admin .kawe-mp-add-player{margin-top:9px}
+  .kawe-mp-admin .kawe-mp-empty{margin:8px 0}
+  .kawe-public-upload[hidden]{display:none!important}.kawe-public-upload{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:20px;box-sizing:border-box}.kawe-public-upload-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(7px)}.kawe-public-upload-card{position:relative;z-index:1;display:flex;flex-direction:column;width:min(100%,900px);max-height:min(92vh,1000px);overflow:auto;border:1px solid rgba(110,231,183,.25);border-radius:16px;background:#07130c;color:#e8fff3;box-shadow:0 30px 90px rgba(0,0,0,.65)}.kawe-public-upload-card>header{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;gap:14px;align-items:center;padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.09);background:#09170f}.kawe-public-upload-card h2{margin:0 0 5px;font-size:20px}.kawe-public-upload-card header p{margin:0;color:#91aa9a;font-size:12px}.kawe-public-close{width:36px;height:36px;border:1px solid rgba(255,255,255,.14);border-radius:9px;background:#102219;color:#e8fff3;font-size:23px;cursor:pointer}.kawe-public-upload-form{display:grid;gap:16px;padding:20px 22px 22px}.kawe-public-fields{display:grid;grid-template-columns:1fr 1fr;gap:13px}.kawe-public-fields label{display:grid;gap:6px;color:#b7c9be;font-size:11px;font-weight:800;letter-spacing:.02em}.kawe-public-fields input,.kawe-public-fields select,.kawe-public-fields textarea{box-sizing:border-box;width:100%;min-height:40px;border:1px solid rgba(255,255,255,.13);border-radius:8px;background:#0a1a11;color:#e8fff3;padding:9px 11px;font:12px inherit}.kawe-public-fields textarea{min-height:66px;resize:vertical}.kawe-public-fields select option{background:#0a1a11}.kawe-public-wide{grid-column:1/-1}.kawe-public-preview{display:grid;grid-template-columns:minmax(180px,320px) 1fr;gap:14px;align-items:center;padding:12px;border:1px solid rgba(110,231,183,.18);border-radius:11px;background:#09170f}.kawe-public-preview-media{position:relative;display:grid;place-items:center;overflow:hidden;min-height:145px;aspect-ratio:16/9;border-radius:8px;background:linear-gradient(135deg,#0c3423,#087e88);color:#d8fff0;font-size:12px;font-weight:750}.kawe-public-preview-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.kawe-public-preview>div:last-child{display:grid;gap:7px}.kawe-public-preview small{color:#88a595;font-size:9px;font-weight:900;letter-spacing:.1em}.kawe-public-preview strong{font-size:15px}.kawe-public-preview span{color:#a2b8aa;font-size:11px}.kawe-public-actions{display:flex;justify-content:flex-end;gap:9px}.kawe-public-actions button{min-height:40px;padding:0 15px;border:1px solid rgba(255,255,255,.13);border-radius:9px;font-size:12px;font-weight:850;cursor:pointer}.kawe-public-cancel{background:#102219;color:#d4e8db}.kawe-public-submit{background:#34d399!important;color:#052012!important}.kawe-public-submit:hover{background:#6ee7b7!important}
+  .central-search .kawe-content-upload-shortcut{align-self:stretch;min-width:78px;border-left:1px solid rgba(255,255,255,.1);border-radius:0 6px 6px 0;background:#163a25;color:#b9f6d1;font-size:11px;font-weight:900;letter-spacing:.02em;padding:0 10px;white-space:nowrap}
+  .central-search .kawe-content-upload-shortcut:hover{background:#1f5132;color:#fff}
+  @media(max-width:700px){.kawe-public-upload{padding:8px}.kawe-public-upload-card{max-height:96vh}.kawe-public-upload-form{padding:15px}.kawe-public-fields{grid-template-columns:1fr}.kawe-public-wide{grid-column:auto}.kawe-public-preview{grid-template-columns:1fr}.kawe-mp-admin-player{grid-template-columns:1fr}.kawe-mp-admin-toolbar{align-items:flex-start;flex-direction:column}.kawe-mp-admin-server-head{align-items:stretch;flex-direction:column}.kawe-mp-viewer{min-height:190px}.central-search .kawe-content-upload-shortcut{min-width:40px;padding:0 7px;font-size:0}.central-search .kawe-content-upload-shortcut:after{content:'＋';font-size:15px}}
+</style>
+<script id="kawe-multi-player-module">
+(function(){
+  'use strict';
+  const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  const makeId=()=>('mp_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,9));
+  const safeUrl=raw=>{try{const u=new URL(String(raw||'').trim());return u.protocol==='http:'||u.protocol==='https:'?u.href:''}catch(_){return ''}};
+  const getSource=raw=>{const value=String(raw||'').trim();const iframe=value.match(/<iframe\b[^>]*\bsrc\s*=\s*["']([^"']+)["'][^>]*>/i);const media=value.match(/<(?:video|source)\b[^>]*\bsrc\s*=\s*["']([^"']+)["'][^>]*>/i);return safeUrl((iframe&&iframe[1])||(media&&media[1])||value)};
+  const isDirectUrl=url=>/\.(mp4|webm|ogg|ogv|m3u8)(?:$|[?#])/i.test(url);
+  const notify=message=>{if(typeof window.toast==='function')window.toast(message);else console.info('[KAWE]',message)};
+  function attachUploadShortcut(){
+    const search=document.querySelector('.central-search');if(!search||search.querySelector('.kawe-content-upload-shortcut'))return;
+    const button=document.createElement('button');button.type='button';button.className='kawe-content-upload-shortcut';button.textContent='↑ Enviar';button.title='Enviar conteúdo por URL ou embed';button.setAttribute('aria-label','Enviar conteúdo por URL ou embed');button.addEventListener('click',()=>window.kaweOpenPublicUpload?.());search.appendChild(button);
+  }
+  function createAdminModule(){
+    const form=document.querySelector('#panelBody form[onsubmit*="fnAddVideo"]');
+    if(!form||form.querySelector('.kawe-mp-admin'))return;
+    // O formulário de upload solicitado aceita apenas URL/embed, não arquivos locais.
+    form.querySelectorAll('input[type="file"]').forEach(input=>input.closest('.field-group')?.remove());
+    const section=document.createElement('section');section.className='kawe-mp-admin';section.innerHTML='<h3>Servidores e players do conteúdo</h3><p>Cadastre os servidores e links alternativos deste título. Na página do player, o público poderá escolher o servidor e a fonte.</p><div class="kawe-mp-admin-toolbar"><strong>Lista de servidores</strong><button type="button" class="kawe-mp-submit" data-admin-action="add-server">＋ Adicionar servidor</button></div><div class="kawe-mp-admin-list"><div class="kawe-mp-empty">Nenhum servidor adicionado. Use “Adicionar servidor” para cadastrar links para este conteúdo.</div></div>';
+    const thumb=document.getElementById('nvThumb');form.insertBefore(section,thumb?.previousElementSibling||null);
+    section.addEventListener('click',event=>{const button=event.target.closest('[data-admin-action]');if(!button)return;const action=button.dataset.adminAction;if(action==='add-server')addServer(section);else if(action==='add-player')addPlayer(button.closest('.kawe-mp-admin-server'));else if(action==='remove-server'){button.closest('.kawe-mp-admin-server')?.remove();refreshEmpty(section)}else if(action==='remove-player'){button.closest('.kawe-mp-admin-player')?.remove();refreshEmpty(section)}});
+    refreshEmpty(section);
+  }
+  function refreshEmpty(section){const list=section.querySelector('.kawe-mp-admin-list');if(!list)return;const cards=[...list.querySelectorAll('.kawe-mp-admin-server')];list.querySelector('.kawe-mp-empty')?.remove();if(!cards.length){const empty=document.createElement('div');empty.className='kawe-mp-empty';empty.textContent='Nenhum servidor adicionado. Use “Adicionar servidor” para cadastrar links para este conteúdo.';list.appendChild(empty)}cards.forEach((card,index)=>{const heading=card.querySelector('[data-server-name]');if(heading&&!heading.value.trim())heading.placeholder=`Servidor ${index+1}`})}
+  function addServer(section){const list=section.querySelector('.kawe-mp-admin-list');list.querySelector('.kawe-mp-empty')?.remove();const card=document.createElement('div');card.className='kawe-mp-admin-server';card.dataset.serverId=makeId();card.innerHTML='<div class="kawe-mp-admin-server-head"><input data-server-name maxlength="80" placeholder="Nome do servidor" aria-label="Nome do servidor"><button type="button" class="kawe-mp-remove" data-admin-action="remove-server">Remover servidor</button></div><div class="kawe-mp-admin-players"></div><button type="button" class="kawe-mp-submit kawe-mp-add-player" data-admin-action="add-player">＋ Adicionar player/link</button>';list.appendChild(card);addPlayer(card);refreshEmpty(section)}
+  function addPlayer(card){if(!card)return;const list=card.querySelector('.kawe-mp-admin-players');const row=document.createElement('div');row.className='kawe-mp-admin-player';row.dataset.playerId=makeId();row.innerHTML='<input data-player-name maxlength="80" placeholder="Nome do player (ex.: Player 1)" aria-label="Nome do player"><input data-player-url type="text" inputmode="url" placeholder="URL HTTP/HTTPS ou código iframe" aria-label="Link do player" required><select data-player-mode aria-label="Tipo de player"><option value="auto">Detecção automática</option><option value="direct">Vídeo direto (MP4/WebM/HLS)</option><option value="embed">Incorporado (URL/iframe)</option></select><button type="button" class="kawe-mp-remove" data-admin-action="remove-player">Remover</button>';list.appendChild(row)}
+  function collectAdminServers(section){section=section||document.querySelector('#panelBody .kawe-mp-admin');if(!section)return [];const result=[];for(const [serverIndex,card] of [...section.querySelectorAll('.kawe-mp-admin-server')].entries()){const rawName=card.querySelector('[data-server-name]')?.value.trim()||`Servidor ${serverIndex+1}`;const players=[];for(const [playerIndex,row] of [...card.querySelectorAll('.kawe-mp-admin-player')].entries()){const raw=row.querySelector('[data-player-url]')?.value.trim()||'';if(!raw){notify(`Informe a URL do Player ${playerIndex+1} em ${rawName}, ou remova esse campo.`);return null}const url=getSource(raw);if(!url){notify(`Informe uma URL HTTP/HTTPS ou um iframe válido para o player em ${rawName}.`);return null}let mode=row.querySelector('[data-player-mode]')?.value||'auto';if(mode==='auto'&&/<iframe\b/i.test(raw))mode='embed';if(mode==='auto'&&/<(?:video|source)\b/i.test(raw))mode='direct';players.push({id:row.dataset.playerId||makeId(),name:(row.querySelector('[data-player-name]')?.value.trim()||`Player ${playerIndex+1}`).slice(0,80),url,mode})}if(players.length)result.push({id:card.dataset.serverId||makeId(),name:rawName.slice(0,80),players})}return result}
+  window.kaweCollectAdminPlayerServers=collectAdminServers;
+  window.kaweStartAdminUpload=function(){window.kaweOpenPublicUpload?.()};
+  function mountKaweMultiPlayer(id,video){const host=document.getElementById('kxWMain');if(!host)return;const original=host.querySelector('.kx-player');if(!original)return;host.querySelector('.kawe-mp-panel')?.remove();host.querySelector('.kawe-mp-viewer')?.remove();host.querySelector('.kawe-mp-caption')?.remove();const servers=Array.isArray(video?.servers)?video.servers.filter(s=>s&&Array.isArray(s.players)&&s.players.length):[];const panel=document.createElement('section');panel.className='kawe-mp-panel';panel.setAttribute('aria-label','Seleção de servidores e players');const viewer=document.createElement('div');viewer.className='kawe-mp-viewer';viewer.setAttribute('aria-live','polite');const caption=document.createElement('p');caption.className='kawe-mp-caption';caption.hidden=true;host.insertBefore(viewer,original);host.insertBefore(caption,viewer);host.insertBefore(panel,caption);let selectedServer=servers[0]?.id||'';let selectedPlayer=null;
+    function showPlayer(player,server){selectedPlayer=player||null;original.style.display=selectedPlayer?'none':'';viewer.replaceChildren();viewer.classList.toggle('active',!!selectedPlayer);caption.hidden=!selectedPlayer;if(!selectedPlayer){caption.textContent='';return}const url=getSource(player.url);if(!url){selectedPlayer=null;original.style.display='';viewer.classList.remove('active');caption.hidden=true;notify('O endereço cadastrado não é mais válido.');return}let mode=player.mode||'auto';if(mode==='auto')mode=isDirectUrl(url)?'direct':'embed';if(mode==='direct'){const media=document.createElement('video');media.controls=true;media.playsInline=true;media.preload='metadata';media.src=url;media.setAttribute('aria-label',player.name);media.addEventListener('error',()=>notify('Este link não pôde ser reproduzido diretamente; tente o modo incorporado.'));viewer.appendChild(media)}else{const frame=document.createElement('iframe');frame.src=url;frame.title=player.name;frame.loading='eager';frame.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen';frame.allowFullscreen=true;frame.referrerPolicy='strict-origin-when-cross-origin';viewer.appendChild(frame)}caption.textContent=`${player.name} · ${server.name} — se o site bloquear a incorporação, escolha outro player ou abra o endereço em uma nova aba.`;panel.querySelectorAll('[data-player-id]').forEach(button=>button.classList.toggle('active',button.dataset.playerId===player.id))}
+    function render(){if(!servers.length){panel.innerHTML='<div class="kawe-mp-head"><h2>Servidores e players</h2><p>Este conteúdo ainda não tem servidores alternativos cadastrados. O player principal do catálogo continua disponível.</p></div>';caption.hidden=true;return}if(!servers.some(s=>s.id===selectedServer))selectedServer=servers[0].id;const server=servers.find(s=>s.id===selectedServer)||servers[0];panel.innerHTML=`<div class="kawe-mp-head"><h2>Servidores e players</h2><p>Escolha um servidor e clique em um player para reproduzir este conteúdo.</p></div><span class="kawe-mp-label">Servidores</span><div class="kawe-mp-server-row">${servers.map(s=>`<button type="button" class="kawe-mp-chip ${s.id===selectedServer?'active':''}" data-server-id="${esc(s.id)}">${esc(s.name)}</button>`).join('')}</div><span class="kawe-mp-label">Players disponíveis · ${esc(server.name)}</span><div class="kawe-mp-player-row"><button type="button" class="kawe-mp-chip ${!selectedPlayer?'active':''}" data-player-id="__catalog">Player do catálogo</button>${server.players.map(p=>`<button type="button" class="kawe-mp-chip ${selectedPlayer?.id===p.id?'active':''}" data-player-id="${esc(p.id)}" data-server-ref="${esc(server.id)}">${esc(p.name)}</button>`).join('')}</div>`;panel.querySelectorAll('[data-server-id]').forEach(button=>button.addEventListener('click',()=>{selectedServer=button.dataset.serverId;selectedPlayer=null;showPlayer(null);render()}));panel.querySelectorAll('[data-player-id]').forEach(button=>button.addEventListener('click',()=>{const playerId=button.dataset.playerId;if(playerId==='__catalog'){selectedPlayer=null;showPlayer(null);render();return}const current=servers.find(s=>s.id===button.dataset.serverRef)||server;const player=current.players.find(p=>p.id===playerId);if(player)showPlayer(player,current)}))}
+    render()}
+  window.mountKaweMultiPlayer=mountKaweMultiPlayer;
+  try{const addFunction=FUNCS.find(item=>item.v==='add');if(addFunction)addFunction.n='Upload de conteúdo (URL/Embed)'}catch(_){}
+  function closePublicUpload(){const modal=document.getElementById('kawePublicUpload');if(!modal)return;modal.hidden=true;modal.classList.remove('open');document.body.style.overflow=document.getElementById('panel')?.classList.contains('open')?'hidden':''}
+  window.kaweClosePublicUpload=closePublicUpload;
+  function openPublicUpload(){
+    let modal=document.getElementById('kawePublicUpload');
+    if(!modal){
+      const options=(()=>{try{return (typeof categories!=='undefined'&&Array.isArray(categories)?categories:[]).filter(name=>name&&name!=='Todos').map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join('')}catch(_){return ''}})()||'<option>Filmes</option><option>Séries</option><option>Documentários</option><option>Fotos</option>';
+      modal=document.createElement('div');modal.id='kawePublicUpload';modal.className='kawe-public-upload';modal.hidden=true;modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-labelledby','kawePublicUploadTitle');
+      modal.innerHTML=`<div class="kawe-public-upload-backdrop" data-public-close></div><section class="kawe-public-upload-card"><header><div><h2 id="kawePublicUploadTitle">Enviar conteúdo</h2><p>Disponível para todos. Informe título, categoria e uma URL ou um embed público.</p></div><button type="button" class="kawe-public-close" aria-label="Fechar" data-public-close>×</button></header><form id="kawePublicUploadForm" class="kawe-public-upload-form" onsubmit="window.kaweSubmitPublicUpload(event)"><input id="nvMediaData" type="hidden"><input id="nvThumbData" type="hidden"><input id="nvBannerData" type="hidden"><div class="kawe-public-fields"><label>Título<input id="nvTitle" required maxlength="140" placeholder="Nome do conteúdo"></label><label>Categoria<select id="nvCat">${options}</select></label><label>Tipo de conteúdo<select id="nvMediaType"><option value="video">Vídeo</option><option value="photo">Foto</option></select></label><label>Duração (opcional)<input id="nvDur" maxlength="40" placeholder="Ex.: 12 min"></label><label>Selo (opcional)<input id="nvLabel" maxlength="40" value="Novo"></label><label>Tipo da fonte<select id="nvLinkType"><option value="url">URL de vídeo</option><option value="iframe">Embed / iframe</option></select></label><label class="kawe-public-wide">URL principal<textarea id="nvLinkUrl" placeholder="https://... (MP4, WebM, HLS ou página do player)"></textarea></label><label class="kawe-public-wide">URL de embed ou código iframe<textarea id="nvLinkIframe" placeholder="https://... ou &lt;iframe src=\"https://...\"&gt;&lt;/iframe&gt;"></textarea></label><label class="kawe-public-wide">URL da thumbnail<input id="nvThumb" type="url" inputmode="url" placeholder="https://.../capa.jpg"></label></div><div class="kawe-public-preview" aria-live="polite"><div class="kawe-public-preview-media"><img alt="Prévia da thumbnail" hidden><span>Prévia da thumbnail</span></div><div><small>PRÉVIA DO CARD</small><strong data-preview-title>Seu título aparecerá aqui</strong><span data-preview-category>Categoria</span></div></div><div data-public-server-manager></div><div class="kawe-public-actions"><button type="button" class="kawe-public-cancel" data-public-close>Cancelar</button><button type="submit" class="kawe-public-submit">Publicar conteúdo</button></div></form></section>`;
+      document.body.appendChild(modal);
+      modal.addEventListener('click',event=>{if(event.target.closest('[data-public-close]'))closePublicUpload()});
+      modal.addEventListener('keydown',event=>{if(event.key==='Escape')closePublicUpload()});
+      const manager=document.createElement('section');manager.className='kawe-mp-admin';manager.innerHTML='<h3>Servidores e players</h3><p>Opcional: adicione alternativas para o público escolher na página do player.</p><div class="kawe-mp-admin-toolbar"><strong>Servidores</strong><button type="button" class="kawe-mp-submit" data-admin-action="add-server">＋ Adicionar servidor</button></div><div class="kawe-mp-admin-list"><div class="kawe-mp-empty">Nenhum servidor adicional cadastrado.</div></div>';
+      modal.querySelector('[data-public-server-manager]').replaceWith(manager);
+      manager.addEventListener('click',event=>{const button=event.target.closest('[data-admin-action]');if(!button)return;const action=button.dataset.adminAction;if(action==='add-server')addServer(manager);else if(action==='add-player')addPlayer(button.closest('.kawe-mp-admin-server'));else if(action==='remove-server'){button.closest('.kawe-mp-admin-server')?.remove();refreshEmpty(manager)}else if(action==='remove-player'){button.closest('.kawe-mp-admin-player')?.remove();refreshEmpty(manager)}});
+      refreshEmpty(manager);
+      const form=modal.querySelector('form'),title=form.querySelector('#nvTitle'),category=form.querySelector('#nvCat'),thumb=form.querySelector('#nvThumb'),media=form.querySelector('.kawe-public-preview-media'),image=media.querySelector('img'),fallback=media.querySelector('span');
+      const updatePreview=()=>{form.querySelector('[data-preview-title]').textContent=title.value.trim()||'Seu título aparecerá aqui';form.querySelector('[data-preview-category]').textContent=category.value||'Categoria';const url=safeUrl(thumb.value);if(url){image.src=url;image.hidden=false;fallback.hidden=true}else{image.removeAttribute('src');image.hidden=true;fallback.hidden=false}};
+      [title,category,thumb].forEach(input=>{input.addEventListener('input',updatePreview);input.addEventListener('change',updatePreview)});updatePreview();
+    }
+    modal.hidden=false;modal.classList.add('open');document.body.style.overflow='hidden';modal.querySelector('#nvTitle')?.focus();
+  }
+  window.kaweOpenPublicUpload=openPublicUpload;
+  window.kaweSubmitPublicUpload=function(event){event.preventDefault();const form=event.currentTarget;if(!form.reportValidity())return;const before=(()=>{try{return videos.length}catch(_){return 0}})();if(typeof window.fnAddVideo!=='function'){notify('Não foi possível abrir a publicação neste momento.');return}window.fnAddVideo(event);setTimeout(()=>{let after=before;try{after=videos.length}catch(_){}if(after>before){form.reset();closePublicUpload()}},0)};
+  function setupAdminObserver(){const body=document.getElementById('panelBody');if(body){const observer=new MutationObserver(()=>{attachUploadShortcut();const form=document.querySelector('#panelBody form[onsubmit*="fnAddVideo"]');if(form){form.querySelectorAll('input[type="file"]').forEach(input=>input.closest('.field-group')?.remove());createAdminModule()}});observer.observe(body,{childList:true,subtree:true});if(document.getElementById('nvTitle'))createAdminModule()}attachUploadShortcut();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setupAdminObserver,{once:true});else setupAdminObserver();
+})();
+</script>
+
+
+
+
+
+
 </body>
 </html>
